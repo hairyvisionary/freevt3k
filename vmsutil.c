@@ -39,6 +39,8 @@
 #include <ucx$inetdef.h>
 #include "vmstypes.h"
 
+#define P(x)			x
+
 #include "error.h"
 
 TT_READ_IOSB
@@ -59,6 +61,7 @@ extern unsigned int
 	termEfn,
 	termBit;
 extern int
+	eight_none,
 	termReadPending,
 	sockReadPending;
 
@@ -68,7 +71,7 @@ int GetEventFlag(unsigned int *efn, unsigned int *bit, unsigned int *mask)
 /*
  * Allocate an event flag and set bit in mask
  */
-    if (VMSerror(LIB$GET_EF(efn)))
+    if (VMSerror(lib$get_ef(efn)))
 	return(-1);
     if (bit != 0)
 	{
@@ -89,7 +92,7 @@ int FreeEventFlag(unsigned int *efn, unsigned int *bit, unsigned int *mask)
  */
     if (*efn)
 	{
-	if (VMSerror(LIB$FREE_EF(efn)))
+	if (VMSerror(lib$free_ef(efn)))
 	    return(-1);
 	}
     if (bit != 0)
@@ -149,7 +152,7 @@ void SetTTYNormal(void)
     int
 	io_status = 0;
 
-    io_status = SYS$QIOW(termEfn,	/* event flag */
+    io_status = sys$qiow(termEfn,	/* event flag */
 			 termNum,	/* channel */
 			 IO$_SETMODE,	/* function */
 			 &sense_iosb,	/* i/o status block */
@@ -162,7 +165,7 @@ void SetTTYNormal(void)
 			 0,		/* P5, parity */
 			 0);		/* P6, fill */
     if ((VMSerror(io_status)) || (VMSerror(sense_iosb.status)))
-	ExitProc("SYS$QIOW", "IO$_SETMODE", 1);
+	ExitProc("sys$qiow", "IO$_SETMODE", 1);
 #endif
 
 } /* SetTTYNormal */
@@ -177,7 +180,7 @@ void SetTTYRaw(void)
     int
 	io_status = 0;
 
-    io_status = SYS$QIOW(termEfn,	/* event flag */
+    io_status = sys$qiow(termEfn,	/* event flag */
 			 termNum,	/* channel */
 			 IO$_SETMODE,	/* function */
 			 &sense_iosb,	/* i/o status block */
@@ -190,7 +193,7 @@ void SetTTYRaw(void)
 			 0,		/* P5, parity */
 			 0);		/* P6, fill */
     if ((VMSerror(io_status)) || (VMSerror(sense_iosb.status)))
-	ExitProc("SYS$QIOW", "IO$_SETMODE", 1);
+	ExitProc("sys$qiow", "IO$_SETMODE", 1);
 #endif
 
 } /* SetTTYRaw */
@@ -219,13 +222,13 @@ void OpenTTY()
     devDesc.dsc$b_dtype	= DSC$K_DTYPE_T;
     devDesc.dsc$b_class	= DSC$K_CLASS_S;
     devDesc.dsc$a_pointer	= "TT:";
-    if (VMSerror(SYS$ASSIGN(&devDesc, &termNum, PSL$C_USER, 0)))
-	ExitProc("SYS$ASSIGN", "", 1);
+    if (VMSerror(sys$assign(&devDesc, &termNum, PSL$C_USER, 0)))
+	ExitProc("sys$assign", "", 1);
 /*
  * Read and save the current characteristics.  These should be restored
  *    on process or image exit by the program.
  */
-    io_status = SYS$QIOW(termEfn,		/* event flag */
+    io_status = sys$qiow(termEfn,		/* event flag */
 			 termNum,		/* channel */
 			 IO$_SENSEMODE,		/* function */
 			 &sense_iosb,		/* i/o status block */
@@ -238,13 +241,13 @@ void OpenTTY()
 			 0,			/* P5, fill */
 			 0);			/* P6, fill */
     if ((VMSerror(io_status)) || (VMSerror(sense_iosb.status)))
-	ExitProc("SYS$QIOW", "IO$_SENSEMODE", 1);
+	ExitProc("sys$qiow", "IO$_SENSEMODE", 1);
     new_sc_buf = old_sc_buf;
 /*
  * Allocate an event flag for TTY
  */
     if (GetEventFlag(&termEfn, &termBit, &efnMask) == -1)
-	ExitProc("LIB$GET_EF", "", 1);
+	ExitProc("lib$get_ef", "", 1);
 #ifdef ONE_AT_A_TIME
 /*
  * Configure TTY port
@@ -253,25 +256,17 @@ void OpenTTY()
  * Setup the terminal port for PASTHRU, EIGHTBIT (no parity), HOSTSYNC
  *    and NOBRDCST
  */
-#ifdef old_way
-    new_sc_buf.basic &= 0xFF000000;
-    new_sc_buf.basic |= (TT$M_EIGHTBIT |
-			 TT$M_HOSTSYNC |
-			 TT$M_NOBRDCST |
-			 TT$M_NOECHO |
-			 TT$M_PASSALL);
-    new_sc_buf.extended |= TT2$M_PASTHRU;
-#else
     new_sc_buf.extended |= TT2$M_PASTHRU | TT2$M_ALTYPEAHD;
     new_sc_buf.basic &= ~TT$M_ESCAPE;		/* Disable escape-seq processing */
     new_sc_buf.extended &= ~TT2$M_LOCALECHO;	/* and local echoing */
-    new_sc_buf.basic |= TT$M_NOECHO | TT$M_EIGHTBIT;
-#endif
+    new_sc_buf.basic |= TT$M_NOECHO;
+    if (eight_none)
+	new_sc_buf.basic |= TT$M_EIGHTBIT;
     SetTTYRaw();
 #endif
 
-    if (VMSerror(SYS$CLREF(termEfn)))
-	ExitProc("SYS$CLREF", "", 1);
+    if (VMSerror(sys$clref(termEfn)))
+	ExitProc("sys$clref", "", 1);
     readMask |= termBit;
 
 } /*OpenTTY*/
@@ -281,8 +276,8 @@ void CloseTTY(void)
 { /*CloseTTY*/
 
 /* Cancel I/O requests */
-    if (VMSerror(SYS$CANCEL(termNum)))
-	ExitProc("SYS$CANCEL", "", 1);
+    if (VMSerror(sys$cancel(termNum)))
+	ExitProc("sys$cancel", "", 1);
 #ifdef ONE_AT_A_TIME
     SetTTYNormal();
     readMask &= ~termBit;
@@ -291,7 +286,7 @@ void CloseTTY(void)
  * Free event flag
  */
     if (FreeEventFlag(&termEfn, &termBit, &readMask) == -1)
-	ExitProc("LIB$FREE_EF", "", 1);
+	ExitProc("lib$free_ef", "", 1);
 
 } /* CloseTTY */
 
@@ -314,8 +309,8 @@ void StartTTYRead(unsigned char *buf, int echo, int timeout)
     if (termReadPending)
 	return;
 
-    if (VMSerror(SYS$CLREF(termEfn)))
-	ExitProc("SYS$CLREF", "", 1);
+    if (VMSerror(sys$clref(termEfn)))
+	ExitProc("sys$clref", "", 1);
 
     if (timeout)
 	ioMask |= IO$M_TIMED;
@@ -329,7 +324,7 @@ void StartTTYRead(unsigned char *buf, int echo, int timeout)
  */
     if (!termReadPending)
 	{
-	io_status = SYS$QIO(termEfn,	/* event flag */
+	io_status = sys$qio(termEfn,	/* event flag */
 			    termNum,	/* channel */
 			    ioMask,	/* function */
 			    &term_iosb,	/* i/o status block */
@@ -342,7 +337,7 @@ void StartTTYRead(unsigned char *buf, int echo, int timeout)
 			    0,		/* P5, prompt string (DC1) */
 			    0);		/* P6, length of prompt string */
 	if (VMSerror(io_status))
-	    ExitProc("SYS$QIO_READ", "term", 1);
+	    ExitProc("sys$qio_READ", "term", 1);
 	termReadPending = 1;
 	}
 
@@ -352,8 +347,8 @@ int CompleteTTYRead(unsigned char *buf)
 
 { /*CompleteTTYRead*/
 
-    if (VMSerror(SYS$CLREF(termEfn)))
-	ExitProc("SYS$CLREF", "", 1);
+    if (VMSerror(sys$clref(termEfn)))
+	ExitProc("sys$clref", "", 1);
 /*
  * Process a byte
  */
@@ -381,11 +376,11 @@ void StartTTYRead(unsigned char *buf, int echo, int timeout)
 	if (echo)
 	    return;
 /* Cancel I/O requests */
-	if (VMSerror(SYS$CANCEL(termNum)))
-	    ExitProc("SYS$CANCEL", "", 1);
+	if (VMSerror(sys$cancel(termNum)))
+	    ExitProc("sys$cancel", "", 1);
 /* Wait for cancellations to complete */
-	if (VMSerror(SYS$WFLOR(termEfn, termBit)))
-	    ExitProc("SYS$WFLOR", "", 1);
+	if (VMSerror(sys$wflor(termEfn, termBit)))
+	    ExitProc("sys$wflor", "", 1);
 	termReadPending = 0;
 	}
 
@@ -398,14 +393,14 @@ void StartTTYRead(unsigned char *buf, int echo, int timeout)
     if (timeout)
 	ioMask |= IO$M_TIMED;
     
-    if (VMSerror(SYS$CLREF(termEfn)))
-	ExitProc("SYS$CLREF", "", 1);
+    if (VMSerror(sys$clref(termEfn)))
+	ExitProc("sys$clref", "", 1);
 /*
  * Read a record
  */
     if (!termReadPending)
 	{
-	io_status = SYS$QIO(termEfn,	/* event flag */
+	io_status = sys$qio(termEfn,	/* event flag */
 			    termNum,	/* channel */
 			    ioMask,	/* function */
 			    &term_iosb,	/* i/o status block */
@@ -418,7 +413,7 @@ void StartTTYRead(unsigned char *buf, int echo, int timeout)
 			    0,		/* P5, prompt string (DC1) */
 			    0);		/* P6, length of prompt string */
 	if (VMSerror(io_status))
-	    ExitProc("SYS$QIO_READ", "", 1);
+	    ExitProc("sys$qio_READ", "", 1);
 	termReadPending = 1;
 	}
 
@@ -445,8 +440,8 @@ int CompleteTTYRead(unsigned char *buf)
     termMask.nil = 0;
     termMask.ctrl_char = (1 << ASC_CR);
     
-    if (VMSerror(SYS$CLREF(termEfn)))
-	ExitProc("SYS$CLREF", "", 1);
+    if (VMSerror(sys$clref(termEfn)))
+	ExitProc("sys$clref", "", 1);
 /*
  * Read a record
  */
@@ -462,7 +457,7 @@ int CompleteTTYRead(unsigned char *buf)
 	}
     while (!done)
 	{
-	io_status = SYS$QIOW(termEfn,	/* event flag */
+	io_status = sys$qiow(termEfn,	/* event flag */
 			     termNum,	/* channel */
 			     ioMask,	/* function */
 			     &term_iosb,/* i/o status block */
@@ -475,9 +470,9 @@ int CompleteTTYRead(unsigned char *buf)
 			     0,		/* P5, prompt string */
 			     0);	/* P6, length of prompt string */
 	if (VMSerror(io_status))
-	    ExitProc("SYS$QIOW_READ", "", 1);
+	    ExitProc("sys$qiow_READ", "", 1);
 	if (VMSerror(term_iosb.status))
-	    ExitProc("SYS$QIOW_READ", "", 1);
+	    ExitProc("sys$qiow_READ", "", 1);
 	retLen = term_iosb.terminator_offset;
 	termLen += retLen;
 	termPtr += retLen;
@@ -503,7 +498,7 @@ int StartReadSocket(int fd, unsigned char *buf, int len)
 	io_status = 0;
     
     chan = vaxc$get_sdc(fd);
-    io_status = SYS$QIO(sockEfn,	/* event flag */
+    io_status = sys$qio(sockEfn,	/* event flag */
 			chan,		/* channel */
 			IO$_READVBLK,	/* function */
 			&sock_iosb,	/* i/o status block */
@@ -535,9 +530,9 @@ int CompleteReadSocket(void)
 int WaitForCompletion(unsigned int *returnMask)
 { /*WaitForCompletion*/
 
-    if (VMSerror(SYS$WFLOR(sockEfn, readMask)))
+    if (VMSerror(sys$wflor(sockEfn, readMask)))
 	return(-1);
-    if (VMSerror(SYS$READEF(sockEfn, returnMask)))
+    if (VMSerror(sys$readef(sockEfn, returnMask)))
 	return(-1);
     return(0);
 

@@ -3,11 +3,16 @@
  */
 
 #ifndef VMS
+#  include "config.h"
 #  include <sys/types.h>
 #  include <unistd.h>
 #  include <errno.h>
 #  include <stdio.h>
 #  include <string.h>
+#  if defined(WINNT)
+#    define HAVE_STRERROR	(1)
+#pragma warning (disable: 4706 4100 4101)
+#  endif
 #else
 #  include types
 #  include unixio
@@ -26,11 +31,11 @@ int VMSerror(int vms_stat)
 
 { /*VMSerror*/
 
-	if (vms_stat & STS$M_SUCCESS)
-		return(0);
-	errno = EVMSERR;
-	vaxc$errno = vms_stat;
-	return(1);
+    if (vms_stat & STS$M_SUCCESS)
+	return(0);
+    errno = EVMSERR;
+    vaxc$errno = vms_stat;
+    return(1);
 
 } /*VMSerror*/
 
@@ -38,20 +43,20 @@ char *VMSstrerror(int io_status)
 
 { /*VMSstrerror*/
 
-	struct dsc$descriptor_s
-		msgDesc;
-	short
-		len;
-	static char
-		buf[257];
+    struct dsc$descriptor_s
+	msgDesc;
+    short
+	len;
+    static char
+	buf[257];
 
-	msgDesc.dsc$w_length  = sizeof buf;
-	msgDesc.dsc$b_dtype   = DSC$K_DTYPE_T;
-	msgDesc.dsc$b_class   = DSC$K_CLASS_S;
-	msgDesc.dsc$a_pointer = buf;
-	sys$getmsg(io_status, &len, &msgDesc, 0x03, 0);
-	buf[len] = '\0';
-	return(buf);
+    msgDesc.dsc$w_length  = sizeof buf;
+    msgDesc.dsc$b_dtype   = DSC$K_DTYPE_T;
+    msgDesc.dsc$b_class   = DSC$K_CLASS_S;
+    msgDesc.dsc$a_pointer = buf;
+    sys$getmsg(io_status, &len, &msgDesc, 0x03, 0);
+    buf[len] = '\0';
+    return(buf);
 
 } /*VMSstrerror*/
 #endif /* VMS */
@@ -61,16 +66,16 @@ int PortableErrno(int err)
 #else
 int PortableErrno(err)
 
-	int
-		err;
+    int
+	err;
 #endif
 
 { /*PortableErrno*/
 
 #ifdef VMS
-	return((err == EVMSERR) ? vaxc$errno : err);
+    return((err == EVMSERR) ? vaxc$errno : err);
 #else
-	return(err);
+    return(err);
 #endif
 
 } /*PortableErrno*/
@@ -80,33 +85,33 @@ char *PortableStrerror(int err)
 #else
 char *PortableStrerror(err)
 
-	int
-		err;
+    int
+	err;
 #endif
 
 { /*PortableStrerror*/
 
-#ifndef HAVE_STRERROR
-	extern char
-		*sys_errlist[];
-	extern int
-		sys_nerr;
-	static char
-		errorMsg[80];
+#if !defined(VMS) && !defined(HAVE_STRERROR)
+    extern char
+	*sys_errlist[];
+    extern int
+	sys_nerr;
+    static char
+	errorMsg[80];
 #endif
 
 #ifdef VMS
-	if (err == EVMSERR)
-		return(VMSstrerror(vaxc$errno));
-	return(strerror(err));
+    if (err == EVMSERR)
+	return(VMSstrerror(vaxc$errno));
+    return(strerror(err));
 #else
 #  ifdef HAVE_STRERROR
-	return(strerror(err));
+    return(strerror(err));
 #  else
-	if ((err > 0) && (err < sys_nerr))
-		return(sys_errlist[err]);
-	sprintf(errorMsg, "Unknown errno = %d", err);
-	return(errorMsg);
+    if ((err > 0) && (err < sys_nerr))
+	return(sys_errlist[err]);
+    sprintf(errorMsg, "Unknown errno = %d", err);
+    return(errorMsg);
 #  endif
 #endif
 
@@ -117,12 +122,12 @@ void PortablePerror(char *text)
 #else
 void PortablePerror(text)
 
-	char
-		*text;
+    char
+	*text;
 #endif
 
 { /*PortablePerror*/
 
-	fprintf(stderr, "%s: %s\n", text, PortableStrerror(errno));
+    fprintf(stderr, "%s: %s\n", text, PortableStrerror(errno));
 
 } /*PortablePerror*/

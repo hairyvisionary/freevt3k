@@ -18,6 +18,12 @@ typedef char tBoolean;
 #    include "vmstypes.h"
 #  endif
 
+#  ifdef __STDC__
+#    define P(x)			x
+#  else
+#    define P(x)			()
+#  endif
+
 #  ifndef STDIN_FILENO
 #    define STDIN_FILENO		(0)
 #  endif

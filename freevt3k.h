@@ -19,9 +19,13 @@
 
 #include "typedef.h"
 
+#define LOG_INPUT		(0x01)
+#define LOG_OUTPUT		(0x02)
+#define LOG_PREFIX              (0x04)
+
 #ifndef TRUE
-#define TRUE 1
-#define FALSE 0
+#  define TRUE 1
+#  define FALSE 0
 #endif
 
 #endif

@@ -29,8 +29,13 @@
 
 #define kMaxLineDeleteEcho	23		/* Long enough, no? */
 
+#ifdef __STDC__
 typedef void tVTDataOutProc(int32 refCon, char * outBuffer, int bufferLength);
 typedef tVTDataOutProc * tVTDataOutProcPtr;
+#else
+typedef void tVTDataOutProc();
+typedef tVTDataOutProc * tVTDataOutProcPtr;
+#endif
 
 typedef enum etVTState
 {
@@ -144,20 +149,20 @@ typedef struct stVTConnection
 
 /* Prototypes */
 
-void FlushQ(void);
-int  GetQ(void);
-int  PutQ(char);
-void VTErrorMessage(tVTConnection * conn, int code, char * msg, int maxLen);
-int  VTInitConnection(tVTConnection * conn, long ipAddress, int ipPort);
-void VTCleanUpConnection(tVTConnection * conn);
-int  VTConnect(tVTConnection * conn);
-int  VTReceiveDataReady(tVTConnection * conn);
-int  VTProcessKeyBuffer(tVTConnection * conn, char * buffer, int length);
-int  VTSetDataOutProc(tVTConnection * conn, tVTDataOutProcPtr dataOutProc);
-int  VTCloseConnection(tVTConnection * conn);
-int  VTSocket(tVTConnection * conn);
-int  VTSendBreak(tVTConnection * conn, int send_index);
-int  VTSendData(tVTConnection * conn, char * buffer, int length, int flags);
-int  ProcessQueueToHost(tVTConnection *conn, int len);
+void FlushQ P((void));
+int  GetQ P((void));
+int  PutQ P((char));
+void VTErrorMessage P((tVTConnection * conn, int code, char * msg, int maxLen));
+int  VTInitConnection P((tVTConnection * conn, long ipAddress, int ipPort));
+void VTCleanUpConnection P((tVTConnection * conn));
+int  VTConnect P((tVTConnection * conn));
+int  VTReceiveDataReady P((tVTConnection * conn));
+int  VTProcessKeyBuffer P((tVTConnection * conn, char * buffer, int length));
+int  VTSetDataOutProc P((tVTConnection * conn, tVTDataOutProcPtr dataOutProc));
+int  VTCloseConnection P((tVTConnection * conn));
+int  VTSocket P((tVTConnection * conn));
+int  VTSendBreak P((tVTConnection * conn, int send_index));
+int  VTSendData P((tVTConnection * conn, char * buffer, int length, int flags));
+int  ProcessQueueToHost P((tVTConnection *conn, int len));
 #endif
 

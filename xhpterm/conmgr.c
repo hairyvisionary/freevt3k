@@ -1,18 +1,44 @@
 /*
 **  conmgr.c -- Connection manager
 */
-#ifdef __hpux
-#  ifndef _HPUX_SOURCE
-#    define _HPUX_SOURCE 1
+#ifdef VMS
+#  include <types.h>
+#  include <stdio.h>
+#  include <unixio.h>
+#  include <string.h>
+#  include <stdlib.h>
+#  include <time.h>
+#  include <timeb.h>
+#  include <stdarg.h>
+#  include <ctype.h>
+#  include <errno.h>
+#  include <limits.h>
+#  include <file.h>
+#  include <signal.h>
+#  include <assert.h>
+#  include <iodef.h>
+#  include <stsdef.h>
+#  include <socket.h>
+#  include <in.h>
+#  include <netdb.h>
+#  include <inet.h>
+#  include <lib$routines.h>
+#  include <starlet.h>
+#  include <ucx$inetdef.h>
+#else
+#  include "config.h"
+#  ifdef __hpux
+#    ifndef _HPUX_SOURCE
+#      define _HPUX_SOURCE 1
+#    endif
+#    ifndef _POSIX_SOURCE
+#      define _POSIX_SOURCE
+#    endif
 #  endif
-#  ifndef _POSIX_SOURCE
-#    define _POSIX_SOURCE
-#  endif
+#  include <stdio.h>
+#  include <stdlib.h>
+#  include <string.h>
 #endif
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include "vt3kglue.h"
 #include "tty.h"
 #include "rlogin.h"
@@ -55,7 +81,8 @@ struct conmgr * conmgr_connect (enum e_contype type, char *hostname) {
     switch (type) {
 	case e_tty:
 	    s = open_tty_connection (hostname);
-	    if (!s) return (0);
+	    if (s == -1)
+	      return (0);
 	    break;
         case e_rlogin:
 	    s = open_rlogin_connection (hostname);

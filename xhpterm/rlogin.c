@@ -5,17 +5,45 @@
 #define _INCLUDE_HPUX_SOURCE 1
 #define _INCLUDE_POSIX_SOURCE 1
 #define _INCLUDE_XOPEN_SOURCE 1
+#define _INCLUDE_XOPEN_SOURCE_EXTENDED 1
 /***************************************************************/
-#include <errno.h>
-#include <ctype.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <netdb.h>
-#include <unistd.h>
+#ifdef VMS
+#  include <types.h>
+#  include <stdio.h>
+#  include <unixio.h>
+#  include <string.h>
+#  include <stdlib.h>
+#  include <time.h>
+#  include <timeb.h>
+#  include <stdarg.h>
+#  include <ctype.h>
+#  include <errno.h>
+#  include <limits.h>
+#  include <file.h>
+#  include <signal.h>
+#  include <assert.h>
+#  include <iodef.h>
+#  include <stsdef.h>
+#  include <socket.h>
+#  include <in.h>
+#  include <netdb.h>
+#  include <inet.h>
+#  include <lib$routines.h>
+#  include <starlet.h>
+#  include <ucx$inetdef.h>
+#else
+#  include "config.h"
+#  include <errno.h>
+#  include <ctype.h>
+#  include <sys/types.h>
+#  include <sys/socket.h>
+#  include <netinet/in.h>
+#  include <netdb.h>
+#  include <unistd.h>
 /***************************************************************/
-#include <stdio.h>
-#include <string.h>
+#  include <stdio.h>
+#  include <string.h>
+#endif
 /***************************************************************/
 #include "conmgr.h"
 /***************************************************************/
@@ -129,7 +157,7 @@ int open_client_connection (hostname, portnum)
 */
     myport = 1022;
     do {
-        memset (&addr, 0, sizeof(addr));
+        memset ((void*)&addr, 0, sizeof(addr));
         addr.sin_family = AF_INET;
         addr.sin_port = htons(myport); 
 
@@ -145,10 +173,10 @@ int open_client_connection (hostname, portnum)
         }
     } while (errn);
 
-    memset (&addr, 0, sizeof(addr));
+    memset ((void*)&addr, 0, sizeof(addr));
     addr.sin_family = AF_INET;
     addr.sin_port = htons(portnum); /* loopback port 1260, telnet port is 23 */
-    memcpy (&(addr.sin_addr), ip_addr, 4);
+    memcpy ((void*)&(addr.sin_addr), (void*)ip_addr, 4);
     addrlen = sizeof(addr);
 
 printf ("Doing connect...\n");

@@ -3,16 +3,19 @@ NAME=		MAKEFILE.MAK
 # Makefile for freevt3k
 #
 
-S=		DNFS2:[HP807S.USR.TELAMON.RANDY.FREEVT3K]
-UCX=		DNFS2:[HP807S.USR.TELAMON.SRC]$UCX_OPT
+S=		DNFS4:[UNIXSERVER.USR.TELAMON.FREEVT3K]
+XS=		DNFS4:[UNIXSERVER.USR.TELAMON.FREEVT3K.XHPTERM]
+UCX=		DNFS4:[UNIXSERVER.USR.TELAMON.SRC]$UCX_OPT
 #VAX:   SYS$LIBRARY:UCX$IPC.OLB/LIB
 #Alpha: nothing
 
 APPSRCS  = $(S)freevt3k.c $(S)vtconn.c $(S)vmsutil.c $(S)error.c
 APPOBJS  = freevt3k.obj,vtconn.obj,vmsutil.obj,error.obj
 HEADERS =  $(S)vt.h $(S)typedef.h $(S)freevt3k.h $(S)vtconn.h
+XAPPOBJS = freevt3k.obj,xvtconn.obj,xerror.obj,vt3kglue.obj,x11glue.obj,hpterm.obj,conmgr.obj,tty.obj,rlogin.obj,getcolor.obj
 
-CFLAGS=/OPTIMIZE/WARNINGS/STANDARD=RELAXED_ANSI89/PREFIX=ALL/DEFINE=(ONE_AT_A_TIME)
+CFLAGS=/OPTIMIZE/WARNINGS/DEFINE=(ONE_AT_A_TIME)
+XCFLAGS=/OPTIMIZE/WARNINGS/DEFINE=(ONE_AT_A_TIME,SHOW_DC1_COUNT=0,DEBUG_BREAK=0,IGNORE_KEYBOARD_LOCK=1,IGNORE_USER_SYSTEM_LOCK=1,DEBUG_BLOCK_MODE=0,XHPTERM)
 
 CC=		cc/$CFL
 
@@ -43,3 +46,39 @@ vmsutil.obj: $(S)vmsutil.c $(HEADERS)
 error.obj: $(S)error.c $(HEADERS)
 	$(CC) $(CFLAGS) $(S)$(*).c
 
+x11glue.obj: $(XS)x11glue.c $(HEADERS)
+	$(CC) $(XCFLAGS) $(XS)$(*).c
+
+xhpterm.exe: $(XAPPOBJS)
+	-$(LINK) $(XAPPOBJS:.obj=),$(UCX)
+	purge $(@)+*.obj
+
+freevt3k.obj: $(S)freevt3k.c $(S)timers.c $(HEADERS)
+	$(CC) $(XCFLAGS) $(S)freevt3k.c
+
+xvtconn.obj: $(S)vtconn.c $(S)dumpbuf.c $(HEADERS)
+	$(CC) $(XCFLAGS) $(S)vtconn.c /OBJ=xvtconn.obj
+
+xerror.obj: $(S)error.c $(HEADERS)
+	$(CC) $(XCFLAGS) $(S)error.c /OBJ=xerror.obj
+
+vt3kglue.obj: $(XS)vt3kglue.c $(HEADERS)
+	$(CC) $(XCFLAGS) $(XS)$(*).c
+
+x11glue.obj: $(XS)x11glue.c $(HEADERS)
+	$(CC) $(XCFLAGS) $(XS)$(*).c
+
+hpterm.obj: $(XS)hpterm.c $(HEADERS)
+	$(CC) $(XCFLAGS) $(XS)$(*).c
+
+conmgr.obj: $(XS)conmgr.c $(HEADERS)
+	$(CC) $(XCFLAGS) $(XS)$(*).c
+
+tty.obj: $(XS)tty.c $(HEADERS)
+	$(CC) $(XCFLAGS) $(XS)$(*).c
+
+rlogin.obj: $(XS)rlogin.c $(HEADERS)
+	$(CC) $(XCFLAGS) $(XS)$(*).c
+
+getcolor.obj: $(XS)getcolor.c $(HEADERS)
+	$(CC) $(XCFLAGS) $(XS)$(*).c

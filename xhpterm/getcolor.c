@@ -2,10 +2,37 @@
  * Copyright 1989 O'Reilly and Associates, Inc.
  * See ../Copyright for complete rights and liability information.
  */
-#include <X11/Xlib.h>
-#include <X11/Xutil.h>
-#include <X11/Xos.h>
-#include <stdio.h>
+#ifdef VMS
+#  include <types.h>
+#  include <stdio.h>
+#  include <unixio.h>
+#  include <string.h>
+#  include <stdlib.h>
+#  include <time.h>
+#  include <timeb.h>
+#  include <stdarg.h>
+#  include <ctype.h>
+#  include <errno.h>
+#  include <limits.h>
+#  include <file.h>
+#  include <signal.h>
+#  include <assert.h>
+#  include <iodef.h>
+#  include <stsdef.h>
+#  include <socket.h>
+#  include <in.h>
+#  include <netdb.h>
+#  include <inet.h>
+#  include <lib$routines.h>
+#  include <starlet.h>
+#  include <ucx$inetdef.h>
+#else
+#  include "config.h"
+#  include <X11/Xlib.h>
+#  include <X11/Xutil.h>
+#  include <X11/Xos.h>
+#  include <stdio.h>
+#endif
 
 #define DEBUG_GET_COLORS 0 
 #define BLACKWHITE_OK 0
@@ -26,7 +53,7 @@ static char *visual_class[] = {
 "DirectColor"
 };
 
-int get_colors(nb_colors, color_names, color_codes)
+get_colors(nb_colors, color_names, color_codes)
 
     int nb_colors;
     char **color_names;
@@ -55,15 +82,15 @@ int get_colors(nb_colors, color_names, color_codes)
 		foreground_pixel = BlackPixel(display, screen_num);
 		return(0);
 #else
-                fprintf (stderr,"Unable to get colors\n");
-                return(0);
+                fprintf (stderr,"Need a color monitor\n");
+                exit(0);
 #endif
 	}
 
-	while (!XMatchVisualInfo(display, screen_num, default_depth, /* visual class */i, &visual_info)) i--;
+	while (!XMatchVisualInfo(display, screen_num, default_depth, /* visual class */i--, &visual_info)) ;
 #if DEBUG_GET_COLORS		
 	printf("%s: found a %s class visual at default_depth.\n", 
-                progname, visual_class[i]);
+                progname, visual_class[++i]);
 #endif	
 	if (i < 2) {
 		/* No color visual available at default_depth.
@@ -78,8 +105,8 @@ int get_colors(nb_colors, color_names, color_codes)
 		foreground_pixel = BlackPixel(display, screen_num);
 		return(0);
 #else
-                fprintf (stderr,"Unable to get colors\n");
-                return(0);
+                fprintf (stderr,"Need a color monitor\n");
+                exit (0);
 #endif
 	}
 
@@ -102,14 +129,14 @@ int get_colors(nb_colors, color_names, color_codes)
                                  &exact_def)) {
 			fprintf(stderr, "%s: color name %s not in database",
                                  progname, color_names[i]);
-			return(0);
+			exit(0);
 		}
 #if DEBUG_GET_COLORS
 		printf("The RGB values from the database are %d, %d, %d\n", exact_def.red, exact_def.green, exact_def.blue);
 #endif
    		if (!XAllocColor(display, default_cmap, &exact_def)) {
 			fprintf(stderr, "%s: can't allocate color: all colorcells allocated and no matching cell found.\n", progname);
-			return(0);
+		exit(0);
 		}
 #if DEBUG_GET_COLORS
 		printf("The RGB values actually allocated are %d, %d, %d\n", exact_def.red, exact_def.green, exact_def.blue);

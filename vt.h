@@ -89,13 +89,13 @@ typedef enum etVTMessageType
 		unsigned8 	fProtocolID; \
 		unsigned8	fMessageType; \
 		unsigned8	fUnused; \
-		unsigned8	fPrimitive;
+		unsigned8	fPrimitive
 
 /* Define messages */
 
 typedef struct stVTMHeader
 {
-    VT_MESSAGE_HEADER
+    VT_MESSAGE_HEADER;
 } tVTMHeader;
 
 /* NOTE: These structures only work with compilers that will allow
@@ -111,7 +111,7 @@ typedef struct stVTMHeader
 
 typedef struct stVTMAMNegotiationRequest
 {
-    VT_MESSAGE_HEADER
+    VT_MESSAGE_HEADER;
     unsigned16		fRequestCount;
     char		fVersionMask[4];
     unsigned16		fBufferSize;
@@ -163,7 +163,7 @@ typedef struct stVTMAMBreakInfo
 
 typedef struct stVTMAMNegotiationReply
 {
-    VT_MESSAGE_HEADER
+    VT_MESSAGE_HEADER;
     unsigned16		fRequestCount;
     unsigned16		fResponseCode;
     unsigned16		fCompletionMask;
@@ -201,7 +201,7 @@ typedef struct stVTMAMNegotiationReply
 
 typedef struct stVTMTMNegotiationRequest
 {
-    VT_MESSAGE_HEADER
+    VT_MESSAGE_HEADER;
     unsigned16		fRequestCount;
     unsigned8		fLinkType;
     unsigned8		fUnused2;
@@ -217,7 +217,7 @@ typedef struct stVTMTMNegotiationRequest
 
 typedef struct stVTMTMNegotiationReply
 {
-    VT_MESSAGE_HEADER
+    VT_MESSAGE_HEADER;
     unsigned16		fRequestCount;
     unsigned16		fResponseCode;
     unsigned8		fCommLinkAcceptReject;
@@ -233,7 +233,7 @@ typedef struct stVTMTMNegotiationReply
 
 typedef struct stVTMTerminationRequest
 {
-    VT_MESSAGE_HEADER
+    VT_MESSAGE_HEADER;
     unsigned16		fRequestCount;
     unsigned8		fTerminationType;
     unsigned8		fUnused2;
@@ -242,7 +242,7 @@ typedef struct stVTMTerminationRequest
 
 typedef struct stVTMTerminationResponse
 {
-    VT_MESSAGE_HEADER
+    VT_MESSAGE_HEADER;
     unsigned16		fRequestCount;
     unsigned16		fResponseCode;
 } tVTMTerminationResponse;
@@ -270,7 +270,7 @@ typedef struct stVTMTerminationResponse
 
 typedef struct stVTMLogonInfo
 {
-    VT_MESSAGE_HEADER
+    VT_MESSAGE_HEADER;
     unsigned16		fRequestCount;
     char		fSessionID[6];
     unsigned16		fLogonLength;
@@ -279,7 +279,7 @@ typedef struct stVTMLogonInfo
 
 typedef struct stVTMLogonInfoResponse
 {
-    VT_MESSAGE_HEADER
+    VT_MESSAGE_HEADER;
     unsigned16		fResponseCount;
     unsigned16		fResponseMask;
 } tVTMLogonInfoResponse;
@@ -290,7 +290,7 @@ typedef struct stVTMLogonInfoResponse
 
 typedef struct stVTMIORequest
 {
-    VT_MESSAGE_HEADER
+    VT_MESSAGE_HEADER;
     unsigned16		fRequestCount;
     unsigned16		fReadFlags;
     unsigned16		fReadByteCount;
@@ -327,7 +327,7 @@ typedef struct stVTMIORequest
 
 typedef struct stVTMTerminalIOResponse
 {
-    VT_MESSAGE_HEADER
+    VT_MESSAGE_HEADER;
     unsigned16			fRequestCount;
     unsigned16			fResponseCode;
     unsigned16			fCompletionMask;
@@ -358,14 +358,14 @@ typedef struct stVTMTerminalIOResponse
 
 typedef struct stVTMAbortIORequest
 {
-    VT_MESSAGE_HEADER
+    VT_MESSAGE_HEADER;
     unsigned16		fRequestCount;
     unsigned16		fRequestMask;
 } tVTMAbortIORequest;
 
 typedef struct stVTMAbortIOResponse
 {
-    VT_MESSAGE_HEADER
+    VT_MESSAGE_HEADER;
     unsigned16		fRequestCount;
     unsigned16		fResponseCode;
 } tVTMAbortIOResponse;
@@ -376,7 +376,7 @@ typedef struct stVTMAbortIOResponse
 
 typedef struct stVTMSetBreakRequest
 {
-    VT_MESSAGE_HEADER
+    VT_MESSAGE_HEADER;
     unsigned16		fRequestCount;
     unsigned8		fIndex;
     unsigned8		fState;
@@ -384,7 +384,7 @@ typedef struct stVTMSetBreakRequest
 
 typedef struct stVTMSetBreakResponse
 {
-    VT_MESSAGE_HEADER
+    VT_MESSAGE_HEADER;
     unsigned16		fRequestCount;
     unsigned16          fResponseCode;
 } tVTMSetBreakResponse;
@@ -395,7 +395,7 @@ typedef struct stVTMSetBreakResponse
 
 typedef struct stVTMTerminalDriverControlRequest
 {
-    VT_MESSAGE_HEADER
+    VT_MESSAGE_HEADER;
     unsigned16		fRequestCount;
     unsigned16		fRequestMask;
     unsigned8		fEcho;
@@ -449,7 +449,7 @@ typedef struct stVTMTerminalDriverControlRequest
 
 typedef struct stVTMTerminalDriverControlResponse
 {
-    VT_MESSAGE_HEADER
+    VT_MESSAGE_HEADER;
     unsigned16		fRequestCount;
     unsigned16		fResponseCode;
     unsigned16		fStatusMask;
@@ -472,14 +472,14 @@ typedef struct stVTMTerminalDriverControlResponse
 
 typedef struct stVTMInvokeBreakRequest
 {
-    VT_MESSAGE_HEADER
+    VT_MESSAGE_HEADER;
     unsigned16		fRequestCount;
     unsigned16		fIndex;
 } tVTMInvokeBreakRequest;
 
 typedef struct stVTMInvokeBreakResponse
 {
-    VT_MESSAGE_HEADER
+    VT_MESSAGE_HEADER;
     unsigned16		fRequestCount;
     unsigned16          fResponseCode;
 } tVTMInvokeBreakResponse;
@@ -490,7 +490,7 @@ typedef struct stVTMInvokeBreakResponse
 
 typedef struct stVTMMPECntlReq
 {
-    VT_MESSAGE_HEADER
+    VT_MESSAGE_HEADER;
     unsigned16		fRequestCount;
     unsigned16		fRequestMask;
     unsigned8		fTermType;
@@ -505,7 +505,7 @@ typedef struct stVTMMPECntlReq
 
 typedef struct stVTMMPECntlResp
 {
-    VT_MESSAGE_HEADER
+    VT_MESSAGE_HEADER;
     unsigned16		fRequestCount;
     unsigned16		fResponseCode;
     unsigned16		fCompletionMask;
@@ -519,14 +519,14 @@ typedef struct stVTMMPECntlResp
 
 typedef struct stVTMMPEGetInfoReq
 {
-     VT_MESSAGE_HEADER
+     VT_MESSAGE_HEADER;
      unsigned16		fRequestCount;
      unsigned16		fRequestMask;
 } tVTMMPEGetInfoReq;
 
 typedef struct stVTMMPEGetInfoResp
 {
-     VT_MESSAGE_HEADER
+     VT_MESSAGE_HEADER;
      unsigned16		fRequestCount;
      unsigned16		fCompletionMask;
      unsigned16		fInfoByteCount;
@@ -549,7 +549,7 @@ typedef struct stVTMMPEGetInfoResp
 
 typedef struct stVTMFDCCntlReq
 {
-    VT_MESSAGE_HEADER
+    VT_MESSAGE_HEADER;
     unsigned16		fRequestCount;
     unsigned32		fFDCFunc;
     unsigned16		fFDCLength;
@@ -559,7 +559,7 @@ typedef struct stVTMFDCCntlReq
 
 typedef struct stVTMFDCCntlResp
 {
-    VT_MESSAGE_HEADER
+    VT_MESSAGE_HEADER;
     unsigned16		fRequestCount;
     unsigned32		fFDCFunc;
     unsigned16		fFDCLength;
@@ -574,14 +574,14 @@ typedef struct stVTMFDCCntlResp
 
 typedef struct stVTMApplCntlReq
 {
-    VT_MESSAGE_HEADER
+    VT_MESSAGE_HEADER;
     unsigned16		fRequestCount;
     unsigned16		fApplIndex;
 } tVTMApplCntlReq;
 
 typedef struct stVTMApplCntlResp
 {
-    VT_MESSAGE_HEADER
+    VT_MESSAGE_HEADER;
     unsigned16		fRequestCount;
     unsigned16		fApplIndex;
 } tVTMApplCntlResp;
