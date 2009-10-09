@@ -139,7 +139,7 @@ int LoadKeybdTable P ((char *file_name, int i_type));
 #define NB_COLORS 2
 unsigned long color_codes[NB_COLORS];
 char *color_names[NB_COLORS] =
-{"blue", "red"};		/* changed "light grey", "red" */
+{"DimGray", "Red"};		/* changed "light grey", "red" */
 char *progname;			/* name this program was invoked by */
 
 /*******************************************************************/
