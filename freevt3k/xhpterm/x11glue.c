@@ -86,8 +86,8 @@ static char const rcsid[] = "$Id: x11glue.c,v 1.1 2003/03/14 16:28:44 randy Exp 
 #  endif
 #  define FONT_NAME	"9x15"
 #else
-#  define FONT_NAME	"-adobe-courier-medium-r-normal--*-140-75-75-m-*-iso8859-1"
-#  define FONT_NAME0	"-bitstream-r_ansi-medium-r-normal--*-120-75-75-m-*-iso8859-1"
+#  define FONT_NAME	"9x15"
+#  define FONT_NAME0	"9x15"
 #endif
 
 #include "x11glue.h"
@@ -139,7 +139,7 @@ int LoadKeybdTable P ((char *file_name, int i_type));
 #define NB_COLORS 2
 unsigned long color_codes[NB_COLORS];
 char *color_names[NB_COLORS] =
-{"gray", "red"};		/* changed "light grey", "red" */
+{"blue", "red"};		/* changed "light grey", "red" */
 char *progname;			/* name this program was invoked by */
 
 /*******************************************************************/

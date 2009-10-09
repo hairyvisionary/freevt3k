@@ -131,8 +131,8 @@ irix:
 linux20:
 	make -f Makefile CC=i386-glibc20-linux-gcc COPTS="-ILinux" SFX=.linux20 all
 
-linux21:
-	make -f Makefile CC=gcc COPTS="-ILinux" SFX=.linux21 all
+linux:
+	make -f Makefile CC=gcc COPTS="-ILinux" SFX=.linux all
 
 ncr:
 	make -f Makefile CC=cc COPTS="-Xa -Hnocopyr -INCR" LIBS="-lnsl -lsocket -lnet" SFX=.ncr all
