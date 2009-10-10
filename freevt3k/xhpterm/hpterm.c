@@ -1092,10 +1092,10 @@ void display_char (char ch)
 	  do_line_feed ();
 	}
     }
-/*  if (term->FormatMode && is_cursor_protected ())
+  if (term->FormatMode && is_cursor_protected ())
     {
       do_forward_tab ();
-    } */
+    } 
 }
 /*****************************************************************/
 void do_esc_atsign (void)
