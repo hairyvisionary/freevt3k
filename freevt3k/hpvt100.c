@@ -500,10 +500,10 @@ void vt3kHPtoVT100(refCon, buf, buf_len)
     *dch   = CSI "%dP",		/* Delete char */
     *ris   = ESC "c",		/* Reset to initial */
     *sel_ascii  = ESC "G",	/* Select ASCII character set */
-    *sel_graph  = ESC "F",	/* Select special graphics character set */
-    *sel_g0     = SI,		/* Select G0 character sets from below */
-    *g0_usascii = ESC "(B",	/* Specify USASCII set */
-    *g0_graphic = ESC "(0";	/* Specify graphics/line drawing set */
+    *sel_graph  = ESC "[m",	/* Select special graphics character set */
+    *sel_g0     = SI,		/* Select G0 character sets from below (G0 is alphanumeric, we should be envoking G1)*/
+    *g0_usascii = ESC "(B",	/* Specify USASCII set (G0 is alphanumeric, we should be envoking G1)*/
+    *g0_graphic = ESC "[m";	/* Specify graphics/line drawing set (G0 is alphanumeric, we should be envoking G1)*/
 #else
   char
     *cup   = "\033[%d;%dH",	/* Cursor position */
@@ -519,10 +519,10 @@ void vt3kHPtoVT100(refCon, buf, buf_len)
     *dch   = "\033[%dP",	/* Delete char */
     *ris   = "\033c",		/* Reset to initial */
     *sel_ascii  = "\033G",	/* Select ASCII character set */
-    *sel_graph  = "\033F",	/* Select special graphics character set */
-    *sel_g0     = "\017",	/* Select G0 character sets from below */
+    *sel_graph  = "\033[m",	/* Select special graphics character set */
+    *sel_g0     = "\016",	/* Select G0 character sets from below (G0 is alphanumeric, we should be envoking G1)*/
     *g0_usascii = "\033(B",	/* Specify USASCII set */
-    *g0_graphic = "\033(0";	/* Specify graphics/line drawing set */
+    *g0_graphic = "\033[m";	/* Specify graphics/line drawing set */
 #endif
   static int
     line_draw = 0;
