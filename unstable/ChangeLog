@@ -1,0 +1,26 @@
+2009-10-5	<mwest@carhop.com>
+
+	* x11glue.c: include stdlib.h regardless of configuration (fixed compile time errors)
+	* xllglue.c: line 142 - changed "light grey", "red" to "grey", "red" light grey made display unreadable 
+	* getcolor.c: include stdlib.h regardless of configuration (fixed compile time errors)
+	
+
+1999-01-13    <randy@telamon.com>
+
+	* All: Change to config.h configurations
+
+Mon Jun  9 12:25:32 1997    <randy@hp425t.telamon.com>
+
+	* vtconn.c: Fix numerous missing htons/htonl calls
+	* freevt3k.c: Switch A.01.03
+
+Tue Jan  7 08:09:44 1997    <randy@telamon.com>
+
+	* freevt3k.c: Inaugural entry.  Version A.01.01
+	* x11glue.c: Add code for '-a|-f|-lio' options
+	* freevt3k.c: Conditionally compiled out code not needed for xhpterm
+	* x11glue.c:  made "-li, -lo, -lio" without a "-f" log to stdout (per vt3k)
+	* x11glue.c:  Added Logit routine
+	* hpterm.c:   Added code to implement Device Control toggle of logging
+	* freevt3k.c: made "-li, -lo, -lio" without a "-f" log to stdout (per vt3k) 
+

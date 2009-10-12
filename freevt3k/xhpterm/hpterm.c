@@ -170,7 +170,7 @@ static struct hpterm *term = 0;
  */
 #if defined(kai_changes)
 /* added to filter out ESC)B, 18.12.2000 */
-static int state_B = 0;
+/*static int state_B = 0;*/
 #endif
 
 static int state = 0;

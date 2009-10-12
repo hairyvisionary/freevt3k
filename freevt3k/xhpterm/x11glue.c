@@ -79,6 +79,8 @@ static char const rcsid[] = "$Id: x11glue.c,v 1.1 2003/03/14 16:28:44 randy Exp 
 #  define USE_9X15     1
 #endif
 
+/* i changed font names here for a more readable font.  
+sorry courier just wasn't doing it for me - mwest */
 #ifdef USE_9X15
 #  if !defined(MEMLOCK_2000)
 #    define CHAR_WIDTH	9
@@ -86,7 +88,7 @@ static char const rcsid[] = "$Id: x11glue.c,v 1.1 2003/03/14 16:28:44 randy Exp 
 #  endif
 #  define FONT_NAME	"9x15"
 #else
-#  define FONT_NAME	"9x15"
+#  define FONT_NAME	"9x15"	/* changed from courier */
 #  define FONT_NAME0	"9x15"
 #endif
 
@@ -150,7 +152,7 @@ void init_disp (int argc, char **argv, char *hostname, char *font1)
   unsigned int border_width = 4;	/* four pixels */
   unsigned int display_width, display_height;
   unsigned int icon_width, icon_height;
-  char *window_name1 = "Xhpterm";
+  char *window_name1 = "xHPTerm";
   char *icon_name = "freevt3k";
   Pixmap icon_pixmap;
   XSizeHints size_hints;

@@ -1,0 +1,14 @@
+int  GetEventFlag(unsigned int*, unsigned int*, unsigned int*);
+int  FreeEventFlag(unsigned int*, unsigned int*, unsigned int*);
+void ExitProc(char*, char*, int);
+void CancelRead(void);
+void ChangeEcho(int);
+void SetTTYNormal(void);
+void SetTTYRaw(void);
+void OpenTTY(void);
+void CloseTTY(void);
+void StartTTYRead(unsigned char*, int, int);
+int  WaitForCompletion(unsigned int*);
+int  CompleteTTYRead(unsigned char*);
+int  StartReadSocket(int, unsigned char*, int);
+int  CompleteReadSocket(void);
