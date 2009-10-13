@@ -8,7 +8,9 @@
 /*#include "../vtconn.h"*/
 #include "terminal.bm"
 
-
+/* Globals */
+  const gchar *F1_label = "F1";
+  const gchar *F2_label = "F2"; 
 void
 on_window_destroy (GtkWidget *widget, gpointer data)
 {
@@ -17,7 +19,7 @@ on_window_destroy (GtkWidget *widget, gpointer data)
 
 /* Callback for close button */
 void
-on_button_clicked (GtkWidget *button, GtkTextBuffer *buffer)
+on_button_clicked (GtkWidget *F1_button, GtkTextBuffer *messageBuffer)
 {
   GtkTextIter start;
   GtkTextIter end;
@@ -25,18 +27,26 @@ on_button_clicked (GtkWidget *button, GtkTextBuffer *buffer)
   gchar *text;
 
   /* Obtain iters for the start and end of points of the buffer */
-  gtk_text_buffer_get_start_iter (buffer, &start);
-  gtk_text_buffer_get_end_iter (buffer, &end);
+  gtk_text_buffer_get_start_iter (messageBuffer, &start);
+  gtk_text_buffer_get_end_iter (messageBuffer, &end);
 
   /* Get the entire buffer text. */
-  text = gtk_text_buffer_get_text (buffer, &start, &end, FALSE);
+  text = gtk_text_buffer_get_text (messageBuffer, &start, &end, FALSE);
 
   /* Print the text */
-  g_print ("%s", text);
+  /* g_print ("%s", text);
 
-  g_free (text);
+  g_free (text); */
 
-  gtk_main_quit ();
+  F1_label = "clicked";
+  F2_label = "changed"; 
+  
+  void gtk_button_set_label (GtkButton *F1_button,
+			   const gchar *F1_label);
+  void gtk_button_set_label (GtkButton *F2_button,
+			   const gchar *F2_label);
+
+  
 }
 
 int 
@@ -60,8 +70,10 @@ main(int argc, char *argv[])
   GtkWidget *F6_button;
   GtkWidget *F7_button;
   GtkWidget *F8_button;
-  GtkTextBuffer *buffer;
-  
+  GtkTextBuffer *messageBuffer;		/* using the buffer from freevt3k.c and vt3lglue.c */
+
+  /* test case for changing the function button labels */
+    
   gtk_init (&argc, &argv);
 
   /* Create a Window. */
@@ -99,9 +111,9 @@ main(int argc, char *argv[])
                    GTK_SCROLLED_WINDOW (scrolled_window), text_view);
 
   /* Obtaining the buffer associated with the widget. */
-  buffer = gtk_text_view_get_buffer (GTK_TEXT_VIEW (text_view));
+  messageBuffer = gtk_text_view_get_buffer (GTK_TEXT_VIEW (text_view));
   /* Set the default buffer text. */ 
-  gtk_text_buffer_set_text (buffer, "Hello Text View!", -1);
+  gtk_text_buffer_set_text (messageBuffer, "Hello Text View!", -1);
   
   /* Create a close button. */
   hbox = gtk_hbox_new (FALSE,0);
@@ -113,13 +125,13 @@ main(int argc, char *argv[])
   group2 = gtk_hbox_new (FALSE,0);
   gtk_box_pack_start (GTK_BOX (hbox), group2, 1, 1, 5);
 
-  F1_button = gtk_button_new_with_label ("F1");
+  F1_button = gtk_button_new_with_label (F1_label);
   gtk_box_pack_start (GTK_BOX (group1), F1_button, 1, 1, 0);
   g_signal_connect (G_OBJECT (F1_button), "clicked", 
                     G_CALLBACK (on_button_clicked),
-                    buffer);
+                    messageBuffer);
   
-  F2_button = gtk_button_new_with_label ("F2");
+  F2_button = gtk_button_new_with_label (F2_label);
   gtk_box_pack_start (GTK_BOX (group1), F2_button, 1, 1, 0);
   
   F3_button = gtk_button_new_with_label ("F3");
