@@ -54,7 +54,7 @@ static char *visual_class[] = {
 "DirectColor"
 };
 
-get_colors(nb_colors, color_names, color_codes)
+int get_colors(nb_colors, color_names, color_codes)
 
     int nb_colors;
     char **color_names;

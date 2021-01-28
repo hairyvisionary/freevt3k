@@ -128,10 +128,10 @@ char *version_str = "A.01.04";
 
 /*******************************************************************/
 int get_colors P ((int nb_colors, char **color_names, unsigned long *color_codes));
-int getGC P ((Window win, GC * gc, XFontStruct * font_info));
-int getGC_Inverse P ((Window win, GC * gc, XFontStruct * font_info));
-int getGC_Halfbright P ((Window win, GC * gc, XFontStruct * font_info));
-int getGC_Red P ((Window win, GC * gc, XFontStruct * font_info));
+void getGC P ((Window win, GC * gc, XFontStruct * font_info));
+void getGC_Inverse P ((Window win, GC * gc, XFontStruct * font_info));
+void getGC_Halfbright P ((Window win, GC * gc, XFontStruct * font_info));
+void getGC_Red P ((Window win, GC * gc, XFontStruct * font_info));
 void Logit P ((int typ, char *ptr, int len, int special_dc1));
 int LoadKeybdTable P ((char *file_name, int i_type));
 /*******************************************************************/
@@ -608,7 +608,7 @@ void event_loop (void)
 	if (DEBUG_KEYSYMS)
 	{
 	  int ii;
-	  printf ("(%x)", keysym);
+	  printf ("(%lx)", (unsigned long) keysym);
 	  printf ("<");
 	  for (ii = 0; ii < charcount; ii++)
 	  {
@@ -653,7 +653,7 @@ void event_loop (void)
   }				/* end while */
 }
 
-getGC (win, gc, font_info)
+void getGC (win, gc, font_info)
      Window win;
      GC *gc;
      XFontStruct *font_info;
@@ -687,7 +687,7 @@ getGC (win, gc, font_info)
   XSetDashes (display, *gc, dash_offset, dash_list, list_length);
 }
 
-getGC_Inverse (win, gc, font_info)
+void getGC_Inverse (win, gc, font_info)
      Window win;
      GC *gc;
      XFontStruct *font_info;
@@ -706,7 +706,7 @@ getGC_Inverse (win, gc, font_info)
   XSetBackground (display, *gc, BlackPixel (display, screen_num));
 }
 
-getGC_Halfbright (win, gc, font_info)
+void getGC_Halfbright (win, gc, font_info)
      Window win;
      GC *gc;
      XFontStruct *font_info;
@@ -725,7 +725,7 @@ getGC_Halfbright (win, gc, font_info)
   XSetBackground (display, *gc, WhitePixel (display, screen_num));
 }
 
-getGC_Red (win, gc, font_info)
+void getGC_Red (win, gc, font_info)
      Window win;
      GC *gc;
      XFontStruct *font_info;
@@ -745,7 +745,7 @@ getGC_Red (win, gc, font_info)
 }
 
 #if defined(MEMLOCK_2000)
-int load_font (XFontStruct **font_info, char *font1)
+void load_font (XFontStruct **font_info, char *font1)
 {
   char *fontname = FONT_NAME;
   if(font1 != NULL)
@@ -774,7 +774,7 @@ int load_font (XFontStruct **font_info, char *font1)
   }
 }
 #else
-int load_font(XFontStruct **font_info)
+void load_font(XFontStruct **font_info)
 {
 	char *fontname = FONT_NAME;
 
@@ -1071,7 +1071,7 @@ int keymapper (KeySym keysym, unsigned int state) {
 #endif
 
 
-int disp_drawtext (style, row, col, buf, nbuf)
+void disp_drawtext (style, row, col, buf, nbuf)
      int style;			/* Low order 4 bits of display enhancements escape code */
      int row;			/* Row number of 1st char of string, 0..23 (or more) */
      int col;			/* Column number of 1st char of string, 0..79 (or more) */
@@ -1137,7 +1137,7 @@ int disp_drawtext (style, row, col, buf, nbuf)
 }
 
 
-disp_erasetext (row, col, nchar)
+void disp_erasetext (row, col, nchar)
      int row;
      int col;
      int nchar;
@@ -1159,7 +1159,7 @@ disp_erasetext (row, col, nchar)
 		  nchar * font_width, font_height);
 }
 
-disp_drawcursor (style, row, col)
+void disp_drawcursor (style, row, col)
      int style;
      int row;
      int col;

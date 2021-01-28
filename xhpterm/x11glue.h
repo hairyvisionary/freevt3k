@@ -31,16 +31,16 @@ void init_disp (int argc, char **argv, char *hostname, char *font1);
 void init_disp(int argc, char **argv);
 #endif
 void event_loop (void);
-int getGC (Window win, GC * gc, XFontStruct * font_info);
+void getGC (Window win, GC * gc, XFontStruct * font_info);
 #if defined(MEMLOCK_2000)
-int load_font (XFontStruct ** font_info, char *font1);
+void load_font (XFontStruct ** font_info, char *font1);
 int keymapper (KeySym keysym, unsigned int state, char *buffer, int charcount);
 #else
 int load_font(XFontStruct **font_info);
 int keymapper (KeySym keysym, unsigned int state);
 #endif
-int disp_drawtext (int style, int row, int col, char *buf, int nbuf);
-int disp_erasetext (int row, int col, int nchar);
-int disp_drawcursor (int style, int row, int col);
+void disp_drawtext (int style, int row, int col, char *buf, int nbuf);
+void disp_erasetext (int row, int col, int nchar);
+void disp_drawcursor (int style, int row, int col);
 void Logit (int typ, char *ptr, int len, int special_dc1);
 void doXBell (void);
