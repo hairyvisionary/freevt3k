@@ -1226,6 +1226,9 @@ int main (int argc, char **argv)
     use_rlogin = 0, display_fns = 0, speed = 9600, parm_error = 0;
   char
    parity = 'N', *input_file = NULL, *hostname = NULL, *log_file = NULL, *ttyname = NULL;
+  int
+    ipPort = kVT_PORT;
+
 #if defined(MEMLOCK_2000)
   char *font1 = NULL;
 #endif
@@ -1368,6 +1371,19 @@ int main (int argc, char **argv)
 	else
 	  ++parm_error;
       }
+    else if (!strcmp(*argv, "-p"))
+      {
+	if (--argc)
+	  {
+	    ++argv;
+	    if (*argv[0] == '-')
+	      ++parm_error;
+	    else
+	      ipPort = atoi(*argv);
+	  }
+	else
+	  ++parm_error;
+      }
     else
       ++parm_error;
     if (parm_error)
@@ -1442,14 +1458,14 @@ int main (int argc, char **argv)
   {
     char ttyinfo[256];
     sprintf (ttyinfo, "%s|%d|%c", ttyname, speed, parity);
-    con = conmgr_connect (e_tty, ttyinfo);
+    con = conmgr_connect (e_tty, ttyinfo, 0);
   }
   else if (hostname)
   {
     if (use_rlogin)
-      con = conmgr_connect (e_rlogin, hostname);
+	con = conmgr_connect (e_rlogin, hostname, 0);
     else
-      con = conmgr_connect (e_vt3k, hostname);
+        con = conmgr_connect (e_vt3k, hostname, ipPort);
   }
   else
   {

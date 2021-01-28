@@ -16,7 +16,7 @@ struct conmgr {
     int eof;
 };
 
-struct conmgr * conmgr_connect (enum e_contype type, char *hostname);
+struct conmgr * conmgr_connect (enum e_contype type, char *hostname, int port);
 void conmgr_read (struct conmgr *con);
 void conmgr_send (struct conmgr *con, char *buf, int nbuf);
 void conmgr_send_break (struct conmgr *con);

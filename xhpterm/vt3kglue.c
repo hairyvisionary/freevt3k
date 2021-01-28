@@ -87,10 +87,10 @@
 
 
 
-tVTConnection * open_vt3k_connection (char *hostname)
+tVTConnection * open_vt3k_connection (char *hostname, int port)
 {
     long  ipAddress;
-    int   ipPort = kVT_PORT;
+    int   ipPort = port;
     struct hostent * theHost;
     tVTConnection * theConnection;
     int             vtError;

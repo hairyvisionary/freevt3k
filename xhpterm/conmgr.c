@@ -70,7 +70,7 @@ void conmgr_rxfunc (long refcon, char *buf, int nbuf) {
 #endif
 }
 /*******************************************************************/
-struct conmgr * conmgr_connect (enum e_contype type, char *hostname) {
+struct conmgr * conmgr_connect (enum e_contype type, char *hostname, int port) {
 /*
 **  Establish a connection
 */
@@ -89,7 +89,7 @@ struct conmgr * conmgr_connect (enum e_contype type, char *hostname) {
 	    if (!s) return (0);
 	    break;
         case e_vt3k:
-	    ptr = open_vt3k_connection (hostname);
+	    ptr = open_vt3k_connection (hostname, port);
 	    if (!ptr) return (0);
 	    s = VTSocket(ptr);
 	    break;
