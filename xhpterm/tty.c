@@ -33,6 +33,11 @@
 #      define _POSIX_SOURCE (1)
 #    endif
 #  endif
+#  ifdef MACOSX
+#    ifndef _POSIX_SOURCE
+#      define _POSIX_SOURCE (1)
+#    endif
+#  endif
 /***************************************************************/
 #  include <errno.h>
 #  include <fcntl.h>
@@ -112,7 +117,7 @@ int open_tty_connection (deviceinfo)
     }
   *(ptr++) = '\0';
   parity = *ptr;
-  fd = open (devicename, O_RDWR | O_NDELAY | O_NOCTTY, 0);
+  fd = open (devicename, O_RDWR | O_NONBLOCK | O_NOCTTY, 0);
   if (fd < 0)
     {
       printf ("Error %d from open(%s)\n", errno, devicename);

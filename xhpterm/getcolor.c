@@ -32,6 +32,7 @@
 #  include <X11/Xutil.h>
 #  include <X11/Xos.h>
 #  include <stdio.h>
+#  include <stdlib.h>
 #endif
 
 #define DEBUG_GET_COLORS 0 

@@ -40,6 +40,8 @@ static char const rcsid[] = "$Id: x11glue.c,v 1.1 2003/03/14 16:28:44 randy Exp 
 #include <ucx$inetdef.h>
 #else
 #include "config.h"
+#include <stdlib.h>
+#include <ctype.h>
 #ifdef __hpux
 #ifndef _HPUX_SOURCE
 #define _HPUX_SOURCE 1

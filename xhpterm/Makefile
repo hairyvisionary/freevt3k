@@ -102,7 +102,7 @@ freebsd:
 	make -f Makefile CC=gcc COPTS="-I../ -I../BSDI" SFX=.freebsd all
 
 macosx:
-	make -f Makefile CC=cc COPTS="-I../ -I../MacOSX -I/usr/include/X11 -I/usr/include/X11/extensions" LIBS="-L/usr/X11R6/lib -lX11" SFX=.macosx all
+	make -f Makefile CC=cc COPTS="-DMACOSX -I../ -I../MacOSX -I/usr/include/X11 -I/usr/include/X11/extensions -I/opt/X11/include -I/opt/X11/include/X11/extensions" LIBS="-L/usr/X11R6/lib -L/opt/X11/lib -lX11" SFX=.macosx all
 
 hpux11pa11:
 	make -f Makefile CC=c89 SFX=.hpux11pa11 COPTS="-Wc,-w1 +e -z -O +Onolimit +ESlit +DD32 -I/usr/include/X11R5 -DHPUX -I../ -I../HP-UX/11.X/PA1.1" LIBS="-L/usr/lib/X11R5 -lX11" all

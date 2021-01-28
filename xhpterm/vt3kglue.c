@@ -121,7 +121,7 @@ tVTConnection * open_vt3k_connection (char *hostname)
         goto Last;
         }
 
-    if (vtError = VTInitConnection(theConnection, ipAddress, ipPort))
+    if ((vtError = VTInitConnection(theConnection, ipAddress, ipPort)))
         {
         printf("Unable to initialize the connection.\n");
         VTErrorMessage(theConnection, vtError,
@@ -140,7 +140,7 @@ tVTConnection * open_vt3k_connection (char *hostname)
 
     theConnection->fDataOutProc = conmgr_rxfunc;
 
-    if (vtError = VTConnect(theConnection))
+    if ((vtError = VTConnect(theConnection)))
 	{
         printf("Unable to connect to host.\n");
         VTErrorMessage(theConnection, vtError,
