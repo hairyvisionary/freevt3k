@@ -1271,21 +1271,16 @@ int OpenTTY(new_termio, old_termio)
   new_termio->c_iflag &= ~IGNBRK;
   new_termio->c_iflag |= BRKINT;
 #endif /*BREAK_VIA_SIG*/
-#ifdef _POSIX_VDISABLE
-#  if (_POSIX_VDISABLE == -1)
-#    undef _POSIX_VDISABLE
-#  endif
-#endif
-#ifndef _POSIX_VDISABLE
-#  ifdef _PC_VDISABLE
+#ifdef _PC_VDISABLE
   if ((posix_vdisable = fpathconf(fd, _PC_VDISABLE)) == -1)
     {
       errno = 0;
       posix_vdisable = 0377;
     }
-#  else
+#elif !defined(_POSIX_VDISABLE)
   posix_vdisable = 0377;
-#  endif
+#else
+  posix_vdisable = _POSIX_VDISABLE;
 #endif
   if (disable_xon_xoff)
     {
