@@ -324,8 +324,8 @@ PRIVATE int ProcessAMNegotiationRequest(conn)
 		htons(kHWCTLParity);   
     amresp.fTMMaxReceiveBurst = htons(amreq->fAMMaxSendBurst);
     amresp.fTMMaxSendBurst = htons(amreq->fAMMaxReceiveBurst);
-    if (returnValue = SendToAM(conn, (tVTMHeader *) &amresp,
-					sizeof(amresp))) goto Last;
+    if ((returnValue = SendToAM(conn, (tVTMHeader *) &amresp,
+				sizeof(amresp)))) goto Last;
 
     /* Now, put together and send a TM negotiation request */ 
 
@@ -350,9 +350,9 @@ PRIVATE int ProcessAMNegotiationRequest(conn)
 			 0);		/* astprm */
     if ((VMSerror(status)) || (VMSerror(iosb.status)))
 	ExitProc("sys$getjpiw", "", 1);
-    sprintf(pid_buf, "%0*d", sizeof(tmreq.fSessionID), pid);
+    sprintf(pid_buf, "%0*d", (int) sizeof(tmreq.fSessionID), pid);
 #else
-    sprintf(pid_buf, "%0*d", sizeof(tmreq.fSessionID), getpid());
+    sprintf(pid_buf, "%0*d", (int) sizeof(tmreq.fSessionID), getpid());
 #endif
     memcpy(tmreq.fSessionID, pid_buf, sizeof(tmreq.fSessionID));
 

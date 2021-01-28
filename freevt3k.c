@@ -355,7 +355,7 @@ void Logit (typ, ptr, len, special_dc1)
 	  int index = (int) *ptr;
 	  if (index == 127)
 	    index = 33;
-	  fprintf (logFd, asc_logvalue[index]);
+	  fprintf (logFd, "%s", asc_logvalue[index]);
 	  if (index == ASC_LF)
 	    putc ('\n', logFd);
 	}
@@ -1506,7 +1506,7 @@ int DoMessageLoop(conn)
 	  time_ptr = (struct timeval*)&timeout;
 	  if (debug)
 	    {
-	      fprintf(debug_fd, "timer: %d.%06d\n", timeout.tv_sec, timeout.tv_usec);
+	      fprintf(debug_fd, "timer: %ld.%06d\n", timeout.tv_sec, timeout.tv_usec);
 	      debug_need_crlf = 0;
 	    }
 	}
@@ -1924,7 +1924,7 @@ int main(argc, argv)
       return(1);
     }
 
-  if (vtError = VTInitConnection(conn, ipAddress, ipPort))
+  if ((vtError = VTInitConnection(conn, ipAddress, ipPort)))
     {
       VTErrorMessage(conn, vtError,
 		     messageBuffer, sizeof(messageBuffer));
@@ -1941,7 +1941,7 @@ int main(argc, argv)
      ((vt52) ? vt3kHPtoVT52 :
       ((generic) ? vt3kHPtoGeneric: vt3kDataOutProc)));
 
-  if (vtError = VTConnect(conn))
+  if ((vtError = VTConnect(conn)))
     {
       VTErrorMessage(conn, vtError,
 		     messageBuffer, sizeof(messageBuffer));
