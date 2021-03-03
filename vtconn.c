@@ -1235,6 +1235,15 @@ void VTErrorMessage(conn, errorCode, msg, maxLength)
 } /*VTErrorMessage*/
 
 #ifdef __STDC__
+tVTConnection * VTAllocConnection(void)
+#else
+tVTConnection * VTAllocConnection()
+#endif
+{ /*VTAllocConnection*/
+	return calloc(1, sizeof(tVTConnection));
+} /*VTAllocConnection*/
+
+#ifdef __STDC__
 int VTInitConnection(tVTConnection * conn, long ipAddress, int ipPort)
 #else
 int VTInitConnection(conn, ipAddress, ipPort)
