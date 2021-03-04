@@ -1329,6 +1329,22 @@ void VTCleanUpConnection(conn)
 } /*VTCleanUpConnection*/
 
 #ifdef __STDC__
+void VTDeallocConnection(tVTConnection * conn)
+#else
+void VTDeallocConnection(conn)
+    tVTConnection
+    	*conn;
+#endif
+{ /*VTDeallocConnection*/
+	if (conn)
+	    {
+	    VTCleanUpConnection(conn);
+	    free(conn);
+	    }
+} /*VTDeallocConnection*/
+
+
+#ifdef __STDC__
 int VTSocket(tVTConnection * conn)
 #else
 int VTSocket(conn)
