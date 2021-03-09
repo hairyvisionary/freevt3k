@@ -75,7 +75,98 @@ int test_VTInitConnection_1()
 		return 3;
 	}
 
+	/* check connection fields to see if they are properly initialized */
+	if (cxn->fLineTerminationChar != '\r') {
+		return 4;
+	}
+	if (cxn->fSendBufferSize != kVT_MAX_BUFFER) {
+		return 5;
+	}
+	if (cxn->fReceiveBufferSize != kVT_MAX_BUFFER) {
+		return 6;
+	}
+	if (cxn->fTargetAddress.sin_family != AF_INET) {
+		return 7;
+	}
+	if (cxn->fTargetAddress.sin_port != htons(ipPort)) {
+		return 8;
+	}
+	if (cxn->fTargetAddress.sin_addr.s_addr != ipAddress) {
+		return 9;
+	}
+	if (cxn->fSocket == -1) {
+		return 10;
+	}
+	if (cxn->fDataOutProc != DefaultDataOutProc) {
+		return 11;
+	}
+	if (cxn->fState != kvtsClosed) {
+		return 12;
+	}
+	if (cxn->fDriverMode != kDTCVanilla) {
+		return 13;
+	}
+	if (cxn->fBlockModeSupported != FALSE) {
+		return 14;
+	}
+
 	VTDeallocConnection(cxn);
+	return 0;
+}
+
+int test_VTConnect_1()
+{
+	char hostname[] = "127.0.0.1";
+	long ipAddress;
+	struct hostent * theHost;
+	int ipPort = kVT_PORT;
+	tVTConnection * cxn;
+	int rc;
+	
+	ipAddress = inet_addr(hostname);
+	if (ipAddress == INADDR_NONE) {
+		theHost = gethostbyname(hostname);
+		if (theHost == NULL)
+		{
+			fprintf(stderr, "Unable to resolve %s.\n", hostname);
+			return 1;
+		}
+		memcpy((char *) &ipAddress, theHost->h_addr, sizeof(ipAddress));
+	}
+
+	cxn = VTAllocConnection();
+	if (cxn == NULL) {
+		return 1;
+	}
+
+	rc = VTInitConnection(cxn, ipAddress, ipPort);
+	if (rc != kVTCNoError) {
+		return 2;
+	}
+
+	/* force fState to state(s) other than kvtsClosed to provoke VTConnect() */
+	cxn->fState = kvtsUninitialized;
+	if (VTConnect(cxn) != kVTCNotInitialized) {
+		return 3;
+	}
+	cxn->fState = kvtsWaitingForAM;
+	if (VTConnect(cxn) != kVTCNotInitialized) {
+		return 4;
+	}
+	cxn->fState = kvtsWaitingForTMReply;
+	if (VTConnect(cxn) != kVTCNotInitialized) {
+		return 5;
+	}
+	cxn->fState = kvtsOpen;
+	if (VTConnect(cxn) != kVTCNotInitialized) {
+		return 6;
+	}
+	cxn->fState = kvtsWaitingForCloseReply;
+	if (VTConnect(cxn) != kVTCNotInitialized) {
+		return 7;
+	}
+
+	/* can't really test VTConnect() beyond this without something to connect() to */
 	return 0;
 }
 
@@ -102,9 +193,12 @@ tTestEntry tests[] = {
 	{
 		&(test_VTInitConnection_1),
 		"VTInitConnection initializes"
+	},
+	{
+		&(test_VTConnect_1),
+		"VTConnect fails if state not kvtsClosed"
 	}
 };
-
 
 int main(int argc, char ** argv)
 {
