@@ -1350,12 +1350,33 @@ int VTConnect(conn)
     int
 	flags = 0;
 #endif
+#ifdef IPPROTO_IP
+#ifdef IP_TOS
+    int tos = 0;
+#endif /* IP_TOS */
+#endif /* IPPROTO_IP */
 
     if (conn->fState != kvtsClosed)
 	{
 	returnValue = kVTCNotInitialized;
 	goto Last;
 	}
+
+#ifdef IPPROTO_IP
+#ifdef IP_TOS
+    /* older versions of NS Transport on classic MPE V/E (V-delta-9, before, likely
+     * some after) have trouble with IP type of service (TOS) header field being non-zero;
+     * and older versions of NS/3000 VT server will call SUDDENDEATH(969) on the resulting
+     * socket error; so force it to zero and don't be the remote denial-of-service
+     */
+    if (0 > setsockopt(conn->fSocket, IPPROTO_IP, IP_TOS, &tos, sizeof(tos)))
+	{
+	returnValue = kVTCSocketError;
+	conn->fLastSocketError = PortableErrno(errno);
+	goto Last;
+	}
+#endif /* IP_TOS */
+#endif /* IPPROTO_IP */
 
     connectError = connect(conn->fSocket, 
 			   (struct sockaddr *) &conn->fTargetAddress,
