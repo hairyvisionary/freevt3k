@@ -67,6 +67,7 @@
 #  include <sys/types.h>
 #  include <sys/socket.h>
 #  include <netinet/in.h>
+#  include <netinet/tcp.h>
 #  include <netdb.h>
 #  include <assert.h>
 #  include <unistd.h>
@@ -1355,6 +1356,11 @@ int VTConnect(conn)
     int tos = 0;
 #endif /* IP_TOS */
 #endif /* IPPROTO_IP */
+#ifdef IPPROTO_TCP
+#ifdef TCP_NOOPT
+    int noopt = 1;
+#endif /* TCP_NOOPT */
+#endif /* IPPROTO_TCP */
 
     if (conn->fState != kvtsClosed)
 	{
@@ -1377,6 +1383,26 @@ int VTConnect(conn)
 	}
 #endif /* IP_TOS */
 #endif /* IPPROTO_IP */
+
+#ifdef IPPROTO_TCP
+#ifdef TCP_NOOPT
+    /* older versions of NS Transport on classic MPE V/E (V-delta-9, before, likely
+     * some after) also have trouble with some TCP options, in particular Selective
+     * Acknowledgement (SACK) and Window Scaling.  Window Scaling seems to make TCP 
+     * ignore the SYN segment until it is retransmitted with the Window Scaling option
+     * removed.  SACK is accepted but provokes a call to SUDDENDEATH(969), so we 
+     * socket error; so force it to zero and don't be the remote denial-of-service, 
+     * and as a bonus get connected faster, but too bad about MSS negotiation via
+     * TCP options.
+     */
+    if (0 > setsockopt(conn->fSocket, IPPROTO_TCP, TCP_NOOPT, &noopt, sizeof(noopt)))
+        {
+	returnValue = kVTCSocketError;
+	conn->fLastSocketError = PortableErrno(errno);
+	goto Last;
+	}
+#endif /* TCP_NOOPT */
+#endif /* IPPROTO_TCP */
 
     connectError = connect(conn->fSocket, 
 			   (struct sockaddr *) &conn->fTargetAddress,
