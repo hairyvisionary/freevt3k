@@ -328,34 +328,38 @@ PRIVATE int ProcessAMNegotiationRequest(conn)
     if ((returnValue = SendToAM(conn, (tVTMHeader *) &amresp,
 				sizeof(amresp)))) goto Last;
 
-    /* Now, put together and send a TM negotiation request */ 
+    /* if we are/were waiting for AM's initial negotiation request... */
 
-    FillStandardMessageHeader((tVTMHeader *) &tmreq, 
-				kvmtEnvCntlReq, kvtpTMNegotiate);
-    tmreq.fRequestCount = htons(++conn->fCurrentTMRequestCount);
-    tmreq.fLinkType = kVTDefaultCommLinkType;
-    tmreq.fTerminalClass = htons(kVTDefaultTerminalClass);
+    if (conn->fState == kvtsWaitingForAM) {
+
+	/* put together and send an initial TM negotiation request */ 
+
+	FillStandardMessageHeader((tVTMHeader *) &tmreq, 
+				  kvmtEnvCntlReq, kvtpTMNegotiate);
+	tmreq.fRequestCount = htons(++conn->fCurrentTMRequestCount);
+	tmreq.fLinkType = kVTDefaultCommLinkType;
+	tmreq.fTerminalClass = htons(kVTDefaultTerminalClass);
 
 #ifdef VMS
-    jpi_info.item_code	= JPI$_JOBTYPE;
-    jpi_info.buf_len	= sizeof(job_type);
-    jpi_info.buf	= (unsigned char*)&job_type;
-    jpi_info.ret_len	= &job_type_len;
-    jpi_info.terminator	= 0;
-    status = sys$getjpiw(0,		/* efn */
-			 &pid,		/* pidadr */
-			 0,		/* prcnam */
-			 &jpi_info,	/* itmlst */
-			 &iosb,		/* iosb */
-			 0,		/* astadr */
-			 0);		/* astprm */
-    if ((VMSerror(status)) || (VMSerror(iosb.status)))
-	ExitProc("sys$getjpiw", "", 1);
-    sprintf(pid_buf, "%0*d", (int) sizeof(tmreq.fSessionID), pid);
+	jpi_info.item_code	= JPI$_JOBTYPE;
+	jpi_info.buf_len	= sizeof(job_type);
+	jpi_info.buf	= (unsigned char*)&job_type;
+	jpi_info.ret_len	= &job_type_len;
+	jpi_info.terminator	= 0;
+	status = sys$getjpiw(0,         /* efn */
+			     &pid,	/* pidadr */
+			     0,		/* prcnam */
+			     &jpi_info,	/* itmlst */
+			     &iosb,	/* iosb */
+			     0,		/* astadr */
+			     0);	/* astprm */
+	if ((VMSerror(status)) || (VMSerror(iosb.status)))
+	    ExitProc("sys$getjpiw", "", 1);
+	sprintf(pid_buf, "%0*d", (int) sizeof(tmreq.fSessionID), pid);
 #else
-    sprintf(pid_buf, "%0*d", (int) sizeof(tmreq.fSessionID), getpid());
+	sprintf(pid_buf, "%0*d", (int) sizeof(tmreq.fSessionID), getpid());
 #endif
-    memcpy(tmreq.fSessionID, pid_buf, sizeof(tmreq.fSessionID));
+	memcpy(tmreq.fSessionID, pid_buf, sizeof(tmreq.fSessionID));
 
 #ifdef VMS
 #  ifdef know_how_to_do_this
@@ -364,25 +368,31 @@ PRIVATE int ProcessAMNegotiationRequest(conn)
  *   getdomainname() call
  */
 #  else
-    gethostname(hostName, sizeof(hostName));
+	gethostname(hostName, sizeof(hostName));
 #  endif
 #else
-    gethostname(hostName, sizeof(hostName));
+	gethostname(hostName, sizeof(hostName));
 #  ifndef WINNT
-    getdomainname(domainName, sizeof(domainName));
-    strcat(hostName, ".");
-    strcat(hostName, domainName);
+	getdomainname(domainName, sizeof(domainName));
+	strcat(hostName, ".");
+	strcat(hostName, domainName);
 #  endif
 #endif
 
-    nodeNameLength = strlen(hostName);
-    if (nodeNameLength > sizeof(tmreq.fNodeName))
-        nodeNameLength = sizeof(tmreq.fNodeName);
-    tmreq.fNodeLength = htons(nodeNameLength);
-    memset((char *)tmreq.fNodeName, 0, sizeof(tmreq.fNodeName));
-    memcpy(tmreq.fNodeName, hostName, nodeNameLength);
-    returnValue = SendToAM(conn, (tVTMHeader *) &tmreq, sizeof(tmreq));
+	nodeNameLength = strlen(hostName);
+	if (nodeNameLength > sizeof(tmreq.fNodeName))
+	    nodeNameLength = sizeof(tmreq.fNodeName);
+	tmreq.fNodeLength = htons(nodeNameLength);
+	memset((char *)tmreq.fNodeName, 0, sizeof(tmreq.fNodeName));
+	memcpy(tmreq.fNodeName, hostName, nodeNameLength);
+	if ((returnValue = SendToAM(conn, (tVTMHeader *) &tmreq, sizeof(tmreq))))
+		goto Last;
 
+	/* and now we are done waiting for AM negotiation and instead waiting for
+	 * TM negotiation reply
+	 */
+	conn->fState = kvtsWaitingForTMReply;
+    }
 Last:
     return returnValue;
 #undef TOHOST
@@ -402,7 +412,10 @@ PRIVATE int ProcessTMNegotiationResponse(conn)
 
    if (ntohs(tmResp->fResponseCode) != kTMNRSuccessful)
 	returnValue = kVTCRejectedTMNegotiation;
-   else returnValue = kVTCVTOpen; 
+   else {
+	returnValue = kVTCVTOpen;
+	conn->fState = kvtsOpen;
+   }
 
    return returnValue;
 } /*ProcessTMNegotiationResponse*/
