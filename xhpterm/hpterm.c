@@ -164,25 +164,6 @@ char tx_buff[256];
    **  When that happens, this static variable can be removed
  */
 static struct hpterm *term = 0;
-/*
-   **  Below this line being phased out
-   **  They should be part of struct hpterm
- */
-#if defined(kai_changes)
-/* added to filter out ESC)B, 18.12.2000 */
-static int state_B = 0;
-#endif
-
-static int state = 0;
-static int cr = 0, cc = 0;
-static int parm = 0;
-static int nparm = 0;
-static int sign = 0;
-static int attr = 0;
-static int keyn = 0;
-static int llen = 0;
-static int slen = 0;
-static int SPOW_latch = 0;
 /*******************************************************************/
 void nyi(void)				/* nyi = Not Yet Implemented */
 {
@@ -295,13 +276,13 @@ void update_cursor (void)
    **      Determine the display enhancements for the cell
    **      that is cursor'ed
  */
-      if (cc >= rp->nbchars)
+      if (term->cc >= rp->nbchars)
 	{
 	  style = 0;
 	}
       else
 	{
-	  ee = cc;
+	  ee = term->cc;
 	  while (ee && !(rp->disp[ee] & HPTERM_ANY_ENHANCEMENT))
 	    {
 	      ee--;
@@ -309,7 +290,7 @@ void update_cursor (void)
 	  style = rp->disp[ee] & 0xF;
 	}
 
-      disp_drawcursor (style, cr, cc);
+      disp_drawcursor (style, term->cr, term->cc);
   }
 }
 #if defined(MEMLOCK_2000)
@@ -468,7 +449,7 @@ struct row *find_cursor_row (void)
   int ii;
   struct row *rp;
 
-  ii = cr;
+  ii = term->cr;
   rp = term->dptr;
   while (ii && rp->next)
     {
@@ -477,7 +458,7 @@ struct row *find_cursor_row (void)
     }
   if (ii)
     {
-      printf ("find_cursor_row: ii=%d, cr=%d\n", ii, cr);
+      printf ("find_cursor_row: ii=%d, cr=%d\n", ii, term->cr);
     }
   return (rp);
 }
@@ -524,21 +505,21 @@ void erase_cursor (void)
    **  Erase cell that was cursor'ed
  */
   nchar = 1;
-  disp_erasetext (cr, cc, nchar);
+  disp_erasetext (term->cr, term->cc, nchar);
 /*
    **  Re-draw char if there is one
  */
-  if (rp && cc < rp->nbchars)
+  if (rp && term->cc < rp->nbchars)
     {
-      buf[0] = rp->text[cc];
+      buf[0] = rp->text[term->cc];
       nchar = 1;
-      ee = cc;
+      ee = term->cc;
       while (ee && !(rp->disp[ee] & HPTERM_ANY_ENHANCEMENT))
 	{
 	  ee--;
 	}
       style = rp->disp[ee] & 0xF;
-      disp_drawtext (style, cr, cc, buf, nchar);
+      disp_drawtext (style, term->cr, term->cc, buf, nchar);
     }
 }
 /*****************************************************************/
@@ -803,8 +784,8 @@ static void update_labels (void)
 /*****************************************************************/
 void do_carriage_return (void)
 {
-  cc = term->LeftMargin;
-  SPOW_latch = 1;
+  term->cc = term->LeftMargin;
+  term->SPOW_latch = 1;
 }
 /*****************************************************************/
 void do_line_feed (void)
@@ -815,8 +796,8 @@ void do_line_feed (void)
   struct row *saverp;
 #endif
 
-  cr++;
-  if (cr >= term->nbrows)
+  term->cr++;
+  if (term->cr >= term->nbrows)
     {				/* while? */
       rp = find_bottom_row ();
       if (!rp->next)
@@ -838,16 +819,16 @@ void do_line_feed (void)
 #endif
 	term->dptr = term->dptr->next;
       term->update_all = 1;
-      cr--;
+      term->cr--;
     }
-  SPOW_latch = 0;
+  term->SPOW_latch = 0;
 }
 /*****************************************************************/
 void do_back_space (void)
 {
 
-  if (cc)
-    cc--;
+  if (term->cc)
+    term->cc--;
 }
 /*****************************************************************/
 int is_cursor_protected (void)
@@ -859,7 +840,7 @@ int is_cursor_protected (void)
   int ee;
 
   rp = find_cursor_row ();
-  ee = cc;
+  ee = term->cc;
   if (ee >= rp->nbchars)
     ee = rp->nbchars - 1;
   while (ee >= 0)
@@ -867,7 +848,7 @@ int is_cursor_protected (void)
       if (rp->disp[ee] & HPTERM_START_FIELD)
 	{
 #if defined(MEMLOCK_2000)
-	  if (cc >= rp->nbchars)
+	  if (term->cc >= rp->nbchars)
 	    return (1);
 	  else
 #endif
@@ -896,45 +877,45 @@ void goto_next_field (void)
   rp = find_cursor_row ();
   if (!is_cursor_protected ())
     {
-      while (cc < rp->nbchars && !(rp->disp[cc] & HPTERM_END_FIELD))
+      while (term->cc < rp->nbchars && !(rp->disp[term->cc] & HPTERM_END_FIELD))
 	{
-	  cc++;
+	  term->cc++;
 	}
     }
 
   save_dptr = term->dptr;
-  save_cr = cr;
-  save_cc = cc;
+  save_cr = term->cr;
+  save_cc = term->cc;
 /*  SWC */
   rp = find_cursor_row ();
   while (rp)
     {
 #if defined(MEMLOCK_2000)
-      while (cc <= rp->nbchars)
+      while (term->cc <= rp->nbchars)
 #else
-      while (cc < rp->nbchars)
+      while (term->cc < rp->nbchars)
 #endif
 	{
-	  if (rp->disp[cc] & HPTERM_START_FIELD)
+	  if (rp->disp[term->cc] & HPTERM_START_FIELD)
 	    {
 	      return;
 	    }
 	  else
 	    {
-	      cc++;
+	      term->cc++;
 	    }
 	}
       rp = rp->next;
       if (rp)
 	{
-	  cc = 0;
+	  term->cc = 0;
 	  do_line_feed ();
 	}
     }
 
   term->dptr = save_dptr;
-  cr = save_cr;
-  cc = save_cc;
+  term->cr = save_cr;
+  term->cc = save_cc;
 }
 /*****************************************************************/
 void do_delete_char (void)
@@ -950,18 +931,18 @@ void do_delete_char (void)
     {
       if (is_cursor_protected ())
 	return;
-      ii = cc;
+      ii = term->cc;
       while (ii + 1 < rp->nbchars && !(rp->disp[ii + 1] & HPTERM_END_FIELD))
 	{
 	  rp->text[ii] = rp->text[ii + 1];
 	  ii++;
 	}
       rp->text[ii] = ' ';
-      update_row (cr, rp);
+      update_row (term->cr, rp);
     }
-  else if (cc < rp->nbchars)
+  else if (term->cc < rp->nbchars)
     {
-      ii = cc;
+      ii = term->cc;
       while (ii + 1 < rp->nbchars)
 	{
 	  rp->text[ii] = rp->text[ii + 1];
@@ -971,7 +952,7 @@ void do_delete_char (void)
       rp->text[ii] = ' ';
       rp->disp[ii] = 0;
       rp->nbchars--;
-      update_row (cr, rp);
+      update_row (term->cr, rp);
     }
 }
 /*****************************************************************/
@@ -1015,11 +996,11 @@ void display_char (char ch)
 	{
 	  rp->nbchars++;
 	}
-      while (jj > cc)
+      while (jj > term->cc)
 	{
 	  rp->text[jj] = rp->text[jj - 1];
 	  rp->disp[jj] = rp->disp[jj - 1];
-	  if (jj == cc + 1)
+	  if (jj == term->cc + 1)
 	    {
 	      rp->disp[jj] = 0;
 	    }
@@ -1028,13 +1009,13 @@ void display_char (char ch)
     }
   else if (term->InsertMode && term->FormatMode)
     {
-      jj = cc;
+      jj = term->cc;
       while (jj < rp->nbchars && !(rp->disp[jj] & HPTERM_END_FIELD))
 	{
 	  jj++;
 	}
       jj--;
-      while (jj > cc)
+      while (jj > term->cc)
 	{
 	  rp->text[jj] = rp->text[jj - 1];
 	  jj--;
@@ -1043,18 +1024,18 @@ void display_char (char ch)
 /*
    **  Store character into memory
  */
-  if (ch == ' ' && term->SPOW_B && SPOW_latch)
+  if (ch == ' ' && term->SPOW_B && term->SPOW_latch)
     {
       /* Spaces do not overwrite */
     }
   else
     {
-      rp->text[cc] = ch;
+      rp->text[term->cc] = ch;
     }
-  if (cc > rp->nbchars)
+  if (term->cc > rp->nbchars)
     fillflag = 1;
-  if (cc >= rp->nbchars)
-    rp->nbchars = cc + 1;
+  if (term->cc >= rp->nbchars)
+    rp->nbchars = term->cc + 1;
 /*
    **  Update screen
  */
@@ -1062,29 +1043,29 @@ void display_char (char ch)
     {
       if (term->InsertMode || fillflag)
 	{
-	  update_row (cr, rp);
+	  update_row (term->cr, rp);
 	}
       else
 	{
-	  disp_erasetext (cr, cc, 1);
-	  ee = cc;
+	  disp_erasetext (term->cr, term->cc, 1);
+	  ee = term->cc;
 	  while (ee && !(rp->disp[ee] & HPTERM_ANY_ENHANCEMENT))
 	    {
 	      ee--;
 	    }
 	  style = rp->disp[ee] & 0xF;
-	  disp_drawtext (style, cr, cc, &ch, 1);
+	  disp_drawtext (style, term->cr, term->cc, &ch, 1);
 	}
     }
 /*
    **  Advance cursor position
  */
-  cc++;
-  if (cc >= term->nbcols || cc >= term->RightMargin)
+  term->cc++;
+  if (term->cc >= term->nbcols || term->cc >= term->RightMargin)
     {
       if (term->InhEolWrp_C)
 	{
-	  cc--;
+	  term->cc--;
 	}
       else
 	{
@@ -1153,16 +1134,16 @@ static void set_display_enh (char ch)
 
   if (ch == '@')
     {
-      rp->disp[cc] = (rp->disp[cc] & 0xE0) | HPTERM_END_ENHANCEMENT;
+      rp->disp[term->cc] = (rp->disp[term->cc] & 0xE0) | HPTERM_END_ENHANCEMENT;
     }
   else
     {
-      rp->disp[cc] = (rp->disp[cc] & 0xE0) | (ch & 0xF);
+      rp->disp[term->cc] = (rp->disp[term->cc] & 0xE0) | (ch & 0xF);
     }
-  if (cc >= rp->nbchars)
-    rp->nbchars = cc + 1;
+  if (term->cc >= rp->nbchars)
+    rp->nbchars = term->cc + 1;
   if (!term->update_all)
-    update_row (cr, rp);
+    update_row (term->cr, rp);
 }
 /*****************************************************************/
 static void set_start_field (void)
@@ -1170,12 +1151,12 @@ static void set_start_field (void)
   struct row *rp;
 
   rp = find_cursor_row ();
-  rp->disp[cc] = (rp->disp[cc] & 0x1F) | HPTERM_START_FIELD;
-  if (cc >= rp->nbchars)
-    rp->nbchars = cc + 1;
+  rp->disp[term->cc] = (rp->disp[term->cc] & 0x1F) | HPTERM_START_FIELD;
+  if (term->cc >= rp->nbchars)
+    rp->nbchars = term->cc + 1;
 #if defined(MEMLOCK_2000)
 #if DEBUG_BLOCK_MODE
-  printf ("START_FIELD cc=%d,cr=%d\n", cc, cr);
+  printf ("START_FIELD cc=%d,cr=%d\n", term->cc, term->cr);
   fflush (stdout);
 #endif
 #endif
@@ -1186,9 +1167,9 @@ static void set_start_tx_only_field (void)
   struct row *rp;
 
   rp = find_cursor_row ();
-  rp->disp[cc] = (rp->disp[cc] & 0x1F) | HPTERM_START_TX_ONLY;
-  if (cc >= rp->nbchars)
-    rp->nbchars = cc + 1;
+  rp->disp[term->cc] = (rp->disp[term->cc] & 0x1F) | HPTERM_START_TX_ONLY;
+  if (term->cc >= rp->nbchars)
+    rp->nbchars = term->cc + 1;
 }
 /*****************************************************************/
 static void set_end_field (void)
@@ -1196,12 +1177,12 @@ static void set_end_field (void)
   struct row *rp;
 
   rp = find_cursor_row ();
-  rp->disp[cc] = (rp->disp[cc] & 0x1F) | HPTERM_END_FIELD;
-  if (cc >= rp->nbchars)
-    rp->nbchars = cc + 1;
+  rp->disp[term->cc] = (rp->disp[term->cc] & 0x1F) | HPTERM_END_FIELD;
+  if (term->cc >= rp->nbchars)
+    rp->nbchars = term->cc + 1;
 #if defined(MEMLOCK_2000)
 #if DEBUG_BLOCK_MODE
-  printf ("END_FIELD cc=%d,cr=%d\n", cc, cr);
+  printf ("END_FIELD cc=%d,cr=%d\n", term->cc, term->cr);
   fflush (stdout);
 #endif
 #endif
@@ -1209,12 +1190,12 @@ static void set_end_field (void)
 /*****************************************************************/
 static void set_tab (void)
 {
-  term->TabStops[cc] = 1;
+  term->TabStops[term->cc] = 1;
 }
 /*****************************************************************/
 static void clear_tab (void)
 {
-  term->TabStops[cc] = 0;
+  term->TabStops[term->cc] = 0;
 }
 /*****************************************************************/
 static void clear_all_tabs (void)
@@ -1222,7 +1203,7 @@ static void clear_all_tabs (void)
   int ii;
   for (ii = 0; ii < 132; ii++)
   {
-    term->TabStops[cc] = 0;
+    term->TabStops[term->cc] = 0;
   }
 }
 /*****************************************************************/
@@ -1237,7 +1218,7 @@ static void do_forward_tab (void)
    **      At the last field, the cursor wraps around to the beginning
    **      of the first field.
  */
-      cc++;
+      term->cc++;
       goto_next_field ();
       if (is_cursor_protected ())
 	{
@@ -1246,26 +1227,26 @@ static void do_forward_tab (void)
     }
   else
     {
-      if (cc < term->LeftMargin)
-	cc = term->LeftMargin;
+      if (term->cc < term->LeftMargin)
+	term->cc = term->LeftMargin;
 
       done = 0;
       while (!done)
 	{
-	  cc++;
-	  if (cc >= term->nbcols || cc >= term->RightMargin)
+	  term->cc++;
+	  if (term->cc >= term->nbcols || term->cc >= term->RightMargin)
 	    {
 	      do_line_feed ();
-	      cc = term->LeftMargin;
+	      term->cc = term->LeftMargin;
 	      done = 1;
 	    }
-	  else if (term->TabStops[cc])
+	  else if (term->TabStops[term->cc])
 	    {
 	      done = 1;
 	    }
 	}
     }
-  SPOW_latch = 0;
+  term->SPOW_latch = 0;
 }
 /*****************************************************************/
 static void do_back_tab (void)
@@ -1279,10 +1260,10 @@ void do_cursor_up (void)
    **  Perform 'Cursor Up' function
  */
   erase_cursor ();
-  if (cr)
-    cr--;
+  if (term->cr)
+    term->cr--;
   else
-    cr = term->nbrows - 1;
+    term->cr = term->nbrows - 1;
   update_cursor ();
 }
 /*****************************************************************/
@@ -1292,10 +1273,10 @@ void do_cursor_down (void)
    **  Perform 'Cursor Down' function
  */
   erase_cursor ();
-  cr++;
-  if (cr >= term->nbrows)
+  term->cr++;
+  if (term->cr >= term->nbrows)
     {
-      cr = 0;
+      term->cr = 0;
     }
   update_cursor ();
 }
@@ -1306,14 +1287,14 @@ void do_cursor_right (void)
    **  Perform 'Cursor Right' function
  */
   erase_cursor ();
-  cc++;
-  if (cc >= term->nbcols)
+  term->cc++;
+  if (term->cc >= term->nbcols)
     {
-      cc = 0;
-      cr++;
-      if (cr >= term->nbrows)
+      term->cc = 0;
+      term->cr++;
+      if (term->cr >= term->nbrows)
 	{
-	  cr = 0;
+	  term->cr = 0;
 	}
     }
   update_cursor ();
@@ -1325,14 +1306,14 @@ void do_cursor_left (void)
    **  Perform 'Cursor Left' function
  */
   erase_cursor ();
-  cc--;
-  if (cc < 0)
+  term->cc--;
+  if (term->cc < 0)
   {
-    cc = term->nbcols - 1;
-    cr--;
-    if (cr < 0)
+    term->cc = term->nbcols - 1;
+    term->cr--;
+    if (term->cr < 0)
     {
-      cr = term->nbrows - 1;
+      term->cr = term->nbrows - 1;
     }
   }
   update_cursor ();
@@ -1345,8 +1326,8 @@ static void do_home_up (void)
  */
   int ii;
 
-  cr = 0;
-  cc = 0;
+  term->cr = 0;
+  term->cc = 0;
 #if defined(MEMLOCK_2000)
   if(term->MemoryLock)
   {
@@ -1356,7 +1337,7 @@ static void do_home_up (void)
         do_roll_down();
       term->head = term->dptr;
     }
-    cr = term->MemLockRow + 1;
+    term->cr = term->MemLockRow + 1;
   }
   else
 #endif
@@ -1368,13 +1349,13 @@ static void do_home_up (void)
       goto_next_field ();
     if (is_cursor_protected ())
     {
-      cr = 0;
-      cc = 0;
+      term->cr = 0;
+      term->cc = 0;
       term->dptr = term->head;
     }
   }
   term->update_all = 1;
-  SPOW_latch = 0;
+  term->SPOW_latch = 0;
 }
 /*****************************************************************/
 void do_home_down (void)
@@ -1397,12 +1378,12 @@ void do_home_down (void)
   {
     if(rp == term->MemLockRP || rp == term->dptr)
     {
-      state = 3;
+      term->state = 3;
       break;
     }
     else if(rp == bptr)
     {
-      state = 2;
+      term->state = 2;
       ii = term->nbrows - 2;
       rp = rp->prev;
     }
@@ -1414,11 +1395,11 @@ void do_home_down (void)
   }
   if(rp == term->MemLockRP || rp == term->dptr)
   {
-    state = 3;
+    term->state = 3;
   }
-  if(state == 1)
+  if(term->state == 1)
   {
-    cc = rp->nbchars;
+    term->cc = rp->nbchars;
     ii = 0;
     while(rp != bptr)
     {
@@ -1432,16 +1413,16 @@ void do_home_down (void)
     }
     for(jj = 0;jj < ii;jj++)
       do_roll_up();
-    cr = term->nbrows - 1;
+    term->cr = term->nbrows - 1;
     do_carriage_return ();
     do_line_feed ();
     term->update_all = 1;
     return;
   }
-  if(state == 2)
+  if(term->state == 2)
   {
-    cc = rp->nbchars;
-    cr = ii;
+    term->cc = rp->nbchars;
+    term->cr = ii;
     do_carriage_return ();
     do_line_feed ();
     term->update_all = 1;
@@ -1458,8 +1439,8 @@ void do_home_down (void)
     rp = rp->prev;
     jj++;
   }
-  cc = rp->nbchars;
-  cr = term->nbrows - 1;
+  term->cc = rp->nbchars;
+  term->cr = term->nbrows - 1;
   if(term->MemoryLock)
   {
     ii = term->nbrows - term->MemLockRow - 1;
@@ -1501,14 +1482,14 @@ void do_home_down (void)
 /*
 **  Put cursor column at end of this line
 */
-    cc = rp->nbchars;
+    term->cc = rp->nbchars;
 /*
 **  Position this line as low on the display as possible
 */
-    cr=0;
-    while (rp->prev && (cr+1 < term->nbrows)) {
+    term->cr=0;
+    while (rp->prev && ((term->cr)+1 < term->nbrows)) {
 	rp = rp->prev;
-	cr++;
+	term->cr++;
     }
     term->dptr = rp;
 /*
@@ -1532,7 +1513,7 @@ void do_clear_display (void)
   if (term->FormatMode)
   {
     rp = find_cursor_row ();
-    j = cc;
+    j = term->cc;
     k = is_cursor_protected ();
     while (rp)
     {
@@ -1562,12 +1543,12 @@ void do_clear_display (void)
 /*
    **  Clear current row to end of line
  */
-  for (j = cc; j < 132; j++)
+  for (j = term->cc; j < 132; j++)
   {
     rp->text[j] = ' ';
     rp->disp[j] = 0;
   }
-  rp->nbchars = cc;
+  rp->nbchars = term->cc;
 /*
    **  Erase all rows that follow
  */
@@ -1600,7 +1581,7 @@ void do_clear_line (void)
     else
     {
       /* Clear text from current cursor position to end of field */
-      j = cc;
+      j = term->cc;
       while (j < rp->nbchars && !(rp->disp[j] & HPTERM_END_FIELD))
       {
 	rp->text[j++] = ' ';
@@ -1613,16 +1594,16 @@ void do_clear_line (void)
 /*
    **      Clear current row to end of line
  */
-    for (j = cc; j < 132; j++)
+    for (j = term->cc; j < 132; j++)
     {
       rp->text[j] = ' ';
       rp->disp[j] = 0;
     }
-    rp->nbchars = cc;
+    rp->nbchars = term->cc;
   }
   if (!term->update_all)
   {
-    update_row (cr, rp);
+    update_row (term->cr, rp);
   }
 }
 /*****************************************************************/
@@ -1641,7 +1622,7 @@ void do_insert_line (void)
 /*
    **  Ignored if inside Memory Lock area
  */
-  if (term->MemoryLock && cr <= term->MemLockRow)
+  if (term->MemoryLock && term->cr <= term->MemLockRow)
     return;
 #endif
 /*
@@ -1665,13 +1646,13 @@ void do_insert_line (void)
 /*
    **  Take care of inserting on first line of screen
  */
-  if (!cr)
+  if (!(term->cr))
   {
     term->dptr = ip;
   }
 
   term->update_all = 1;
-  cc = 0;
+  term->cc = 0;
 }
 /*****************************************************************/
 void do_delete_line (void)
@@ -1689,7 +1670,7 @@ void do_delete_line (void)
 /*
    **  Ignored if inside Memory Lock area
  */
-  if (term->MemoryLock && cr <= term->MemLockRow)
+  if (term->MemoryLock && term->cr <= term->MemLockRow)
     return;
 #endif
 /*
@@ -1699,7 +1680,7 @@ void do_delete_line (void)
 /*
    **  Handle case of deleting first line of screen
  */
-  if (!cr)
+  if (!(term->cr))
   {
     term->dptr = term->dptr->next;
   }
@@ -1716,7 +1697,7 @@ void do_delete_line (void)
  */
   clear_row (rp);
   term->update_all = 1;
-  cc = 0;
+  term->cc = 0;
 }
 /*****************************************************************/
 void do_roll_up (void)
@@ -1853,7 +1834,7 @@ void do_esc_amper_a_r (int parm)
       term->dptr = term->dptr->prev;
       dr--;
     }
-    cr = 0;
+    term->cr = 0;
     term->update_all = 1;
   }
   else if (parm > dr + 23)
@@ -1863,12 +1844,12 @@ void do_esc_amper_a_r (int parm)
       term->dptr = term->dptr->next;
       dr++;
     }
-    cr = 23;
+    term->cr = 23;
     term->update_all = 1;
   }
   else
   {
-    cr = parm - dr;
+    term->cr = parm - dr;
   }
 }
 /***************************************************************/
@@ -1890,7 +1871,7 @@ void do_esc_amper_a_plus_r (int parm)
     dr++;
   }
 
-  do_esc_amper_a_r (dr + cr + parm);
+  do_esc_amper_a_r (dr + term->cr + parm);
 }
 /***************************************************************/
 void do_esc_amper_a_minus_r (int parm)
@@ -1959,9 +1940,9 @@ void send_cursor_abs (void)
   tx_buff[tx_tail++] = ASC_ESC;
   tx_buff[tx_tail++] = '&';
   tx_buff[tx_tail++] = 'a';
-  send_number (cc);
+  send_number (term->cc);
   tx_buff[tx_tail++] = 'c';
-  send_number (dr + cr);
+  send_number (dr + term->cr);
   tx_buff[tx_tail++] = 'R';
 }
 /***************************************************************/
@@ -1974,9 +1955,9 @@ void send_cursor_rel (void)
   tx_buff[tx_tail++] = ASC_ESC;
   tx_buff[tx_tail++] = '&';
   tx_buff[tx_tail++] = 'a';
-  send_number (cc);
+  send_number (term->cc);
   tx_buff[tx_tail++] = 'c';
-  send_number (cr);
+  send_number (term->cr);
   tx_buff[tx_tail++] = 'Y';
 }
 /***************************************************************/
@@ -2064,6 +2045,25 @@ void init_hpterm (void)
   term->MemoryLock = 0;
   term->MemLockRP  = 0;
 #endif
+  term->cr = 0;
+  term->cc = 0;
+
+  term->state = 0;
+
+  term->parm = 0;
+  term->nparm = 0;
+  term->sign = 0;
+  term->attr = 0;
+  term->keyn = 0;
+  term->llen = 0;
+  term->slen = 0;
+
+  term->SPOW_latch = 0;
+
+#if defined(kai_changes)
+/* added to filter out ESC)B, 18.12.2000 */
+  term->state_B = 0;
+#endif
 }
 /***************************************************************/
 void hpterm_winsize (int nbrows, int nbcols)
@@ -2114,10 +2114,10 @@ void hpterm_winsize (int nbrows, int nbcols)
 
   term->nbrows = nbrows;
   term->nbcols = nbcols;
-  if (cr >= nbrows)
-    cr = nbrows - 1;
-  if (cc >= nbcols)
-    cc = nbcols - 1;
+  if (term->cr >= nbrows)
+    term->cr = nbrows - 1;
+  if (term->cc >= nbcols)
+    term->cc = nbcols - 1;
   if (term->MemLockRow >= nbrows)
   {
     term->MemoryLock = 0;
@@ -2361,19 +2361,19 @@ int send_field (struct row *rp)
    **  Returns 1 if block terminator was found
    **  Returns 0 if end of field was found
  */
-  while (cc < rp->nbchars)
+  while (term->cc < rp->nbchars)
   {
-    if (rp->text[cc] == term->BlkTerminator)
+    if (rp->text[term->cc] == term->BlkTerminator)
     {
-      cc++;
+      term->cc++;
       return (1);
     }
-    if (rp->disp[cc] & HPTERM_END_FIELD)
+    if (rp->disp[term->cc] & HPTERM_END_FIELD)
     {
-      cc++;
+      term->cc++;
       return (0);
     }
-    tx_buff[tx_tail++] = rp->text[cc++];
+    tx_buff[tx_tail++] = rp->text[term->cc++];
   }
   return (0);
 }
@@ -2386,22 +2386,22 @@ int send_line (struct row *rp)
    **  Returns 1 if block terminator was found
    **  Returns 0 if end of line was found
  */
-  while (cc < rp->nbchars)
+  while (term->cc < rp->nbchars)
   {
 /*
    **      Check for display enhancement escape sequence
  */
-    if (rp->disp[cc] & HPTERM_ANY_ENHANCEMENT)
+    if (rp->disp[term->cc] & HPTERM_ANY_ENHANCEMENT)
     {
       tx_buff[tx_tail++] = ASC_ESC;
       tx_buff[tx_tail++] = '&';
       tx_buff[tx_tail++] = 'd';
-      tx_buff[tx_tail++] = (rp->disp[cc] & 0xF) + '@';
+      tx_buff[tx_tail++] = (rp->disp[term->cc] & 0xF) + '@';
     }
 /*
    **      Check for start of field escape sequence
  */
-    if (rp->disp[cc] & HPTERM_START_FIELD)
+    if (rp->disp[term->cc] & HPTERM_START_FIELD)
     {
       tx_buff[tx_tail++] = ASC_ESC;
       tx_buff[tx_tail++] = '[';
@@ -2409,7 +2409,7 @@ int send_line (struct row *rp)
 /*
    **      Check for end of field escape sequence
  */
-    if (rp->disp[cc] & HPTERM_END_FIELD)
+    if (rp->disp[term->cc] & HPTERM_END_FIELD)
     {
       tx_buff[tx_tail++] = ASC_ESC;
       tx_buff[tx_tail++] = ']';
@@ -2417,15 +2417,15 @@ int send_line (struct row *rp)
 /*
    **      Check for block terminator
  */
-    if (rp->text[cc] == term->BlkTerminator)
+    if (rp->text[term->cc] == term->BlkTerminator)
     {
-      cc++;
+      term->cc++;
       return (1);
     }
 /*
    **      Now transmit character
  */
-    tx_buff[tx_tail++] = rp->text[cc++];
+    tx_buff[tx_tail++] = rp->text[term->cc++];
   }
   return (0);
 }
@@ -2511,7 +2511,7 @@ void send_enter_data (void)
 #endif
     rp = find_cursor_row ();
     if (term->InhDC2_H)
-      cc = 0;			/* See page 3-13 */
+      term->cc = 0;			/* See page 3-13 */
     blkterm = send_line (rp);
     if (blkterm)
     {
@@ -2519,7 +2519,7 @@ void send_enter_data (void)
     }
     else
     {
-      cc = 0;
+      term->cc = 0;
       if (term->AutoLineFeed)
 	do_line_feed ();
     }
@@ -2602,7 +2602,7 @@ void send_enter_data (void)
       {
 	tx_buff[tx_tail++] = ASC_CR;
 	tx_buff[tx_tail++] = ASC_LF;
-	cc = 0;
+	term->cc = 0;
 	do_line_feed ();
       }
       if (rp == re)
@@ -2746,7 +2746,7 @@ void send_enter_data (void)
 #endif
 #endif
     rp = find_cursor_row ();
-    cc = ccsave = term->StartCol;
+    term->cc = ccsave = term->StartCol;
     blkterm = send_line (rp);
     if (blkterm)
     {
@@ -2755,9 +2755,9 @@ void send_enter_data (void)
     else
     {
       if (term->LocalEcho)
-	cc = 0;
+	term->cc = 0;
       else
-	cc = ccsave;
+	term->cc = ccsave;
     }
     tx_buff[tx_tail++] = ASC_CR;
     if (term->AutoLineFeed)
@@ -2784,7 +2784,7 @@ void send_enter_data (void)
 #endif
 #endif
     rp = find_cursor_row ();
-    cc = term->LeftMargin;
+    term->cc = term->LeftMargin;
     blkterm = send_line (rp);
     if (blkterm)
     {
@@ -2792,7 +2792,7 @@ void send_enter_data (void)
     }
     else
     {
-      cc = 0;
+      term->cc = 0;
       do_line_feed ();
     }
     tx_buff[tx_tail++] = ASC_CR;
@@ -3136,16 +3136,16 @@ static void hpterm_rxchar (char ch)
       do_carriage_return ();
       do_line_feed ();
     }
-    if (state == 1 && ch == 'Z' && term->DisplayFuncs == 1)
+    if (term->state == 1 && ch == 'Z' && term->DisplayFuncs == 1)
     {
       term->DisplayFuncs = 0;
       if (term->KeyState == ks_modes)
 	update_labels ();
     }
     if (ich == ASC_ESC)
-      state = 1;
+      term->state = 1;
     else
-      state = 0;
+      term->state = 0;
     goto done;
   }
 
@@ -3159,11 +3159,11 @@ static void hpterm_rxchar (char ch)
     goto done;
   }
 
-  switch (state)
+  switch (term->state)
   {
   case 0:
     if (ich == ASC_ESC)
-      state = 1;
+      term->state = 1;
     else if (ich == ASC_CR)
       do_carriage_return ();
     else if (ich == ASC_LF)
@@ -3177,10 +3177,10 @@ static void hpterm_rxchar (char ch)
     else if (ich >= 32)
       {
 #if defined(kai_changes)
-      if (state_B == 0) 		/* added to filter out ESC)B, 18.12.2000 */
+      if (term->state_B == 0) 		/* added to filter out ESC)B, 18.12.2000 */
         display_char (ich);
       else
-        state_B = 0;
+        term->state_B = 0;
 #else
       display_char (ich);
 #endif
@@ -3189,159 +3189,159 @@ static void hpterm_rxchar (char ch)
   case 1:
     if (ich == '&')
     {
-      state = 2;
+      term->state = 2;
     }
     else if (ich == '1')
     {
       set_tab ();
-      state = 0;
+      term->state = 0;
     }
     else if (ich == '2')
     {
       clear_tab ();
-      state = 0;
+      term->state = 0;
     }
     else if (ich == '3')
     {
       clear_all_tabs ();
-      state = 0;
+      term->state = 0;
     }
     else if (ich == '4')
     {
-      term->LeftMargin = cc;
-      state = 0;
+      term->LeftMargin = term->cc;
+      term->state = 0;
     }
     else if (ich == '5')
     {
-      term->RightMargin = cc + 1;
-      state = 0;
+      term->RightMargin = term->cc + 1;
+      term->state = 0;
     }
     else if (ich == '9')
     {
       term->LeftMargin = 0;
       term->RightMargin = 255;
-      state = 0;
+      term->state = 0;
     }
     else if (ich == '@')
     {
       do_esc_atsign ();
-      state = 0;
+      term->state = 0;
     }
     else if (ich == 'A')
     {
       do_cursor_up ();
-      state = 0;
+      term->state = 0;
     }
     else if (ich == 'B')
     {
       do_cursor_down ();
-      state = 0;
+      term->state = 0;
     }
     else if (ich == 'C')
     {
       do_cursor_right ();
-      state = 0;
+      term->state = 0;
     }
     else if (ich == 'D')
     {
       do_cursor_left ();
-      state = 0;
+      term->state = 0;
     }
     else if (ich == 'E')
     {
       do_hard_reset ();
-      state = 0;
+      term->state = 0;
     }
     else if (ich == 'F')
     {
       do_home_down ();
-      state = 0;
+      term->state = 0;
     }
     else if (ich == 'H' || ich == 'h')
     {
       do_home_up ();
-      state = 0;
+      term->state = 0;
     }
     else if (ich == 'G')
     {
       do_carriage_return ();
-      state = 0;
+      term->state = 0;
     }
     else if (ich == 'I')
     {
       do_forward_tab ();
-      state = 0;
+      term->state = 0;
     }
     else if (ich == 'J')
     {
       do_clear_display ();
-      state = 0;
+      term->state = 0;
     }
     else if (ich == 'K')
     {
       do_clear_line ();
-      state = 0;
+      term->state = 0;
     }
     else if (ich == 'L')
     {
       do_insert_line ();
-      state = 0;
+      term->state = 0;
     }
     else if (ich == 'M')
     {
       do_delete_line ();
-      state = 0;
+      term->state = 0;
     }
     else if (ich == 'N')
     {
       term->InsertMode = 2;	/* Insert Char w/wraparound */
       if (term->KeyState)
 	update_labels ();
-      state = 0;
+      term->state = 0;
     }
     else if (ich == 'O')
     {
       do_delete_char_with_wrap ();
-      state = 0;
+      term->state = 0;
     }
     else if (ich == 'P')
     {
       do_delete_char ();
-      state = 0;
+      term->state = 0;
     }
     else if (ich == 'Q')
     {
       term->InsertMode = 1;	/* Insert Char w/o wraparound */
       if (term->KeyState)
 	update_labels ();
-      state = 0;
+      term->state = 0;
     }
     else if (ich == 'R')
     {
       term->InsertMode = 0;
       if (term->KeyState)
 	update_labels ();
-      state = 0;
+      term->state = 0;
     }
     else if (ich == 'S')
     {
       do_roll_up ();
-      state = 0;
+      term->state = 0;
     }
     else if (ich == 'T')
     {
       do_roll_down ();
-      state = 0;
+      term->state = 0;
     }
     else if (ich == 'U')
     {
       do_next_page ();
-      state = 0;
+      term->state = 0;
     }
     else if (ich == 'V')
     {
       do_previous_page ();
-      state = 0;
+      term->state = 0;
     }
     else if (ich == 'W')
     {
@@ -3352,7 +3352,7 @@ static void hpterm_rxchar (char ch)
       term->FormatMode = 1;
       if (is_cursor_protected ())
 	do_forward_tab ();
-      state = 0;
+      term->state = 0;
     }
     else if (ich == 'X')
     {
@@ -3361,7 +3361,7 @@ static void hpterm_rxchar (char ch)
       fflush (stdout);
 #endif
       term->FormatMode = 0;
-      state = 0;
+      term->state = 0;
     }
     else if (ich == 'Y')
     {
@@ -3371,7 +3371,7 @@ static void hpterm_rxchar (char ch)
 	if (term->KeyState == ks_modes)
 	  update_labels ();
       }
-      state = 0;
+      term->state = 0;
     }
     else if (ich == 'Z')
     {
@@ -3381,45 +3381,45 @@ static void hpterm_rxchar (char ch)
 	if (term->KeyState == ks_modes)
 	  update_labels ();
       }
-      state = 0;
+      term->state = 0;
     }
     else if (ich == '[')
     {
       set_start_field ();
-      state = 0;
+      term->state = 0;
     }
     else if (ich == ']')
     {
       set_end_field ();
-      state = 0;
+      term->state = 0;
     }
     else if (ich == '^')
     {
       term->PrimaryStatusPending = 1;
       check_transfers_pending ();
-      state = 0;
+      term->state = 0;
     }
     else if (ich == '~')
     {
       term->SecondaryStatusPending = 1;
       check_transfers_pending ();
-      state = 0;
+      term->state = 0;
     }
     else if (ich == 'a')
     {
       term->CursorSensePending = 1;	/* 1=abs, 2=rel */
       check_transfers_pending ();
-      state = 0;
+      term->state = 0;
     }
     else if (ich == 'b')
     {
       term->EnableKybd = 1;
-      state = 0;
+      term->state = 0;
     }
     else if (ich == 'c')
     {
       term->EnableKybd = 0;
-      state = 0;
+      term->state = 0;
     }
     else if (ich == 'd')
     {
@@ -3430,47 +3430,47 @@ static void hpterm_rxchar (char ch)
       update_labels ();
 #endif
       check_transfers_pending ();
-      state = 0;
+      term->state = 0;
     }
     else if (ich == 'f')
     {
       do_modem_disconnect ();
-      state = 0;
+      term->state = 0;
     }
     else if (ich == 'g')
     {
       do_soft_reset ();
-      state = 0;
+      term->state = 0;
     }
     else if (ich == 'i')
     {
       do_back_tab ();
-      state = 0;
+      term->state = 0;
     }
     else if (ich == 'j')
     {
       term->UserKeyMenu = 1;
-      state = 0;
+      term->state = 0;
     }
     else if (ich == 'k')
     {
       term->UserKeyMenu = 0;
-      state = 0;
+      term->state = 0;
     }
     else if (ich == 'l')
     {
       term->MemoryLock = 1;
 #if defined(MEMLOCK_2000)
-      term->MemLockRow = cr - 1;
-      cr = cr - 1;
+      term->MemLockRow = term->cr - 1;
+      term->cr = term->cr - 1;
       term->MemLockRP = find_cursor_row ();
-      cr = cr + 1;
+      term->cr = term->cr + 1;
 #else
-      term->MemLockRow = cr;
+      term->MemLockRow = term->cr;
 #endif
       if (term->KeyState == ks_modes)
 	update_labels ();
-      state = 0;
+      term->state = 0;
     }
     else if (ich == 'm')
     {
@@ -3481,12 +3481,12 @@ static void hpterm_rxchar (char ch)
 #endif
       if (term->KeyState == ks_modes)
 	      update_labels ();
-      state = 0;
+      term->state = 0;
     }
     else if (ich >= 'p' && ich <= 'w')
     {
       /* Ignore incoming function button message */
-      state = 0;
+      term->state = 0;
     }
     else if (ich == 'y')
     {
@@ -3494,26 +3494,26 @@ static void hpterm_rxchar (char ch)
       term->DisplayFuncs = 2;
       if (term->KeyState == ks_modes)
 	update_labels ();
-      state = 0;
+      term->state = 0;
     }
     else if (ich == '\'')
     {
       term->CursorSensePending = 2;	/* 1=abs, 2=rel */
       check_transfers_pending ();
-      state = 0;
+      term->state = 0;
     }
     else if (ich == '*')
     {
-      state = 31;
+      term->state = 31;
     }
     else if (ich == '{')
     {
       set_start_tx_only_field ();
-      state = 0;
+      term->state = 0;
     }
     else if ((ich == ')') || (ich == '('))
       {
-	state = 80;
+	term->state = 80;
       }
     else
     {
@@ -3522,204 +3522,204 @@ static void hpterm_rxchar (char ch)
       /* display_char ('E');
       display_char ('c');
       display_char (ich); */
-      state_B = 1;  
+      term->state_B = 1;  
 #else
       display_char ('E');
       display_char ('c');
       display_char (ich);
 #endif
-      state = 0;
+      term->state = 0;
     }
     break;
   case 2:			/* Got esc &, waiting for more */
     if (ich == 'a')
     {
-      parm = 0;
-      state = 3;
+      term->parm = 0;
+      term->state = 3;
     }
     else if (ich == 'd')
     {
-      parm = 0;
-      state = 11;
+      term->parm = 0;
+      term->state = 11;
     }
     else if (ich == 'f')
     {
-      parm = 0;
-      sign = 1;
-      attr = 0;
-      keyn = 1;
-      llen = 0;
-      slen = 1;
-      state = 37;
+      term->parm = 0;
+      term->sign = 1;
+      term->attr = 0;
+      term->keyn = 1;
+      term->llen = 0;
+      term->slen = 1;
+      term->state = 37;
     }
     else if (ich == 'j')
     {
-      parm = 0;
-      state = 35;
+      term->parm = 0;
+      term->state = 35;
     }
     else if (ich == 'k')
     {
-      parm = 0;
-      state = 41;
+      term->parm = 0;
+      term->state = 41;
     }
     else if (ich == 's')
     {
-      parm = 0;
-      state = 45;
+      term->parm = 0;
+      term->state = 45;
     }
     else if (ich == 'X')
     {				/* 700/92 manual page 3-3 says */
-      parm = 0;			/* this is an upper-case X...  */
-      state = 46;		/* Is this true? */
+      term->parm = 0;		/* this is an upper-case X...  */
+      term->state = 46;		/* Is this true? */
     }
     else
     {
-      state = 0;
+      term->state = 0;
     }
     break;
 
   case 3:			/* Got esc & a  -- waiting for more */
     if (ich == '+')
     {
-      state = 4;
+      term->state = 4;
     }
     else if (ich == '-')
     {
-      state = 5;
+      term->state = 5;
     }
     else if (ich >= '0' && ich <= '9')
     {
-      parm = parm * 10 + ich - '0';
+      term->parm = term->parm * 10 + ich - '0';
     }
     else if (ich == 'c')
     {
-      cc = parm;
-      if (cc >= term->nbcols)
-	cc = term->nbcols - 1;
-      parm = 0;
+      term->cc = term->parm;
+      if (term->cc >= term->nbcols)
+	term->cc = term->nbcols - 1;
+      term->parm = 0;
     }
     else if (ich == 'y')
     {
-      do_esc_amper_a_y (parm);
-      parm = 0;
+      do_esc_amper_a_y (term->parm);
+      term->parm = 0;
     }
     else if (ich == 'r')
     {
 #if defined(MEMLOCK_2000)
       if (!term->MemoryLock)
 #endif
-	do_esc_amper_a_r (parm);
-      parm = 0;
+	do_esc_amper_a_r (term->parm);
+      term->parm = 0;
     }
     else if (ich == 'C')
     {
-      cc = parm;
-      if (cc >= term->nbcols)
-	cc = term->nbcols - 1;
-      state = 0;
+      term->cc = term->parm;
+      if (term->cc >= term->nbcols)
+	term->cc = term->nbcols - 1;
+      term->state = 0;
     }
     else if (ich == 'Y')
     {
-      do_esc_amper_a_y (parm);
-      state = 0;
+      do_esc_amper_a_y (term->parm);
+      term->state = 0;
     }
     else if (ich == 'R')
     {
 #if defined(MEMLOCK_2000)
       if (!term->MemoryLock)
 #endif
-	do_esc_amper_a_r (parm);
-      state = 0;
+	do_esc_amper_a_r (term->parm);
+      term->state = 0;
     }
     else
     {
-      state = 0;
+      term->state = 0;
     }
     break;
 
   case 4:
     if (ich >= '0' && ich <= '9')
     {
-      parm = parm * 10 + ich - '0';
+      term->parm = term->parm * 10 + ich - '0';
     }
     else if (ich == 'c')
     {
-      cc = cc + parm;
-      if (cc >= term->nbcols)
-	cc = term->nbcols - 1;
-      parm = 0;
-      state = 3;
+      term->cc += term->parm;
+      if (term->cc >= term->nbcols)
+	term->cc = term->nbcols - 1;
+      term->parm = 0;
+      term->state = 3;
     }
     else if (ich == 'r')
     {
 #if defined(MEMLOCK_2000)
       if (!term->MemoryLock)
 #endif
-	do_esc_amper_a_plus_r (parm);
-      parm = 0;
-      state = 3;
+	do_esc_amper_a_plus_r (term->parm);
+      term->parm = 0;
+      term->state = 3;
     }
     else if (ich == 'C')
     {
-      cc = cc + parm;
-      if (cc >= term->nbcols)
-	cc = term->nbcols - 1;
-      state = 0;
+      term->cc = term->cc + term->parm;
+      if (term->cc >= term->nbcols)
+	term->cc = term->nbcols - 1;
+      term->state = 0;
     }
     else if (ich == 'R')
     {
 #if defined(MEMLOCK_2000)
       if (!term->MemoryLock)
 #endif
-	do_esc_amper_a_plus_r (parm);
-      state = 0;
+	do_esc_amper_a_plus_r (term->parm);
+      term->state = 0;
     }
     else
     {
-      state = 0;
+      term->state = 0;
     }
     break;
 
   case 5:
     if (ich >= '0' && ich <= '9')
     {
-      parm = parm * 10 + ich - '0';
+      term->parm = term->parm * 10 + ich - '0';
     }
     else if (ich == 'c')
     {
-      cc = cc - parm;
-      if (cc < 0)
-	cc = 0;
-      parm = 0;
-      state = 3;
+      term->cc = term->cc - term->parm;
+      if (term->cc < 0)
+	term->cc = 0;
+      term->parm = 0;
+      term->state = 3;
     }
     else if (ich == 'r')
     {
 #if defined(MEMLOCK_2000)
       if (!term->MemoryLock)
 #endif
-	do_esc_amper_a_minus_r (parm);
-      parm = 0;
-      state = 3;
+	do_esc_amper_a_minus_r (term->parm);
+      term->parm = 0;
+      term->state = 3;
     }
     else if (ich == 'C')
     {
-      cc = cc - parm;
-      if (cc < 0)
-	cc = 0;
-      state = 0;
+      term->cc = term->cc - term->parm;
+      if (term->cc < 0)
+	term->cc = 0;
+      term->state = 0;
     }
     else if (ich == 'R')
     {
 #if defined(MEMLOCK_2000)
       if (!term->MemoryLock)
 #endif
-	do_esc_amper_a_minus_r (parm);
-      state = 0;
+	do_esc_amper_a_minus_r (term->parm);
+      term->state = 0;
     }
     else
     {
-      state = 0;
+      term->state = 0;
     }
     break;
 
@@ -3731,76 +3731,76 @@ static void hpterm_rxchar (char ch)
     else if (ich == 'S')
     {
       set_security ();
-      state = 0;
+      term->state = 0;
     }
     else if (ich >= '@' && ich <= 'O')
     {
       set_display_enh (ich);
-      state = 0;
+      term->state = 0;
     }
     else
     {
-      state = 0;
+      term->state = 0;
     }
     break;
 
   case 31:			/* Got esc *, waiting for s or d */
     if (ich == 's')
     {
-      parm = 0;
-      state = 32;
+      term->parm = 0;
+      term->state = 32;
     }
     else if (ich == 'd')
     {
-      parm = 0;
-      nparm = 0;
-      state = 42;
+      term->parm = 0;
+      term->nparm = 0;
+      term->state = 42;
     }
     else
     {
-      state = 0;
+      term->state = 0;
     }
     break;
 
   case 32:			/* Got esc * s, waiting for ^ */
     if (ich >= '0' && ich <= '9')
     {
-      parm = parm * 10 + ich - '0';
+      term->parm = term->parm * 10 + ich - '0';
     }
     else if (ich == '^')
     {
       term->TerminalIdPending = 1;
       check_transfers_pending ();
-      state = 0;
+      term->state = 0;
     }
     else
     {
-      state = 0;
+      term->state = 0;
     }
     break;
 
   case 35:			/* Got esc & j -- waiting for more */
     if (ich >= '0' && ich <= '9')
     {
-      parm = parm * 10 + ich - '0';
+      term->parm = term->parm * 10 + ich - '0';
     }
     else if (ich == '@')
     {
       term->KeyState = ks_off;
       update_labels ();
-      state = 0;
+      term->state = 0;
     }
     else if (ich == 'A')
     {
       term->KeyState = ks_modes;
       update_labels ();
-      state = 0;
+      term->state = 0;
     }
     else if (ich == 'B')
     {
       term->KeyState = ks_user;
       update_labels ();
-      state = 0;
+      term->state = 0;
     }
     else if (ich == 'C')
     {
@@ -3810,333 +3810,333 @@ static void hpterm_rxchar (char ch)
 	term->Message = 0;
 	update_labels ();
       }
-      state = 0;
+      term->state = 0;
     }
     else if (ich == 'D')
     {
-      term->MessageMode = parm;
-      state = 0;
+      term->MessageMode = term->parm;
+      term->state = 0;
     }
     else if (ich == 'L')
     {
-      if (parm)
+      if (term->parm)
       {
 	if (term->Message)
 	  free (term->Message);
-	term->Message = (char *) calloc (1, parm + 1);
-	nparm = 0;
-	state = 36;
+	term->Message = (char *) calloc (1, term->parm + 1);
+	term->nparm = 0;
+	term->state = 36;
       }
       else
-	state = 0;
+	term->state = 0;
     }
     else if (ich == 'S')
     {
       term->UserSystem = 0;
-      state = 0;
+      term->state = 0;
     }
     else if (ich == 'R')
     {
       term->UserSystem = 1;
-      state = 0;
+      term->state = 0;
     }
     else
     {
-      state = 0;
+      term->state = 0;
     }
     break;
 
   case 36:			/* Got esc & j <parm> L -- waiting for message */
-    term->Message[nparm++] = ich;
-    if (nparm == parm)
+    term->Message[term->nparm++] = ich;
+    if (term->nparm == term->parm)
     {
       update_labels ();
-      state = 0;
+      term->state = 0;
     }
     break;
 
   case 37:			/* Got esc & f  --  waiting for more */
     if (ich >= '0' && ich <= '9')
     {
-      parm = parm * 10 + ich - '0';
+      term->parm = term->parm * 10 + ich - '0';
     }
     else if (ich == '-')
     {
-      sign = -1;
+      term->sign = -1;
     }
     else if (ich == 'E')
     {
-      keyn = sign * parm;
-      if (keyn >= 1 && keyn <= 8)
+      term->keyn = term->sign * term->parm;
+      if (term->keyn >= 1 && term->keyn <= 8)
       {
-	do_function_button (keyn - 1);
-	state = 0;
+	do_function_button (term->keyn - 1);
+	term->state = 0;
 #if defined(MEMLOCK_2000)
-	parm = 0;
-	sign = 1;
-	attr = 0;
-	keyn = 1;
-	llen = 0;
-	slen = 1;
+	term->parm = 0;
+	term->sign = 1;
+	term->attr = 0;
+	term->keyn = 1;
+	term->llen = 0;
+	term->slen = 1;
 #endif
       }
-      else if (keyn == -1)
+      else if (term->keyn == -1)
       {
 	hpterm_kbd_Enter ();
-	state = 0;
+	term->state = 0;
 #if defined(MEMLOCK_2000)
-	parm = 0;
-	sign = 1;
-	attr = 0;
-	keyn = 1;
-	llen = 0;
-	slen = 1;
+	term->parm = 0;
+	term->sign = 1;
+	term->attr = 0;
+	term->keyn = 1;
+	term->llen = 0;
+	term->slen = 1;
 #endif
       }
     }
     else if (ich == 'a' || ich == 'A')
     {
-      attr = sign * parm;
-      parm = 0;
-      sign = 1;
+      term->attr = term->sign * term->parm;
+      term->parm = 0;
+      term->sign = 1;
     }
     else if (ich == 'k' || ich == 'K')
     {
-      keyn = sign * parm;
-      parm = 0;
-      sign = 1;
+      term->keyn = term->sign * term->parm;
+      term->parm = 0;
+      term->sign = 1;
     }
     else if (ich == 'd' || ich == 'D')
     {
-      llen = sign * parm;
-      parm = 0;
-      sign = 1;
+      term->llen = term->sign * term->parm;
+      term->parm = 0;
+      term->sign = 1;
     }
     else if (ich == 'l' || ich == 'L')
     {
-      slen = sign * parm;
-      parm = 0;
-      sign = 1;
+      term->slen = term->sign * term->parm;
+      term->parm = 0;
+      term->sign = 1;
     }
     else
     {
-      state = 0;
+      term->state = 0;
 #if defined(MEMLOCK_2000)
-      parm = 0;
-      sign = 1;
-      attr = 0;
-      keyn = 1;
-      llen = 0;
-      slen = 1;
+      term->parm = 0;
+      term->sign = 1;
+      term->attr = 0;
+      term->keyn = 1;
+      term->llen = 0;
+      term->slen = 1;
 #endif
     }
     if (ich == 'A' || ich == 'K' || ich == 'D' || ich == 'L')
     {
-      if (keyn >= 1 && keyn <= 8)
+      if (term->keyn >= 1 && term->keyn <= 8)
       {
-	if (attr >= 0 && attr <= 2)
+	if (term->attr >= 0 && term->attr <= 2)
 	{
-	  term->UserDefKeys[keyn - 1]->Attribute = attr;
+	  term->UserDefKeys[term->keyn - 1]->Attribute = term->attr;
 	}
-	if (llen >= 0)
+	if (term->llen >= 0)
 	{
-	  term->UserDefKeys[keyn - 1]->LabelLength = 0;
+	  term->UserDefKeys[term->keyn - 1]->LabelLength = 0;
 	}
-	if (slen == -1 || slen > 0)
+	if (term->slen == -1 || term->slen > 0)
 	{
-	  term->UserDefKeys[keyn - 1]->StringLength = 0;
+	  term->UserDefKeys[term->keyn - 1]->StringLength = 0;
 	}
-	if (llen > 0 && llen <= 16)
+	if (term->llen > 0 && term->llen <= 16)
 	{
-	  nparm = 0;
-	  state = 38;
+	  term->nparm = 0;
+	  term->state = 38;
 	}
-	else if (slen > 0 && slen <= 80)
+	else if (term->slen > 0 && term->slen <= 80)
 	{
-	  nparm = 0;
-	  state = 39;
+	  term->nparm = 0;
+	  term->state = 39;
 	}
 	else
 	{
-	  state = 0;
+	  term->state = 0;
 #if defined(MEMLOCK_2000)
-	  parm = 0;
-	  sign = 1;
-	  attr = 0;
-	  keyn = 1;
-	  llen = 0;
-	  slen = 1;
+	  term->parm = 0;
+	  term->sign = 1;
+	  term->attr = 0;
+	  term->keyn = 1;
+	  term->llen = 0;
+	  term->slen = 1;
 #endif
 	}
       }
-      else if (keyn == 0 || keyn == -1)
+      else if (term->keyn == 0 || term->keyn == -1)
       {
-	nparm = 0;
-	state = 40;
+	term->nparm = 0;
+	term->state = 40;
       }
       else
       {
-	state = 0;
+	term->state = 0;
 #if defined(MEMLOCK_2000)
-	parm = 0;
-	sign = 1;
-	attr = 0;
-	keyn = 1;
-	llen = 0;
-	slen = 1;
+	term->parm = 0;
+	term->sign = 1;
+	term->attr = 0;
+	term->keyn = 1;
+	term->llen = 0;
+	term->slen = 1;
 #endif
       }
     }
     break;
 
   case 38:			/* Getting function key label */
-    term->UserDefKeys[keyn - 1]->Label[nparm++] = ich;
-    term->UserDefKeys[keyn - 1]->LabelLength = nparm;
-    if (nparm == llen)
+    term->UserDefKeys[term->keyn - 1]->Label[term->nparm++] = ich;
+    term->UserDefKeys[term->keyn - 1]->LabelLength = term->nparm;
+    if (term->nparm == term->llen)
     {
-      if (slen > 0 && slen <= 80)
+      if (term->slen > 0 && term->slen <= 80)
       {
-	nparm = 0;
-	state = 39;
+	term->nparm = 0;
+	term->state = 39;
       }
       else
       {
-	state = 0;
+	term->state = 0;
 #if defined(MEMLOCK_2000)
-	parm = 0;
-	sign = 1;
-	attr = 0;
-	keyn = 1;
-	llen = 0;
-	slen = 1;
+	term->parm = 0;
+	term->sign = 1;
+	term->attr = 0;
+	term->keyn = 1;
+	term->llen = 0;
+	term->slen = 1;
 #endif
       }
     }
     break;
 
   case 39:			/* Getting function key string */
-    term->UserDefKeys[keyn - 1]->String[nparm++] = ich;
-    term->UserDefKeys[keyn - 1]->StringLength = nparm;
-    if (nparm == slen)
+    term->UserDefKeys[term->keyn - 1]->String[term->nparm++] = ich;
+    term->UserDefKeys[term->keyn - 1]->StringLength = term->nparm;
+    if (term->nparm == term->slen)
     {
-      state = 0;
+      term->state = 0;
 #if defined(MEMLOCK_2000)
-      parm = 0;
-      sign = 1;
-      attr = 0;
-      keyn = 1;
-      llen = 0;
-      slen = 1;
+      term->parm = 0;
+      term->sign = 1;
+      term->attr = 0;
+      term->keyn = 1;
+      term->llen = 0;
+      term->slen = 1;
 #endif
     }
     break;
 
   case 40:			/* Getting window title or icon name */
-    nparm++;
-    if (nparm == llen)
+    term->nparm++;
+    if (term->nparm == term->llen)
     {
-      state = 0;
+      term->state = 0;
     }
     break;
 
   case 41:			/* Got esc & k -- waiting for number */
     if (ich >= '0' && ich <= '9')
     {
-      parm = parm * 10 + ich - '0';
+      term->parm = term->parm * 10 + ich - '0';
     }
     else if (ich == 'a' || ich == 'A')
     {
-      term->AutoLineFeed = parm;
+      term->AutoLineFeed = term->parm;
       if (term->KeyState == ks_modes)
 	update_labels ();
     }
     else if (ich == 'b' || ich == 'B')
     {
-      term->BlockMode = parm;
+      term->BlockMode = term->parm;
       if (term->KeyState == ks_modes)
 	update_labels ();
 #if DEBUG_BLOCK_MODE
-      printf ("BlockMode = %d\n", parm);
+      printf ("BlockMode = %d\n", term->parm);
       fflush (stdout);
 #endif
     }
     else if (ich == 'c' || ich == 'C')
     {
-      term->CapsLockMode = parm;
+      term->CapsLockMode = term->parm;
     }
     else if (ich == 'd' || ich == 'D')
     {
-      term->WarningBell = parm;
+      term->WarningBell = term->parm;
     }
     else if (ich == 'j' || ich == 'J')
     {
-      term->FrameRate = parm;
+      term->FrameRate = term->parm;
     }
     else if (ich == 'k' || ich == 'K')
     {
-      term->AutoKybdLock = parm;
+      term->AutoKybdLock = term->parm;
     }
     else if (ich == 'l' || ich == 'L')
     {
-      term->LocalEcho = parm;
+      term->LocalEcho = term->parm;
     }
     else if (ich == 'm' || ich == 'M')
     {
-      term->ModifyAll = parm;
+      term->ModifyAll = term->parm;
       if (term->KeyState == ks_modes)
 	update_labels ();
     }
     else if (ich == 'p' || ich == 'P')
     {
-      term->CapsMode = parm;
+      term->CapsMode = term->parm;
     }
     else if (ich == 'q' || ich == 'Q')
     {
-      term->KeyClick = parm;
+      term->KeyClick = term->parm;
     }
     else if (ich == 'r' || ich == 'R')
     {
-      term->RemoteMode = parm;
+      term->RemoteMode = term->parm;
       if (term->KeyState == ks_modes)
 	update_labels ();
     }
     else if (ich == '[')
     {
-      term->SmoothScroll = parm;
+      term->SmoothScroll = term->parm;
       if (term->KeyState == ks_modes)
 	update_labels ();
-      state = 0;
+      term->state = 0;
     }
     else if (ich == ']')
     {
-      term->EnterSelect = parm;
-      state = 0;
+      term->EnterSelect = term->parm;
+      term->state = 0;
     }
     if (ich >= 'a' && ich <= 'z')
     {
-      parm = 0;
+      term->parm = 0;
     }
     else if (ich >= 'A' && ich <= 'Z')
     {
-      state = 0;
+      term->state = 0;
     }
     break;
 
   case 42:			/* Got esc * d -- waiting for number */
     if (ich >= '0' && ich <= '9')
     {
-      parm = parm * 10 + ich - '0';
-      nparm++;
+      term->parm = term->parm * 10 + ich - '0';
+      term->nparm++;
     }
     else if (ich == 'e' || ich == 'E')
     {
-      term->InverseBkgd = parm;
+      term->InverseBkgd = term->parm;
     }
     else if (ich == 'q' || ich == 'Q')
     {
-      if (nparm)
+      if (term->nparm)
       {
-	term->CursorType = parm;
+	term->CursorType = term->parm;
       }
       else
       {
@@ -4149,147 +4149,147 @@ static void hpterm_rxchar (char ch)
     }
     if (ich >= 'a' && ich <= 'z')
     {
-      parm = 0;
-      nparm = 0;
+      term->parm = 0;
+      term->nparm = 0;
     }
     else if (ich >= 'A' && ich <= 'Z')
     {
-      state = 0;
+      term->state = 0;
     }
     break;
 
   case 43:			/* Got esc & w -- waiting for number */
     if (ich >= '0' && ich <= '9')
     {
-      parm = parm * 10 + ich - '0';
+      term->parm = term->parm * 10 + ich - '0';
     }
     else if (ich == 'F')
     {
-      if (parm == 12)
+      if (term->parm == 12)
       {
 	term->ScreenBlanked = 1;
       }
-      else if (parm == 13)
+      else if (term->parm == 13)
       {
 	term->ScreenBlanked = 0;
       }
-      state = 0;
+      term->state = 0;
     }
     else if (ich == 'f')
     {
-      if (parm == 6)
+      if (term->parm == 6)
       {
-	parm = 0;
-	state = 44;
+	term->parm = 0;
+	term->state = 44;
       }
       else
       {
-	state = 0;
+	term->state = 0;
       }
     }
     else
     {
-      state = 0;
+      term->state = 0;
     }
     break;
 
   case 44:			/* Got esc & w 6 f -- waiting for number */
     if (ich >= '0' && ich <= '9')
     {
-      parm = parm * 10 + ich - '0';
+      term->parm = term->parm * 10 + ich - '0';
     }
     else if (ich == 'X')
     {
-      term->Columns = parm;
-      state = 0;
+      term->Columns = term->parm;
+      term->state = 0;
     }
     else
     {
-      state = 0;
+      term->state = 0;
     }
     break;
 
   case 45:			/* Got esc & s -- waiting for number */
     if (ich >= '0' && ich <= '9')
     {
-      parm = parm * 10 + ich - '0';
+      term->parm = term->parm * 10 + ich - '0';
     }
     else if (ich == 'a' || ich == 'A')
     {
-      term->XmitFnctn_A = parm;
+      term->XmitFnctn_A = term->parm;
     }
     else if (ich == 'b' || ich == 'B')
     {
-      term->SPOW_B = parm;
+      term->SPOW_B = term->parm;
     }
     else if (ich == 'c' || ich == 'C')
     {
-      term->InhEolWrp_C = parm;
+      term->InhEolWrp_C = term->parm;
     }
     else if (ich == 'd' || ich == 'D')
     {
-      term->LinePage_D = parm;
+      term->LinePage_D = term->parm;
 #if DEBUG_BLOCK_MODE
-      printf ("LinePage_D = %d\n", parm);
+      printf ("LinePage_D = %d\n", term->parm);
       fflush (stdout);
 #endif
     }
     else if (ich == 'g' || ich == 'G')
     {
-      term->InhHndShk_G = parm;
+      term->InhHndShk_G = term->parm;
 #if DEBUG_BLOCK_MODE
-      printf ("InhHndShk_G = %d\n", parm);
+      printf ("InhHndShk_G = %d\n", term->parm);
       fflush (stdout);
 #endif
     }
     else if (ich == 'h' || ich == 'H')
     {
-      term->InhDC2_H = parm;
+      term->InhDC2_H = term->parm;
 #if DEBUG_BLOCK_MODE
-      printf ("InhDC2_H = %d\n", parm);
+      printf ("InhDC2_H = %d\n", term->parm);
       fflush (stdout);
 #endif
     }
     else if (ich == 'n' || ich == 'N')
     {
-      term->EscXfer_N = parm;
+      term->EscXfer_N = term->parm;
     }
     if (ich >= 'a' && ich <= 'z')
     {
-      parm = 0;
+      term->parm = 0;
     }
     else if (ich >= 'A' && ich <= 'Z')
     {
-      state = 0;
+      term->state = 0;
     }
     break;
 
   case 46:			/* Got esc & X -- waiting for number */
     if (ich >= '0' && ich <= '9')
     {
-      parm = parm * 10 + ich - '0';
+      term->parm = term->parm * 10 + ich - '0';
     }
     else if (ich == 'C')
     {
-      term->SendCursorPos = parm;
-      state = 0;
+      term->SendCursorPos = term->parm;
+      term->state = 0;
     }
     else
     {
-      state = 0;
+      term->state = 0;
     }
     break;
 
   case 80:			/* Got esc ), waiting for next byte */
-    state = 0;
+    term->state = 0;
     break;
 
   case 99:			/* Waiting for upper case letter */
     if (ich >= '@' && ich <= 'Z')
-      state = 0;
+      term->state = 0;
     break;
   default:
-    state = 0;
+    term->state = 0;
     break;
   }
 done:

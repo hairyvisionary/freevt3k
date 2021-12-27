@@ -181,10 +181,8 @@ struct hpterm
 /*
    **  Cursor and scroll window
  */
-#if 0
   int cr;			/* Cursor row number, 0..nbrows-1 */
   int cc;			/* Cursor column number, 0..nbcols-1 */
-#endif
   struct row *dptr;		/* Pointer to first row on screen */
 #if defined(MEMLOCK_2000)
   struct row *MemLockRP;	/* Pointer to last locked row on screen */
@@ -196,6 +194,25 @@ struct hpterm
  */
   int update_all;		/* =1 if scrollable region needs updating */
   int update_menus;		/* =1 if function key menus need updating */
+  /*
+   *  Escape sequence parser state
+   */
+  int state;			/* escape sequence parser state machine position */
+  int parm;			/* integer parameter accumulator */
+  int nparm;
+  int sign;
+  int attr;
+  int keyn;
+  int llen;
+  int slen;
+
+  int SPOW_latch;
+
+#if defined(kai_changes)
+/* added to filter out ESC)B, 18.12.2000 */
+  int term->state_B;
+#endif
+
 };
 
 void set_display_functions (void);
