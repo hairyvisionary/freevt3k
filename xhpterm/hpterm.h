@@ -173,6 +173,9 @@ struct hpterm
   int TerminalIdPending;	/* 0=No, 1=Yes */
   int DC1Count;			/* Number of DC1s we have rec'd */
   int DC2Count;			/* Number of DC2s we have sent */
+
+  int SPOW_latch;
+
 /*
    **  Memory buffer
  */
@@ -199,14 +202,12 @@ struct hpterm
    */
   int state;			/* escape sequence parser state machine position */
   int parm;			/* integer parameter accumulator */
-  int nparm;
-  int sign;
-  int attr;
-  int keyn;
-  int llen;
-  int slen;
-
-  int SPOW_latch;
+  int sign;			/* sign of accumulated parameter in parm */
+  int nparm;			/* used to count characters in/out of function key area */
+  int attr;			/* ESC & f <attr> a */
+  int keyn;			/* ESC & f <keyn> k */
+  int llen;			/* ESC & f <llen> d */
+  int slen;			/* ESC & f <slen> l */
 
 #if defined(kai_changes)
 /* added to filter out ESC)B, 18.12.2000 */
