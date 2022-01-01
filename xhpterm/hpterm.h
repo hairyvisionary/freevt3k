@@ -212,6 +212,10 @@ struct hpterm
    *  Datacomm connection
    */
   struct conmgr *dccon;
+/*
+   **  Transmit buffer contains characters that are waiting
+   **  to be given to conmgr.c
+ */
   unsigned int dctxhead;
   unsigned int dctxtail;
   unsigned char *dctxbuff;

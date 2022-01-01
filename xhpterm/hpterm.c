@@ -152,14 +152,6 @@ static void do_home_up (void);	/* Forward */
 static void do_forward_tab (void);	/* Forward */
 /*******************************************************************/
 /*
-   **  Transmit buffer contains characters that are waiting
-   **  to be given to conmgr.c
- */
-unsigned char tx_head = 0;
-unsigned char tx_tail = 0;
-char tx_buff[256];
-/*******************************************************************/
-/*
    **  Someday, all routines might have 'term' as their first argument
    **  When that happens, this static variable can be removed
  */
