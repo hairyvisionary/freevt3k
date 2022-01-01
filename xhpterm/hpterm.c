@@ -170,19 +170,19 @@ void nyi(void)				/* nyi = Not Yet Implemented */
   doXBell ();
 }
 /*******************************************************************/
-void term_flush_tx(struct conmgr *con)
+void term_flush_tx(struct hpterm *term)
 {
 /*
    **  Flush buffer from terminal emulator to connection manager
  */
   char ch, termchar;
 
-  while (tx_head != tx_tail)
+  while (term->dctxhead != term->dctxtail)
     {
-      ch = tx_buff[tx_head++];
+      ch = term->dctxbuff[term->dctxhead++];
       if (term->RemoteMode)
 	{
-	  conmgr_send (con, &ch, 1);
+	  conmgr_send (term->dccon, &ch, 1);
 /*
    **          Check if read trigger can be cleared
  */
@@ -1913,9 +1913,9 @@ void send_number (int i)
   i = i - a * 100;
   b = i / 10;
   c = i - b * 10;
-  tx_buff[tx_tail++] = a + '0';
-  tx_buff[tx_tail++] = b + '0';
-  tx_buff[tx_tail++] = c + '0';
+  term->dctxbuff[term->dctxtail++] = a + '0';
+  term->dctxbuff[term->dctxtail++] = b + '0';
+  term->dctxbuff[term->dctxtail++] = c + '0';
 }
 /***************************************************************/
 void send_cursor_abs (void)
@@ -1937,13 +1937,13 @@ void send_cursor_abs (void)
     dr++;
   }
 
-  tx_buff[tx_tail++] = ASC_ESC;
-  tx_buff[tx_tail++] = '&';
-  tx_buff[tx_tail++] = 'a';
+  term->dctxbuff[term->dctxtail++] = ASC_ESC;
+  term->dctxbuff[term->dctxtail++] = '&';
+  term->dctxbuff[term->dctxtail++] = 'a';
   send_number (term->cc);
-  tx_buff[tx_tail++] = 'c';
+  term->dctxbuff[term->dctxtail++] = 'c';
   send_number (dr + term->cr);
-  tx_buff[tx_tail++] = 'R';
+  term->dctxbuff[term->dctxtail++] = 'R';
 }
 /***************************************************************/
 void send_cursor_rel (void)
@@ -1952,13 +1952,13 @@ void send_cursor_rel (void)
    **  Send cursor position using relative addressing
    **  Does not send the terminator
  */
-  tx_buff[tx_tail++] = ASC_ESC;
-  tx_buff[tx_tail++] = '&';
-  tx_buff[tx_tail++] = 'a';
+  term->dctxbuff[term->dctxtail++] = ASC_ESC;
+  term->dctxbuff[term->dctxtail++] = '&';
+  term->dctxbuff[term->dctxtail++] = 'a';
   send_number (term->cc);
-  tx_buff[tx_tail++] = 'c';
+  term->dctxbuff[term->dctxtail++] = 'c';
   send_number (term->cr);
-  tx_buff[tx_tail++] = 'Y';
+  term->dctxbuff[term->dctxtail++] = 'Y';
 }
 /***************************************************************/
 void reset_user_keys (void)
@@ -1983,7 +1983,7 @@ void reset_user_keys (void)
   }
 }
 /***************************************************************/
-void init_hpterm (void)
+struct hpterm * init_hpterm (void)
 {
 /*
    **  Initialize terminal emulator
@@ -2060,10 +2060,16 @@ void init_hpterm (void)
 
   term->SPOW_latch = 0;
 
+  term->dccon = NULL;
+  term->dctxhead = term->dctxtail = 0;
+  term->dctxbuff = calloc(1, 256);
+
 #if defined(kai_changes)
 /* added to filter out ESC)B, 18.12.2000 */
   term->state_B = 0;
 #endif
+
+  return term;
 }
 /***************************************************************/
 void hpterm_winsize (int nbrows, int nbcols)
@@ -2223,14 +2229,14 @@ void send_terminator (void)
  */
   if (term->BlockMode && term->LinePage_D)
   {
-    tx_buff[tx_tail++] = term->BlkTerminator;
+    term->dctxbuff[term->dctxtail++] = term->BlkTerminator;
   }
   else
   {
-    tx_buff[tx_tail++] = ASC_CR;
+    term->dctxbuff[term->dctxtail++] = ASC_CR;
     if (term->AutoLineFeed)
     {
-      tx_buff[tx_tail++] = ASC_LF;
+      term->dctxbuff[term->dctxtail++] = ASC_LF;
     }
   }
 }
@@ -2243,15 +2249,15 @@ void send_primary_status (void)
   char s[14];
 
   get_terminal_status (s);
-  tx_buff[tx_tail++] = ASC_ESC;
-  tx_buff[tx_tail++] = '\\';
-  tx_buff[tx_tail++] = s[0];
-  tx_buff[tx_tail++] = s[1];
-  tx_buff[tx_tail++] = s[2];
-  tx_buff[tx_tail++] = s[3];
-  tx_buff[tx_tail++] = s[4];
-  tx_buff[tx_tail++] = s[5];
-  tx_buff[tx_tail++] = s[6];
+  term->dctxbuff[term->dctxtail++] = ASC_ESC;
+  term->dctxbuff[term->dctxtail++] = '\\';
+  term->dctxbuff[term->dctxtail++] = s[0];
+  term->dctxbuff[term->dctxtail++] = s[1];
+  term->dctxbuff[term->dctxtail++] = s[2];
+  term->dctxbuff[term->dctxtail++] = s[3];
+  term->dctxbuff[term->dctxtail++] = s[4];
+  term->dctxbuff[term->dctxtail++] = s[5];
+  term->dctxbuff[term->dctxtail++] = s[6];
   send_terminator ();
 
   term->PrimaryStatusPending = 0;
@@ -2265,15 +2271,15 @@ void send_secondary_status (void)
   char s[14];
 
   get_terminal_status (s);
-  tx_buff[tx_tail++] = ASC_ESC;
-  tx_buff[tx_tail++] = '|';
-  tx_buff[tx_tail++] = s[7];
-  tx_buff[tx_tail++] = s[8];
-  tx_buff[tx_tail++] = s[9];
-  tx_buff[tx_tail++] = s[10];
-  tx_buff[tx_tail++] = s[11];
-  tx_buff[tx_tail++] = s[12];
-  tx_buff[tx_tail++] = s[13];
+  term->dctxbuff[term->dctxtail++] = ASC_ESC;
+  term->dctxbuff[term->dctxtail++] = '|';
+  term->dctxbuff[term->dctxtail++] = s[7];
+  term->dctxbuff[term->dctxtail++] = s[8];
+  term->dctxbuff[term->dctxtail++] = s[9];
+  term->dctxbuff[term->dctxtail++] = s[10];
+  term->dctxbuff[term->dctxtail++] = s[11];
+  term->dctxbuff[term->dctxtail++] = s[12];
+  term->dctxbuff[term->dctxtail++] = s[13];
   send_terminator ();
 
   term->SecondaryStatusPending = 0;
@@ -2282,13 +2288,13 @@ void send_secondary_status (void)
 void send_device_status (void)
 {
 
-  tx_buff[tx_tail++] = ASC_ESC;
-  tx_buff[tx_tail++] = '\\';
-  tx_buff[tx_tail++] = 'p';
-  tx_buff[tx_tail++] = term->DeviceStatusPending + '0';
-  tx_buff[tx_tail++] = 0x30;	/* 0x31 = Last print failed */
-  tx_buff[tx_tail++] = 0x38;	/* 0x31 = Busy, 0x38 = Completed */
-  tx_buff[tx_tail++] = 0x31;	/* 0x31 = Printer Present */
+  term->dctxbuff[term->dctxtail++] = ASC_ESC;
+  term->dctxbuff[term->dctxtail++] = '\\';
+  term->dctxbuff[term->dctxtail++] = 'p';
+  term->dctxbuff[term->dctxtail++] = term->DeviceStatusPending + '0';
+  term->dctxbuff[term->dctxtail++] = 0x30;	/* 0x31 = Last print failed */
+  term->dctxbuff[term->dctxtail++] = 0x38;	/* 0x31 = Busy, 0x38 = Completed */
+  term->dctxbuff[term->dctxtail++] = 0x31;	/* 0x31 = Printer Present */
   send_terminator ();
 
   term->DeviceStatusPending = 0;
@@ -2328,9 +2334,9 @@ void send_function_key (void)
    **      Is really the 'Select' function
    **      See top of page 3-10
  */
-    tx_buff[tx_tail++] = ASC_ESC;
-    tx_buff[tx_tail++] = '&';
-    tx_buff[tx_tail++] = 'P';
+    term->dctxbuff[term->dctxtail++] = ASC_ESC;
+    term->dctxbuff[term->dctxtail++] = '&';
+    term->dctxbuff[term->dctxtail++] = 'P';
 
   }
   else
@@ -2342,7 +2348,7 @@ void send_function_key (void)
 
     for (j = 0; j < u->StringLength; j++)
     {
-      tx_buff[tx_tail++] = u->String[j];
+      term->dctxbuff[term->dctxtail++] = u->String[j];
     }
   }
   send_terminator ();
@@ -2373,7 +2379,7 @@ int send_field (struct row *rp)
       term->cc++;
       return (0);
     }
-    tx_buff[tx_tail++] = rp->text[term->cc++];
+    term->dctxbuff[term->dctxtail++] = rp->text[term->cc++];
   }
   return (0);
 }
@@ -2393,26 +2399,26 @@ int send_line (struct row *rp)
  */
     if (rp->disp[term->cc] & HPTERM_ANY_ENHANCEMENT)
     {
-      tx_buff[tx_tail++] = ASC_ESC;
-      tx_buff[tx_tail++] = '&';
-      tx_buff[tx_tail++] = 'd';
-      tx_buff[tx_tail++] = (rp->disp[term->cc] & 0xF) + '@';
+      term->dctxbuff[term->dctxtail++] = ASC_ESC;
+      term->dctxbuff[term->dctxtail++] = '&';
+      term->dctxbuff[term->dctxtail++] = 'd';
+      term->dctxbuff[term->dctxtail++] = (rp->disp[term->cc] & 0xF) + '@';
     }
 /*
    **      Check for start of field escape sequence
  */
     if (rp->disp[term->cc] & HPTERM_START_FIELD)
     {
-      tx_buff[tx_tail++] = ASC_ESC;
-      tx_buff[tx_tail++] = '[';
+      term->dctxbuff[term->dctxtail++] = ASC_ESC;
+      term->dctxbuff[term->dctxtail++] = '[';
     }
 /*
    **      Check for end of field escape sequence
  */
     if (rp->disp[term->cc] & HPTERM_END_FIELD)
     {
-      tx_buff[tx_tail++] = ASC_ESC;
-      tx_buff[tx_tail++] = ']';
+      term->dctxbuff[term->dctxtail++] = ASC_ESC;
+      term->dctxbuff[term->dctxtail++] = ']';
     }
 /*
    **      Check for block terminator
@@ -2425,7 +2431,7 @@ int send_line (struct row *rp)
 /*
    **      Now transmit character
  */
-    tx_buff[tx_tail++] = rp->text[term->cc++];
+    term->dctxbuff[term->dctxtail++] = rp->text[term->cc++];
   }
   return (0);
 }
@@ -2466,34 +2472,34 @@ void send_enter_data (void)
     for (i = 0; i < 8; i++)
     {
       u = term->UserDefKeys[i];
-      tx_buff[tx_tail++] = ASC_ESC;
-      tx_buff[tx_tail++] = '&';
-      tx_buff[tx_tail++] = 'f';
-      tx_buff[tx_tail++] = u->Attribute + '0';
-      tx_buff[tx_tail++] = 'a';
-      tx_buff[tx_tail++] = i + '1';
-      tx_buff[tx_tail++] = 'k';
+      term->dctxbuff[term->dctxtail++] = ASC_ESC;
+      term->dctxbuff[term->dctxtail++] = '&';
+      term->dctxbuff[term->dctxtail++] = 'f';
+      term->dctxbuff[term->dctxtail++] = u->Attribute + '0';
+      term->dctxbuff[term->dctxtail++] = 'a';
+      term->dctxbuff[term->dctxtail++] = i + '1';
+      term->dctxbuff[term->dctxtail++] = 'k';
       send_number (u->LabelLength);
-      tx_buff[tx_tail++] = 'd';
+      term->dctxbuff[term->dctxtail++] = 'd';
       send_number (u->StringLength);
-      tx_buff[tx_tail++] = 'L';
+      term->dctxbuff[term->dctxtail++] = 'L';
       for (j = 0; j < u->LabelLength; j++)
       {
-	tx_buff[tx_tail++] = u->Label[j];
+	term->dctxbuff[term->dctxtail++] = u->Label[j];
       }
       for (j = 0; j < u->StringLength; j++)
       {
-	tx_buff[tx_tail++] = u->String[j];
+	term->dctxbuff[term->dctxtail++] = u->String[j];
       }
-      tx_buff[tx_tail++] = ASC_CR;
-      tx_buff[tx_tail++] = ASC_LF;
+      term->dctxbuff[term->dctxtail++] = ASC_CR;
+      term->dctxbuff[term->dctxtail++] = ASC_LF;
       if (i < 7)
       {
-	term_flush_tx (con);
+	term_flush_tx (term);
       }
       else
       {
-	tx_buff[tx_tail++] = term->BlkTerminator;
+	term->dctxbuff[term->dctxtail++] = term->BlkTerminator;
       }
     }
 
@@ -2515,7 +2521,7 @@ void send_enter_data (void)
     blkterm = send_line (rp);
     if (blkterm)
     {
-      tx_buff[tx_tail++] = term->BlkTerminator;
+      term->dctxbuff[term->dctxtail++] = term->BlkTerminator;
     }
     else
     {
@@ -2523,10 +2529,10 @@ void send_enter_data (void)
       if (term->AutoLineFeed)
 	do_line_feed ();
     }
-    tx_buff[tx_tail++] = ASC_CR;
+    term->dctxbuff[term->dctxtail++] = ASC_CR;
     if (term->AutoLineFeed)
     {
-      tx_buff[tx_tail++] = ASC_LF;
+      term->dctxbuff[term->dctxtail++] = ASC_LF;
     }
 
   }
@@ -2545,7 +2551,7 @@ void send_enter_data (void)
       goto_next_field ();
     if (is_cursor_protected ())
     {
-      tx_buff[tx_tail++] = term->BlkTerminator;
+      term->dctxbuff[term->dctxtail++] = term->BlkTerminator;
     }
     else
     {
@@ -2553,13 +2559,13 @@ void send_enter_data (void)
       blkterm = send_field (rp);
       if (blkterm)
       {
-	tx_buff[tx_tail++] = term->BlkTerminator;
+	term->dctxbuff[term->dctxtail++] = term->BlkTerminator;
       }
     }
-    tx_buff[tx_tail++] = ASC_CR;
+    term->dctxbuff[term->dctxtail++] = ASC_CR;
     if (term->AutoLineFeed)
     {
-      tx_buff[tx_tail++] = ASC_LF;
+      term->dctxbuff[term->dctxtail++] = ASC_LF;
     }
 
   }
@@ -2600,17 +2606,17 @@ void send_enter_data (void)
       }
       else
       {
-	tx_buff[tx_tail++] = ASC_CR;
-	tx_buff[tx_tail++] = ASC_LF;
+	term->dctxbuff[term->dctxtail++] = ASC_CR;
+	term->dctxbuff[term->dctxtail++] = ASC_LF;
 	term->cc = 0;
 	do_line_feed ();
       }
       if (rp == re)
 	done = 1;
       if (!done)
-	term_flush_tx (con);
+	term_flush_tx (term);
     }
-    tx_buff[tx_tail++] = term->BlkTerminator;
+    term->dctxbuff[term->dctxtail++] = term->BlkTerminator;
 
   }
   else if (term->BlockMode && term->LinePage_D && term->FormatMode)
@@ -2670,8 +2676,8 @@ void send_enter_data (void)
 #endif
 	if (count)
 	{
-	  tx_buff[tx_tail++] = term->FldSeparator;
-	  term_flush_tx (con);
+	  term->dctxbuff[term->dctxtail++] = term->FldSeparator;
+	  term_flush_tx (term);
 #if defined(MEMLOCK_2000)
 #if DEBUG_BLOCK_MODE
 	  printf ("tf ");
@@ -2700,7 +2706,7 @@ void send_enter_data (void)
 #endif
       }
     }
-    tx_buff[tx_tail++] = term->BlkTerminator;
+    term->dctxbuff[term->dctxtail++] = term->BlkTerminator;
 
   }
   else if (term->FormatMode)
@@ -2718,19 +2724,19 @@ void send_enter_data (void)
       goto_next_field ();
     if (is_cursor_protected ())
     {
-      tx_buff[tx_tail++] = term->BlkTerminator;
+      term->dctxbuff[term->dctxtail++] = term->BlkTerminator;
     }
     else
     {
       rp = find_cursor_row ();	/*??? */
       blkterm = send_field (rp);
       if (blkterm)
-	tx_buff[tx_tail++] = term->BlkTerminator;
+	term->dctxbuff[term->dctxtail++] = term->BlkTerminator;
     }
-    tx_buff[tx_tail++] = ASC_CR;
+    term->dctxbuff[term->dctxtail++] = ASC_CR;
     if (term->AutoLineFeed)
     {
-      tx_buff[tx_tail++] = ASC_LF;
+      term->dctxbuff[term->dctxtail++] = ASC_LF;
     }
 
   }
@@ -2750,7 +2756,7 @@ void send_enter_data (void)
     blkterm = send_line (rp);
     if (blkterm)
     {
-      tx_buff[tx_tail++] = term->BlkTerminator;
+      term->dctxbuff[term->dctxtail++] = term->BlkTerminator;
     }
     else
     {
@@ -2759,10 +2765,10 @@ void send_enter_data (void)
       else
 	term->cc = ccsave;
     }
-    tx_buff[tx_tail++] = ASC_CR;
+    term->dctxbuff[term->dctxtail++] = ASC_CR;
     if (term->AutoLineFeed)
     {
-      tx_buff[tx_tail++] = ASC_LF;
+      term->dctxbuff[term->dctxtail++] = ASC_LF;
     }
     if (term->LineModify)
     {
@@ -2788,17 +2794,17 @@ void send_enter_data (void)
     blkterm = send_line (rp);
     if (blkterm)
     {
-      tx_buff[tx_tail++] = term->BlkTerminator;
+      term->dctxbuff[term->dctxtail++] = term->BlkTerminator;
     }
     else
     {
       term->cc = 0;
       do_line_feed ();
     }
-    tx_buff[tx_tail++] = ASC_CR;
+    term->dctxbuff[term->dctxtail++] = ASC_CR;
     if (term->AutoLineFeed)
     {
-      tx_buff[tx_tail++] = ASC_LF;
+      term->dctxbuff[term->dctxtail++] = ASC_LF;
     }
   }
 /*
@@ -2827,7 +2833,7 @@ void send_terminal_id (void)
 
   for (ii = 0; term->TerminalId[ii]; ii++)
   {
-    tx_buff[tx_tail++] = term->TerminalId[ii];
+    term->dctxbuff[term->dctxtail++] = term->TerminalId[ii];
   }
   send_terminator ();
 
@@ -2880,13 +2886,13 @@ int check_type3_handshake (void)
 
   if (term->DC1Count && !term->DC2Count)
   {
-    tx_buff[tx_tail++] = ASC_DC2;
+    term->dctxbuff[term->dctxtail++] = ASC_DC2;
     if (term->LinePage_D == 0)
     {
-      tx_buff[tx_tail++] = ASC_CR;	/* See note on page 2-12 */
+      term->dctxbuff[term->dctxtail++] = ASC_CR;	/* See note on page 2-12 */
       if (term->AutoLineFeed)
       {				/* of 700/92 manual */
-	tx_buff[tx_tail++] = ASC_LF;
+	term->dctxbuff[term->dctxtail++] = ASC_LF;
       }
     }
     term->DC1Count = 0;
@@ -3050,7 +3056,7 @@ void check_transfers_pending (void)
   {
     /* No transfers are pending */
   }
-  term_flush_tx (con);
+  term_flush_tx (term);
 }
 /***************************************************************/
 void hpterm_rxfunc (void *ptr, char *buf, int nbuf)

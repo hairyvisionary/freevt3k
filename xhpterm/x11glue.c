@@ -117,6 +117,8 @@ GC gc_red;
 
 XFontStruct *font_info;
 
+static struct hpterm *term;
+
 struct conmgr *con = 0;
 int logging = 0;
 
@@ -1414,7 +1416,7 @@ int main (int argc, char **argv)
   }
 #endif
   /* Start the terminal emulator */
-  init_hpterm ();
+  term = init_hpterm ();
   if (display_fns)
     set_display_functions ();
 
@@ -1474,6 +1476,8 @@ int main (int argc, char **argv)
     con = 0;
   }
 
+  term->dccon = con;
+  
   if (!con)
     return (1);
 

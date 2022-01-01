@@ -208,10 +208,17 @@ struct hpterm
   int keyn;			/* ESC & f <keyn> k */
   int llen;			/* ESC & f <llen> d */
   int slen;			/* ESC & f <slen> l */
-
+  /*
+   *  Datacomm connection
+   */
+  struct conmgr *dccon;
+  unsigned int dctxhead;
+  unsigned int dctxtail;
+  unsigned char *dctxbuff;
+  
 #if defined(kai_changes)
 /* added to filter out ESC)B, 18.12.2000 */
-  int term->state_B;
+  int state_B;
 #endif
 
 };
@@ -222,7 +229,7 @@ void clear_display_functions (void);
 void do_roll_down(void);
 void do_roll_up(void);
 #endif
-void init_hpterm (void);
+struct hpterm * init_hpterm (void);
 void hpterm_winsize (int nbrows, int nbcols);
 void hpterm_mouse_click (int row, int col);
 void term_update (void);
