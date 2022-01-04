@@ -136,6 +136,8 @@ extern struct conmgr *con;
 extern int logging;
 extern char *termid;		/*990121 */
 /*******************************************************************/
+#define ASC_ENQ 0x05
+#define ASC_ACK 0x06
 #define ASC_BEL 0x07
 #define ASC_BS  0x08
 #define ASC_HT  0x09
@@ -2061,6 +2063,9 @@ struct hpterm * init_hpterm (void)
   term->state_B = 0;
 #endif
 
+  /* enable ENQ/ACK flow control */
+  term->EnqAck = 1;
+
   return term;
 }
 /***************************************************************/
@@ -3154,6 +3159,12 @@ static void hpterm_rxchar (char ch)
     update_labels ();
 #endif
     check_transfers_pending ();
+    goto done;
+  }
+
+  if (ich == ASC_ENQ && term->EnqAck != 0) {
+    term->dctxbuff[term->dctxtail++] = ASC_ACK;
+    term_flush_tx(term);
     goto done;
   }
 
