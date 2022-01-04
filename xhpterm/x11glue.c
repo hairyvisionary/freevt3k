@@ -160,7 +160,7 @@ void init_disp (int argc, char **argv, char *hostname, char *font1)
   XIconSize *size_list;
   int count;
   char *window_name;
-  char title_name[50];
+  char title_name[128];
   char *display_name = NULL;
   int nbrows = 26;
   int nbcols = 80;
