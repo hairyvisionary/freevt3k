@@ -1214,7 +1214,11 @@ int main (int argc, char **argv)
   if (argc)
   {
     hostname = *argv;
-    if (wintitle == NULL)
+  }
+
+  if (wintitle == NULL)
+  {
+    if (hostname != NULL)
     {
       wintitle = calloc (1, strlen(hostname) + 3 + strlen(wtprefix));
       if (wintitle == NULL)
@@ -1224,10 +1228,7 @@ int main (int argc, char **argv)
       }
       sprintf (wintitle, "%s: %s", wtprefix, hostname);
     }
-  }
-  else
-  {
-    if ((wintitle == NULL) && (ttyname != NULL))
+    else if (ttyname != NULL)
     {
       wintitle = calloc (1, strlen(ttyname) + 3 + strlen(wtprefix));
       if (wintitle == NULL)
@@ -1235,14 +1236,13 @@ int main (int argc, char **argv)
 	fprintf(stderr, "wintitle calloc\n");
 	return 1;
       }
-      sprintf (wintitle, "%s: %s", wtprefix, hostname);
+      sprintf (wintitle, "%s: %s", wtprefix, ttyname);
+    }
+    else {
+      wintitle = wtprefix;
     }
   }
   
-  if (wintitle == NULL) {
-    wintitle = wtprefix;
-  }
-
   /* Start the X11 driver */
   init_disp (argc, argv, wintitle, font1);
 
