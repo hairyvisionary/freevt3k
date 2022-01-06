@@ -146,27 +146,22 @@ char *color_names[NB_COLORS] =
 char *progname;			/* name this program was invoked by */
 
 /*******************************************************************/
-#if defined(MEMLOCK_2000)
-void init_disp (int argc, char **argv, char *hostname, char *font1)
+void init_disp (int argc, char **argv, char *wintitle, char *fontname)
 {
   int x, y, i, j;		/* window position */
   unsigned int border_width = 4;	/* four pixels */
   unsigned int display_width, display_height;
   unsigned int icon_width, icon_height;
-  char *window_name1 = "FreeVT3K Terminal Emulator";
   char *icon_name = "freevt3k";
   Pixmap icon_pixmap;
   XSizeHints size_hints;
   XIconSize *size_list;
   int count;
-  char *window_name;
   char title_name[128];
   char *display_name = NULL;
   int nbrows = 26;
   int nbcols = 80;
   char ch;
-  sprintf (title_name, "%s : %s", window_name1, hostname);
-  window_name = title_name;
 
   progname = argv[0];
 
@@ -192,7 +187,7 @@ void init_disp (int argc, char **argv, char *hostname, char *font1)
  *  fetch font info to ensure metrics
  */
 
-  load_font (&font_info, font1);
+  load_font (&font_info, fontname);
 
   width = nbcols * font_info->max_bounds.width;
   height = nbrows * (font_info->ascent + font_info->descent);
@@ -250,7 +245,7 @@ void init_disp (int argc, char **argv, char *hostname, char *font1)
 
 #ifdef X11R3
   /* set Properties for window manager (always before mapping) */
-  XSetStandardProperties (display, win, window_name, icon_name,
+  XSetStandardProperties (display, win, wintitle, icon_name,
 			  icon_pixmap, argv, argc, &size_hints);
 
 #else /* X11R4 or later */
@@ -263,10 +258,10 @@ void init_disp (int argc, char **argv, char *hostname, char *font1)
      * arguments has changed in R4 */
     XTextProperty windowName, iconName;
 
-    /* These calls store window_name and icon_name into
+    /* These calls store wintitle (window_name) and icon_name into
      * XTextProperty structures and set their other
      * fields properly. */
-    if (XStringListToTextProperty (&window_name, 1, &windowName) == 0)
+    if (XStringListToTextProperty (&wintitle, 1, &windowName) == 0)
     {
       (void) fprintf (stderr, "%s: structure allocation for windowName failed.\n",
 		      progname);
@@ -317,164 +312,6 @@ void init_disp (int argc, char **argv, char *hostname, char *font1)
   XMapWindow (display, win);
 
 }
-#else
-void init_disp(int argc, char **argv)
-{
-	int x, y; 	/* window position */
-	unsigned int border_width = 4;	/* four pixels */
-	unsigned int display_width, display_height;
-	unsigned int icon_width, icon_height;
-	char *window_name = "FREEVT3K Terminal Emulator";
-	char *icon_name = "freevt3k";
-	Pixmap icon_pixmap;
-	XSizeHints size_hints;
-	XIconSize *size_list;
-	int count;
-	char *display_name = NULL;
-	int nbrows = 26;
-	int nbcols = 80;
-	char ch;
-
-	progname = argv[0];
-
-	/* connect to X server */
-	if ( (display=XOpenDisplay(display_name)) == NULL )
-	{
-		(void) fprintf( stderr, "%s: cannot connect to X server %s\n",
-				progname, XDisplayName(display_name));
-		exit( -1 );
-	}
-
-	/* get screen size from display structure macro */
-	screen_num = DefaultScreen(display);
-	display_width = DisplayWidth(display, screen_num);
-	display_height = DisplayHeight(display, screen_num);
-
-	/* Note that in a real application, x and y would default to 0
-	 * but would be settable from the command line or resource database.
-	 */
-	x = y = 0;
-
-	width = nbcols * CHAR_WIDTH;          /* Should get the font first */
-	height = nbrows * CHAR_HEIGHT;
-
-	/* create opaque window */
-	win = XCreateSimpleWindow(display, RootWindow(display,screen_num),
-			x, y, width, height, border_width, BlackPixel(display,
-			screen_num), WhitePixel(display,screen_num));
-
-	/* Get available icon sizes from Window manager */
-
-	if (XGetIconSizes(display, RootWindow(display,screen_num),
-			&size_list, &count) == 0)
-		(void) fprintf( stderr, "%s: Window manager didn't set icon sizes - using default.\n", progname);
-	else {
-		;
-		/* A real application would search through size_list
-		 * here to find an acceptable icon size, and then
-		 * create a pixmap of that size.  This requires
-		 * that the application have data for several sizes
-		 * of icons. */
-	}
-
-	/* Create pixmap of depth 1 (bitmap) for icon */
-
-	icon_pixmap = XCreateBitmapFromData(display, win, (const char*)terminal_bits,
-			terminal_width, terminal_height);
-
-	/* Set size hints for window manager.  The window manager may
-	 * override these settings.  Note that in a real
-	 * application if size or position were set by the user
-	 * the flags would be UPosition and USize, and these would
-	 * override the window manager's preferences for this window. */
-#ifdef X11R3
-	size_hints.flags = PPosition | PSize | PMinSize;
-	size_hints.x = x;
-	size_hints.y = y;
-	size_hints.width = width;
-	size_hints.height = height;
-	size_hints.min_width = 300;
-	size_hints.min_height = 200;
-#else /* X11R4 or later */
-	/* x, y, width, and height hints are now taken from
-	 * the actual settings of the window when mapped. Note
-	 * that PPosition and PSize must be specified anyway. */
-
-	size_hints.flags = PPosition | PSize | PMinSize;
-	size_hints.min_width = 300;
-	size_hints.min_height = 200;
-#endif
-
-#ifdef X11R3
-	/* set Properties for window manager (always before mapping) */
-	XSetStandardProperties(display, win, window_name, icon_name,
-			icon_pixmap, argv, argc, &size_hints);
-
-#else /* X11R4 or later */
-	{
-	XWMHints wm_hints;
-	XClassHint class_hints;
-
-	/* format of the window name and icon name
-	 * arguments has changed in R4 */
-	XTextProperty windowName, iconName;
-
-	/* These calls store window_name and icon_name into
-	 * XTextProperty structures and set their other
-	 * fields properly. */
-	if (XStringListToTextProperty(&window_name, 1, &windowName) == 0) {
-		(void) fprintf( stderr, "%s: structure allocation for windowName failed.\n",
-				progname);
-		exit(-1);
-	}
-
-	if (XStringListToTextProperty(&icon_name, 1, &iconName) == 0) {
-		(void) fprintf( stderr, "%s: structure allocation for iconName failed.\n",
-				progname);
-		exit(-1);
-	}
-
-	wm_hints.initial_state = NormalState;
-	wm_hints.input = True;
-	wm_hints.icon_pixmap = icon_pixmap;
-	wm_hints.flags = StateHint | IconPixmapHint | InputHint;
-
-	class_hints.res_name = progname;
-	class_hints.res_class = "Basicwin";
-
-	XSetWMProperties(display, win, &windowName, &iconName,
-			argv, argc, &size_hints, &wm_hints,
-			&class_hints);
-	}
-#endif
-
-	/* Select event types wanted */
-	XSelectInput(display, win, ExposureMask | KeyPressMask |
-			ButtonPressMask | StructureNotifyMask);
-
-	load_font(&font_info);
-
-	/* get colors that we need */
-	get_colors (NB_COLORS, color_names, color_codes);
-
-	/* create GC for text and drawing */
-	getGC(win, &gc_normal, font_info);
-
-	/* create GC for Inverse video */
-	getGC_Inverse (win, &gc_inverse, font_info);
-
-	/* create GC for halfbright video */
-	getGC_Halfbright (win, &gc_halfbright, font_info);
-
-	/* create GC for red video */
-	getGC_Red (win, &gc_red, font_info);
-
-	/* Display window */
-	XMapWindow(display, win);
-
-}
-#endif
-
 void event_loop (void)
 {
 
@@ -575,26 +412,16 @@ void event_loop (void)
 	 * notify hpterm.c */
 	width = report.xconfigure.width;
 	height = report.xconfigure.height;
-#if defined(MEMLOCK_2000)
 	nbcols = width / font_info->max_bounds.width;
 	nbrows = height / (font_info->ascent + font_info->descent);
-#else
-	nbcols = width / CHAR_WIDTH;    /* Needs work here */
-	nbrows = height / CHAR_HEIGHT;
-#endif
 	hpterm_winsize (nbrows, nbcols);
 	break;
       case ButtonPress:
 	if (report.xbutton.button == 1)
 	{
 	  int r, c;
-#if defined(MEMLOCK_2000)
 	  c = report.xbutton.x / font_info->max_bounds.width;
 	  r = report.xbutton.y / (font_info->ascent + font_info->descent);
-#else
-	  c = report.xbutton.x / CHAR_WIDTH;
-	  r = report.xbutton.y / CHAR_HEIGHT;
-#endif
 	  hpterm_mouse_click (r, c);
 	}
 	/* right mouse button causes program to exit */
@@ -746,7 +573,6 @@ void getGC_Red (win, gc, font_info)
   XSetBackground (display, *gc, WhitePixel (display, screen_num));
 }
 
-#if defined(MEMLOCK_2000)
 void load_font (XFontStruct **font_info, char *font1)
 {
   char *fontname = FONT_NAME;
@@ -775,20 +601,6 @@ void load_font (XFontStruct **font_info, char *font1)
 	  }
   }
 }
-#else
-void load_font(XFontStruct **font_info)
-{
-	char *fontname = FONT_NAME;
-
-	/* Load font and get font information structure. */
-	if ((*font_info = XLoadQueryFont(display,fontname)) == NULL)
-	{
-		(void) fprintf( stderr, "%s: Cannot open %s font\n",
-				progname, FONT_NAME);
-		exit( -1 );
-	}
-}
-#endif
 
 static struct km
 {
@@ -1215,9 +1027,8 @@ void Usage (void)
   printf ("   -f file         - destination for logging (default: stdout)\n");
   printf ("   -a file         - read initial commands from file.\n");
   printf ("   -df             - start with Display Functions enabled.\n");
-#if defined(MEMLOCK_2000)
   printf ("   -font fontname  - override default font with fontname.\n");
-#endif
+  printf ("   -title title    - override default window title.\n");
 
 } /*Usage */
 
@@ -1231,20 +1042,15 @@ int main (int argc, char **argv)
   int
     ipPort = kVT_PORT;
 
-#if defined(MEMLOCK_2000)
   char *font1 = NULL;
-#endif
-  
+  char *wintitle = NULL;
+  char *wtprefix = "FreeVT3K Terminal Emulator";
+
   /* init the logging stuff... *//* 970107 */
 
   logFd = stdout;		/* 970107 */
   log_type = 0;			/* 970107 */
   logging = 0;			/* 970107 */
-
-#if !defined(MEMLOCK_2000)
-  /* Start the X11 driver */
-  init_disp(argc,argv);
-#endif
 
   /* Start the datacomm module */
   ++argv;
@@ -1269,7 +1075,7 @@ int main (int argc, char **argv)
       must_logoff = 1;
     else if (!strcmp (*argv, "-df"))
       display_fns = 1;
-   else if (!strcmp (*argv, "-tty"))
+    else if (!strcmp (*argv, "-tty"))
     {
       if ((--argc) && (argv[1][0] != '-'))
 	ttyname = *(++argv);
@@ -1309,15 +1115,20 @@ int main (int argc, char **argv)
       else
 	++parm_error;
     }
-#if defined(MEMLOCK_2000)
-    else if (!strcmp (*argv, "-font"))
+    else if (!strcmp (*argv, "-font") || !strcmp (*argv, "-fn"))
     {
       if ((--argc))
 	font1 = *(++argv);
       else
 	++parm_error;
     }
-#endif
+    else if (!strcmp (*argv, "-T") || !strcmp(*argv, "-title"))
+    {
+      if ((--argc))
+	wintitle = *(++argv);
+      else
+	++parm_error;
+    }
     else if (!strcmp (*argv, "-a"))
     {
       if ((--argc) && (argv[1][0] != '-'))
@@ -1403,18 +1214,38 @@ int main (int argc, char **argv)
   if (argc)
   {
     hostname = *argv;
-#if defined(MEMLOCK_2000)
-/* Start the X11 driver */
-    init_disp (argc, argv, hostname, font1);
-#endif
+    if (wintitle == NULL)
+    {
+      wintitle = calloc (1, strlen(hostname) + 3 + strlen(wtprefix));
+      if (wintitle == NULL)
+      {
+	fprintf(stderr, "wintitle calloc\n");
+	return 1;
+      }
+      sprintf (wintitle, "%s: %s", wtprefix, hostname);
+    }
   }
-#if defined(MEMLOCK_2000)
   else
   {
-/* Start the X11 driver */
-    init_disp (argc, argv, ttyname, font1);
+    if ((wintitle == NULL) && (ttyname != NULL))
+    {
+      wintitle = calloc (1, strlen(ttyname) + 3 + strlen(wtprefix));
+      if (wintitle == NULL)
+      {
+	fprintf(stderr, "wintitle calloc\n");
+	return 1;
+      }
+      sprintf (wintitle, "%s: %s", wtprefix, hostname);
+    }
   }
-#endif
+  
+  if (wintitle == NULL) {
+    wintitle = wtprefix;
+  }
+
+  /* Start the X11 driver */
+  init_disp (argc, argv, wintitle, font1);
+
   /* Start the terminal emulator */
   term = init_hpterm ();
   if (display_fns)
