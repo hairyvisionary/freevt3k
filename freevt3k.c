@@ -1506,7 +1506,7 @@ int DoMessageLoop(conn)
 	  time_ptr = (struct timeval*)&timeout;
 	  if (debug)
 	    {
-	      fprintf(debug_fd, "timer: %ld.%06d\n", timeout.tv_sec, timeout.tv_usec);
+	      fprintf(debug_fd, "timer: %ld.%06ld\n", timeout.tv_sec, timeout.tv_usec);
 	      debug_need_crlf = 0;
 	    }
 	}

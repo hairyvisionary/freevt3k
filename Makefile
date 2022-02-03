@@ -87,7 +87,7 @@ alphaosf:
 	make -f Makefile CC=cc COPTS="-std -IAlphaOSF/4" SFX=.alphaosf all
 
 freebsd:
-	make -f Makefile CC=gcc COPTS="-IBSDI" SFX=.freebsd all
+	make -f Makefile CC=cc COPTS="-IBSDI" SFX=.freebsd all
 
 macosx:
 	make -f Makefile CC=cc COPTS="-IMacOSX" SFX=.macosx all

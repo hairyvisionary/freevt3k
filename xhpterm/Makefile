@@ -99,7 +99,7 @@ alphaosf:
 	make -f Makefile CC=cc COPTS="-std -I../ -I../AlphaOSF/4" LIBS="-L/usr/lib/X11 -lX11" SFX=.alphaosf all
 
 freebsd:
-	make -f Makefile CC=gcc COPTS="-I../ -I../BSDI" SFX=.freebsd all
+	make -f Makefile CC=cc COPTS="-DFREEBSD -I../ -I../BSDI -I/usr/local/include" LIBS="-L/usr/local/lib -lX11" SFX=.freebsd all
 
 macosx:
 	make -f Makefile CC=cc COPTS="-DMACOSX -I../ -I../MacOSX -I/usr/include/X11 -I/usr/include/X11/extensions -I/opt/X11/include -I/opt/X11/include/X11/extensions" LIBS="-L/usr/X11R6/lib -L/opt/X11/lib -lX11" SFX=.macosx all

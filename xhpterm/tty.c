@@ -33,7 +33,7 @@
 #      define _POSIX_SOURCE (1)
 #    endif
 #  endif
-#  ifdef MACOSX
+#  if defined(MACOSX) || defined(FREEBSD)
 #    ifndef _POSIX_SOURCE
 #      define _POSIX_SOURCE (1)
 #    endif
