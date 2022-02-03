@@ -28,7 +28,7 @@
 */
 
 char
-	*Sccsid = "@(#) freevt3k.c: A.01.03";
+	*Sccsid = "@(#) freevt3k.c: A.02.00";
 
 #ifdef VMS
 #  include <types.h>
