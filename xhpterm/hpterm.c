@@ -205,6 +205,13 @@ void term_flush_tx(struct hpterm *term)
 	  hpterm_rxfunc (term, &ch, 1);
 	}
     }
+/*
+   **          If we flushed entire buffer, reset its indices
+ */
+  if (term->dctxhead == term->dctxtail)
+    {
+      term->dctxhead = term->dctxtail = 0;
+    }
 }
 /*******************************************************************/
 void update_row (int r, struct row *rp)
