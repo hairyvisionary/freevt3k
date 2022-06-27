@@ -126,7 +126,7 @@ int must_logoff = 0;
 
 char *termid = NULL;
 
-char *version_str = "A.02.00";
+char *version_str = "A.02.01";
 
 /*******************************************************************/
 int get_colors P ((int nb_colors, char **color_names, unsigned long *color_codes));
