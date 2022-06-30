@@ -25,7 +25,6 @@ dflt:
 	@echo "  make alphaosf"
 	@echo "  make clean"
 	@echo "  make freebsd"
-	@echo "  make hpux_knr (Kernighan & Ritchie)"
 #	@echo "  make hpux_ansi"
 #	@echo "  make hpux_posix"
 	@echo "  make hpux11pa11 (HP-UX 11.X PARISC 1.1)"
@@ -91,9 +90,6 @@ freebsd:
 
 macosx:
 	make -f Makefile CC=cc COPTS="-IMacOSX" SFX=.macosx all
-
-hpux_knr:
-	make -f Makefile CC=cc COPTS="-Ac -DHPUX" all
 
 hpux11pa11:
 	make -f Makefile CC=c89 COPTS="-Wc,-w1 +e -z -O +Onolimit +ESlit +DD32 -DHPUX -IHP-UX/11.X/PA1.1" SFX=.hpux11pa11 all
