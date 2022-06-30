@@ -126,16 +126,16 @@ int must_logoff = 0;
 
 char *termid = NULL;
 
-char *version_str = "A.02.01";
+char *version_str = "B.00.A0";
 
 /*******************************************************************/
-int get_colors P ((int nb_colors, char **color_names, unsigned long *color_codes));
-void getGC P ((Window win, GC * gc, XFontStruct * font_info));
-void getGC_Inverse P ((Window win, GC * gc, XFontStruct * font_info));
-void getGC_Halfbright P ((Window win, GC * gc, XFontStruct * font_info));
-void getGC_Red P ((Window win, GC * gc, XFontStruct * font_info));
-void Logit P ((int typ, char *ptr, int len, int special_dc1));
-int LoadKeybdTable P ((char *file_name, int i_type));
+int get_colors(int nb_colors, char **color_names, unsigned long *color_codes);
+void getGC(Window win, GC * gc, XFontStruct * font_info);
+void getGC_Inverse(Window win, GC * gc, XFontStruct * font_info);
+void getGC_Halfbright(Window win, GC * gc, XFontStruct * font_info);
+void getGC_Red(Window win, GC * gc, XFontStruct * font_info);
+void Logit(int typ, char *ptr, int len, int special_dc1);
+int LoadKeybdTable(char *file_name, int i_type);
 /*******************************************************************/
 #define GRAY_INDEX 0
 #define RED_INDEX 1

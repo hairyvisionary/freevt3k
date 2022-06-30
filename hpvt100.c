@@ -1,7 +1,4 @@
 /* Circular VT queue parms */
-#ifndef __STDC__
-#  define const
-#endif
 #define MAX_VT_QUEUE		(kVT_MAX_BUFFER)
 
 char
@@ -15,8 +12,7 @@ int
     vt_queue_len_hold = 0,
     vt_queue_len = 0;
 
-#ifdef __STDC__
-#  include <stdarg.h>
+#include <stdarg.h>
 int int_sprintf(char *buf, const char *fmt, ...)
 { /*int_sprintf*/
 
@@ -29,54 +25,8 @@ int int_sprintf(char *buf, const char *fmt, ...)
   return(strlen(buf));
 
 } /*int_sprintf*/
-#else
-#  ifdef HAVE_VARARGS_H
-#    include <varargs.h>
-int int_sprintf(va_alist)
-  va_dcl	/* no ';' terminator! */
-{ /*int_sprintf*/
-
-  va_list
-    ap;
-  char
-    *buf,
-    *fmt;
-
-  va_start(ap);
-  buf = va_arg(ap, char*);
-  fmt = va_arg(ap, char*);
-  vsprintf(buf, fmt, ap);
-  va_end(ap);
-  return(strlen(buf));
-
-} /*int_sprintf*/
-#  else
-int int_sprintf(buf, fmt, p1, p2, p3, p4, p5, p6, p7, p8, p9)
-  char *buf;
-  char *fmt;
-  void *p1;
-  void *p2;
-  void *p3;
-  void *p4;
-  void *p5;
-  void *p6;
-  void *p7;
-  void *p8;
-  void *p9;
-{ /*int_sprintf*/
-
-  (void)sprintf(buf, fmt, p1, p2, p3, p4, p5, p6, p7, p8, p9);
-  return(strlen(buf));
-
-} /*int_sprintf*/
-#  endif
-#endif
 
-#ifdef __STDC__
 static int GetVTQueue(void)
-#else
-static int GetVTQueue()
-#endif
 { /*GetVTQueue*/
 
   if (!vt_queue_len)
@@ -89,12 +39,7 @@ static int GetVTQueue()
     
 } /*GetVTQueue*/
 
-#ifdef __STDC__
 static int PutVTQueue(char ch)
-#else
-static int PutVTQueue(ch)
-  char ch;
-#endif
 { /*PutVTQueue*/
 
   if (++vtq_wptr == &vt_queue[MAX_VT_QUEUE])
@@ -110,11 +55,7 @@ static int PutVTQueue(ch)
 
 } /*PutVTQueue*/
 
-#ifdef __STDC__
 static int GetNextChar(void)
-#else
-static int GetNextChar()
-#endif
 { /*GetNextChar*/
 
   if (GetVTQueue() == -1)
@@ -132,12 +73,7 @@ static int GetNextChar()
 
 } /*GetNextChar*/
 
-#ifdef __STDC__
 static char *VT100DisplayEnhance(char ch)
-#else
-static char *VT100DisplayEnhance(ch)
-  char ch;
-#endif
 { /*VT100DisplayEnhance*/
 /*                                      0x40+
 @                                        0000
@@ -166,7 +102,6 @@ O   Half     Underline Inverse  Blink    1111
 
   static char
     buf[256];
-#ifdef __STDC__
 #  define CSI			"\033["
   const char
     *blink = CSI "5m",
@@ -174,14 +109,6 @@ O   Half     Underline Inverse  Blink    1111
     *rev   = CSI "7m",	/* aka: smso */
     *smul  = CSI "4m",	/* set mode: underline */
     *sgr0  = CSI "m";	/* aka: rmso and rmul */
-#else
-  char
-    *blink = "\033[5m",
-    *bold  = "\033[1m",
-    *rev   = "\033[7m",	/* aka: smso */
-    *smul  = "\033[4m",	/* set mode: underline */
-    *sgr0  = "\033[m";	/* aka: rmso and rmul */
-#endif
 
   if ((int)ch & HPTERM_OPT_MASK)
     {
@@ -205,12 +132,7 @@ O   Half     Underline Inverse  Blink    1111
 
 } /*VT100DisplayEnhance*/
 
-#ifdef __STDC__
 static char *GenericDisplayEnhance(char ch)
-#else
-static char *GenericDisplayEnhance(ch)
-  char ch;
-#endif
 { /*GenericDisplayEnhance*/
 /*                                      0x40+
 @                                        0000
@@ -268,12 +190,7 @@ O   Half     Underline Inverse  Blink    1111
 
 } /*GenericDisplayEnhance*/
 
-#ifdef __STDC__
 static char TtyLineDraw(char ch)
-#else
-static char TtyLineDraw(ch)
-  char ch;
-#endif
 { /*TtyLineDraw*/
 
   switch (toupper((int)ch))
@@ -362,12 +279,7 @@ static char TtyLineDraw(ch)
 
 } /*TtyLineDraw*/
 
-#ifdef __STDC__
 static char VT100LineDraw(char ch)
-#else
-static char VT100LineDraw(ch)
-  char ch;
-#endif
 { /*VT100LineDraw*/
 
   switch (toupper((int)ch))
@@ -456,14 +368,7 @@ static char VT100LineDraw(ch)
 
 } /*VT100LineDraw*/
 
-#ifdef __STDC__
 void vt3kHPtoVT100(int32 refCon, char *buf, int buf_len)
-#else
-void vt3kHPtoVT100(refCon, buf, buf_len)
-  int32 refCon;
-  char *buf;
-  int buf_len;
-#endif
 { /*vt3kHPtoVT100*/
 
 #define	ASC_SO			(0x0E)
@@ -482,7 +387,6 @@ void vt3kHPtoVT100(refCon, buf, buf_len)
     num_buf[256],
     *num_ptr = num_buf,
     *out_ptr = out_buf;
-#ifdef __STDC__
 #  define SI			"\017"
 #  define ESC			"\033"
 #  define CSI			"\033["
@@ -504,26 +408,6 @@ void vt3kHPtoVT100(refCon, buf, buf_len)
     *sel_g0     = SI,		/* Select G0 character sets from below */
     *g0_usascii = ESC "(B",	/* Specify USASCII set */
     *g0_graphic = ESC "(0";	/* Specify graphics/line drawing set */
-#else
-  char
-    *cup   = "\033[%d;%dH",	/* Cursor position */
-    *cuu   = "\033[%dA",	/* Cursor up */
-    *cud   = "\033[%dB",	/* Cursor down */
-    *cuf   = "\033[%dC",	/* Cursor forward */
-    *cub   = "\033[%dD",	/* Cursor back */
-    *home  = "\033[1;1H",	/* Cursor home */
-    *ed    = "\033[%dJ",	/* Erase to end-of-display */
-    *el    = "\033[%dK",	/* Erase to end-of-line */
-    *il    = "\033[%dL",	/* Insert line */
-    *dl    = "\033[%dM",	/* Delete line */
-    *dch   = "\033[%dP",	/* Delete char */
-    *ris   = "\033c",		/* Reset to initial */
-    *sel_ascii  = "\033G",	/* Select ASCII character set */
-    *sel_graph  = "\033F",	/* Select special graphics character set */
-    *sel_g0     = "\017",	/* Select G0 character sets from below */
-    *g0_usascii = "\033(B",	/* Specify USASCII set */
-    *g0_graphic = "\033(0";	/* Specify graphics/line drawing set */
-#endif
   static int
     line_draw = 0;
 
@@ -585,18 +469,10 @@ void vt3kHPtoVT100(refCon, buf, buf_len)
 	      out_ptr += int_sprintf(out_ptr, "%cH", ASC_ESC);
 	      break;
 	    case '2':	/* Clear tab */
-#ifdef __STDC__
 	      out_ptr += int_sprintf(out_ptr, CSI "0G");
-#else
-	      out_ptr += int_sprintf(out_ptr, "\033[0G");
-#endif
 	      break;
 	    case '3':	/* Clear all tabs */
-#ifdef __STDC__
 	      out_ptr += int_sprintf(out_ptr, CSI "3G");
-#else
-	      out_ptr += int_sprintf(out_ptr, "\033[3G");
-#endif
 	      break;
 	    case '4':	/* Set Left Margin */
 	      break;
@@ -620,21 +496,13 @@ void vt3kHPtoVT100(refCon, buf, buf_len)
 	      out_ptr += int_sprintf(out_ptr, cud, 1);
 	      break;
 	    case 'b':	/* Keyboard unlock */
-#ifdef __STDC__
 	      out_ptr += int_sprintf(out_ptr, CSI "2l");
-#else
-	      out_ptr += int_sprintf(out_ptr, "\033[2l");
-#endif
 	      break;
 	    case 'C':	/* Cursor forward */
 	      out_ptr += int_sprintf(out_ptr, cuf, 1);
 	      break;
 	    case 'c':	/* Keyboard lock */
-#ifdef __STDC__
 	      out_ptr += int_sprintf(out_ptr, CSI "2h");
-#else
-	      out_ptr += int_sprintf(out_ptr, "\033[2h");
-#endif
 	      break;
 	    case 'D':	/* Cursor back */
 	      out_ptr += int_sprintf(out_ptr, cub, 1);
@@ -643,22 +511,14 @@ void vt3kHPtoVT100(refCon, buf, buf_len)
 	      out_ptr += int_sprintf(out_ptr, ris);
 	      break;
 	    case 'F':	/* Home down */
-#ifdef __STDC__
 	      out_ptr += int_sprintf(out_ptr, CSI ">1s");
-#else
-	      out_ptr += int_sprintf(out_ptr, "\033[>1s");
-#endif
 	      break;
 	    case 'h':
 	    case 'H':	/* Home cursor */
 	      out_ptr += int_sprintf(out_ptr, home);
 	      break;
 	    case 'i':	/* Back tab */
-#ifdef __STDC__
 	      out_ptr += int_sprintf(out_ptr, CSI "1Z");
-#else
-	      out_ptr += int_sprintf(out_ptr, "\033[1Z");
-#endif
 	      break;
 	    case 'J':	/* Clear to end of memory */
 	      out_ptr += int_sprintf(out_ptr, ed, 0);
@@ -676,60 +536,28 @@ void vt3kHPtoVT100(refCon, buf, buf_len)
 	      out_ptr += int_sprintf(out_ptr, dch, 1);
 	      break;
 	    case 'Q':	/* Insert char on */
-#ifdef __STDC__
 	      out_ptr += int_sprintf(out_ptr, CSI "4h");
-#else
-	      out_ptr += int_sprintf(out_ptr, "\033[4h");
-#endif
 	      break;
 	    case 'R':	/* Insert char off */
-#ifdef __STDC__
 	      out_ptr += int_sprintf(out_ptr, CSI "4l");
-#else
-	      out_ptr += int_sprintf(out_ptr, "\033[4l");
-#endif
 	      break;
 	    case 'S':	/* Scroll up */
-#ifdef __STDC__
 	      out_ptr += int_sprintf(out_ptr, CSI "1S");
-#else
-	      out_ptr += int_sprintf(out_ptr, "\033[1S");
-#endif
 	      break;
 	    case 'T':	/* Scroll down */
-#ifdef __STDC__
 	      out_ptr += int_sprintf(out_ptr, CSI "1T");
-#else
-	      out_ptr += int_sprintf(out_ptr, "\033[1T");
-#endif
 	      break;
 	    case 'U':	/* Page down (next) */
-#ifdef __STDC__
 	      out_ptr += int_sprintf(out_ptr, CSI "1U");
-#else
-	      out_ptr += int_sprintf(out_ptr, "\033[1U");
-#endif
 	      break;
 	    case 'V':	/* Page up (prev) */
-#ifdef __STDC__
 	      out_ptr += int_sprintf(out_ptr, CSI "1V");
-#else
-	      out_ptr += int_sprintf(out_ptr, "\033[1V");
-#endif
 	      break;
 	    case 'Y':	/* Display fns on */
-#ifdef __STDC__
 	      out_ptr += int_sprintf(out_ptr, CSI "3h");
-#else
-	      out_ptr += int_sprintf(out_ptr, "\033[3h");
-#endif
 	      break;
 	    case 'Z':	/* Display fns off */
-#ifdef __STDC__
 	      out_ptr += int_sprintf(out_ptr, CSI "3l");
-#else
-	      out_ptr += int_sprintf(out_ptr, "\033[3l");
-#endif
 	      break;
 	    default:	/* ??? */
 	      break;
@@ -758,11 +586,7 @@ void vt3kHPtoVT100(refCon, buf, buf_len)
 	  int do_terminal_id = 0;
 	  if (vt_ch == '^')
 	    {
-#ifdef __STDC__
 	      char *prim = ESC "\\?008000\r", *ptr = prim;
-#else
-	      char *prim = "\033\\?008000\r", *ptr = prim;
-#endif
 	      while (*ptr)
 		{
 		  if (PutImmediateQ(*ptr) == -1)
@@ -773,11 +597,7 @@ void vt3kHPtoVT100(refCon, buf, buf_len)
 	    }
 	  if (vt_ch == '~')
 	    {
-#ifdef __STDC__
 	      char *sec = ESC "|0400000\r", *ptr = sec;
-#else
-	      char *sec = "\033|0400000\r", *ptr = sec;
-#endif
 	      while (*ptr)
 		{
 		  if (PutImmediateQ(*ptr) == -1)
@@ -934,14 +754,7 @@ void vt3kHPtoVT100(refCon, buf, buf_len)
 
 } /*vt3kHPtoVT100*/
 
-#ifdef __STDC__
 void vt3kHPtoGeneric(int32 refCon, char *buf, int buf_len)
-#else
-void vt3kHPtoGeneric(refCon, buf, buf_len)
-  int32 refCon;
-  char *buf;
-  int buf_len;
-#endif
 { /*vt3kHPtoGeneric*/
 
 #define	ASC_SO			(0x0E)
@@ -1262,14 +1075,7 @@ void vt3kHPtoGeneric(refCon, buf, buf_len)
 
 } /*vt3kHPtoGeneric*/
 
-#ifdef __STDC__
 void vt3kHPtoVT52(int32 refCon, char *buf, int buf_len)
-#else
-void vt3kHPtoVT52(refCon, buf, buf_len)
-  int32 refCon;
-  char *buf;
-  int buf_len;
-#endif
 { /*vt3kHPtoVT52*/
 
 #define	ASC_SO			(0x0E)
@@ -1288,7 +1094,6 @@ void vt3kHPtoVT52(refCon, buf, buf_len)
     num_buf[256],
     *num_ptr = num_buf,
     *out_ptr = out_buf;
-#ifdef __STDC__
 #  define ESC			"\033"
   const char
     *cup   = ESC "Y%c%c",	/* Cursor position */
@@ -1299,17 +1104,6 @@ void vt3kHPtoVT52(refCon, buf, buf_len)
     *home  = ESC "H",		/* Cursor home */
     *ed    = ESC "J",		/* Erase to end-of-display */
     *el    = ESC "K";		/* Erase to end-of-line */
-#else
-  char
-    *cup   = "\033Y%c%c",	/* Cursor position */
-    *cuu1  = "\033A",		/* Cursor up */
-    *cud1  = "\033B",		/* Cursor down */
-    *cuf1  = "\033C",		/* Cursor forward */
-    *cub1  = "\033D",		/* Cursor back */
-    *home  = "\033H",		/* Cursor home */
-    *ed    = "\033J",		/* Erase to end-of-display */
-    *el    = "\033K";		/* Erase to end-of-line */
-#endif
   static int
     line_draw = 0;
 
@@ -1394,11 +1188,7 @@ void vt3kHPtoVT52(refCon, buf, buf_len)
 	  int do_terminal_id = 0;
 	  if (vt_ch == '^')
 	    {
-#ifdef __STDC__
 	      char *prim = ESC "\\?008000\r", *ptr = prim;
-#else
-	      char *prim = "\033\\?008000\r", *ptr = prim;
-#endif
 	      while (*ptr)
 		{
 		  if (PutImmediateQ(*ptr) == -1)
@@ -1409,11 +1199,7 @@ void vt3kHPtoVT52(refCon, buf, buf_len)
 	    }
 	  if (vt_ch == '~')
 	    {
-#ifdef __STDC__
 	      char *sec = ESC "|0400000\r", *ptr = sec;
-#else
-	      char *sec = "\033|0400000\r", *ptr = sec;
-#endif
 	      while (*ptr)
 		{
 		  if (PutImmediateQ(*ptr) == -1)
@@ -1536,13 +1322,7 @@ void vt3kHPtoVT52(refCon, buf, buf_len)
 } /*vt3kHPtoVT52*/
 
 #ifdef TRANSLATE_INPUT
-#ifdef __STDC__
 void TranslateKeyboard(char *buf, int *buf_len)
-#else
-void TranslateKeyboard(buf, buf_len)
-  char *buf;
-  int *buf_len;
-#endif
 { /*TranslateKeyboard*/
 
   int
@@ -1553,7 +1333,6 @@ void TranslateKeyboard(buf, buf_len)
     *in_ptr = hold_buf,
     *out_ptr = buf,
     *key_codes = "pqrst uvw";
-#ifdef __STDC__
   const char
     *kpp    = ESC "V",		/* Page Up (prev) */
     *knp    = ESC "U",		/* Page Down (next) */
@@ -1562,16 +1341,6 @@ void TranslateKeyboard(buf, buf_len)
     *kcuf1  = ESC "C",		/* Cursor forward */
     *kcub1  = ESC "D",		/* Cursor back */
     *kfn    = ESC "%c\r";	/* Function key */
-#else
-  char
-    *kpp    = "\033V",		/* Page Up (prev) */
-    *knp    = "\033U",		/* Page Down (next) */
-    *kcuu1  = "\033A",		/* Cursor up */
-    *kcud1  = "\033B",		/* Cursor down */
-    *kcuf1  = "\033C",		/* Cursor forward */
-    *kcub1  = "\033D",		/* Cursor back */
-    *kfn    = "\033%c\r";	/* Function key */
-#endif
 
 /*
  * Work in progress

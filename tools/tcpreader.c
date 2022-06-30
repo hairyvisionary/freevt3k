@@ -100,13 +100,7 @@ char
 	*ip1_name = NULL,
 	*ip2_name = NULL;
 
-#ifdef __STDC__
 void Swap(void *buf, int n_bytes)
-#else
-void Swap(buf, n_bytes)
-  void *buf;
-  int n_bytes;
-#endif
 { /*Swap*/
 
   unsigned char
@@ -130,15 +124,7 @@ void Swap(buf, n_bytes)
 
 } /*Swap*/
 
-#ifdef __STDC__
 void DumpBuffer(void *buf, int buf_len, char *dump_id, int vt_entry)
-#else
-void DumpBuffer(buf, buf_len, dump_id, vt_entry)
-  unsigned char *buf;
-  int buf_len;
-  char *dump_id;
-  int vt_entry;
-#endif
 { /*DumpBuffer*/
 
 #define CHAR_PER_LINE		(16)
@@ -224,14 +210,7 @@ void DumpBuffer(buf, buf_len, dump_id, vt_entry)
 
 } /*DumpBuffer*/
 
-#ifdef __STDC__
 void ExitProc(char *text1, char *text2, int exit_code)
-#else
-void ExitProc(text1, text2, exit_code)
-  char *text1;
-  char *text2;
-  int exit_code;
-#endif
 { /*ExitProc*/
 
   char
@@ -256,11 +235,7 @@ void ExitProc(text1, text2, exit_code)
 
 } /*ExitProc*/
 
-#ifdef __STDC__
 void FormatEnvCntl(void)
-#else
-void FormatEnvCntl()
-#endif
 {/*FormatEnvCntl*/
 
   tVTMAMNegotiationRequest
@@ -492,11 +467,7 @@ void FormatEnvCntl()
 
 } /*FormatEnvCntl*/
 
-#ifdef __STDC__
 void FormatTerminalIO(void)
-#else
-void FormatTerminalIO()
-#endif
 {/*FormatTerminalIO*/
 
   tVTMTerminalIOResponse
@@ -579,11 +550,7 @@ void FormatTerminalIO()
 	
 }/*FormatTerminalIO*/
 
-#ifdef __STDC__
 void FormatTerminalCntl(void)
-#else
-void FormatTerminalCntl()
-#endif
 {/*FormatTerminalCntl*/
 
   tVTMSetBreakRequest
@@ -683,11 +650,7 @@ void FormatTerminalCntl()
 	
 }/*FormatTerminalCntl*/
 
-#ifdef __STDC__
 void FormatApplicationCntl(void)
-#else
-void FormatApplicationCntl()
-#endif
 {/*FormatApplicationCntl*/
 
   tVTMApplCntlReq
@@ -704,11 +667,7 @@ void FormatApplicationCntl()
 
 }/*FormatApplicationCntl*/
 
-#ifdef __STDC__
 void FormatMPECntl(void)
-#else
-void FormatMPECntl()
-#endif
 {/*FormatMPECntl*/
 
   tVTMMPECntlReq
@@ -726,11 +685,7 @@ void FormatMPECntl()
 
 }/*FormatMPECntl*/
 
-#ifdef __STDC__
 void FormatFDCCntl(void)
-#else
-void FormatFDCCntl()
-#endif
 {/*FormatFDCCntl*/
 
   tVTMFDCCntlReq
@@ -742,13 +697,7 @@ void FormatFDCCntl()
 
 }/*FormatFDCCntl*/
 
-#ifdef __STDC__
 void main(int argc, char *argv[])
-#else
-void main(argc, argv)
-  int argc;
-  char *argv[];
-#endif
 { /*main*/
 
   int

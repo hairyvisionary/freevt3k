@@ -5,19 +5,7 @@
 FILE
 	*debug_fd = NULL;
 
-#ifdef __STDC__
 void DumpBuffer(void *buf, int buf_len, char *dump_id)
-#else
-void DumpBuffer(buf, buf_len, dump_id)
-
-    unsigned char
-	*buf;
-    int
-	buf_len;
-    char
-	*dump_id;
-#endif
-
 { /*DumpBuffer*/
 
 #define CHAR_PER_LINE		(16)
@@ -55,11 +43,7 @@ void DumpBuffer(buf, buf_len, dump_id)
 	printOffset = 1;
 	}
     nLines = buf_len / CHAR_PER_LINE;
-#ifdef __STDC__
     charPtr = (unsigned char*)buf;
-#else
-    charPtr = buf;
-#endif
     for (iLine = 0; iLine <= nLines; iLine++)
 	{
 	if (iLine == nLines)

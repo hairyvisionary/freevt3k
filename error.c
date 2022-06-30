@@ -61,15 +61,7 @@ char *VMSstrerror(int io_status)
 } /*VMSstrerror*/
 #endif /* VMS */
 
-#ifdef __STDC__
 int PortableErrno(int err)
-#else
-int PortableErrno(err)
-
-    int
-	err;
-#endif
-
 { /*PortableErrno*/
 
 #ifdef VMS
@@ -80,15 +72,7 @@ int PortableErrno(err)
 
 } /*PortableErrno*/
 
-#ifdef __STDC__
 char *PortableStrerror(int err)
-#else
-char *PortableStrerror(err)
-
-    int
-	err;
-#endif
-
 { /*PortableStrerror*/
 
 #if !defined(VMS) && !defined(HAVE_STRERROR)
@@ -117,15 +101,7 @@ char *PortableStrerror(err)
 
 } /*PortableStrerror*/
 
-#ifdef __STDC__
 void PortablePerror(char *text)
-#else
-void PortablePerror(text)
-
-    char
-	*text;
-#endif
-
 { /*PortablePerror*/
 
     fprintf(stderr, "%s: %s\n", text, PortableStrerror(errno));

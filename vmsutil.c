@@ -39,8 +39,6 @@
 #include <ucx$inetdef.h>
 #include "vmstypes.h"
 
-#define P(x)			x
-
 #include "error.h"
 
 TT_READ_IOSB
@@ -105,18 +103,7 @@ int FreeEventFlag(unsigned int *efn, unsigned int *bit, unsigned int *mask)
 
 } /*FreeEventFlag*/
 
-#ifdef __STDC__
 void ExitProc(char *text1, char *text2, int exit_code)
-#else
-void ExitProc(text1, text2, exit_code)
-
-    char
-	*text1,
-	*text2;
-    int
-	exit_code;
-#endif
-
 { /*ExitProc*/
 
     char
@@ -198,12 +185,7 @@ void SetTTYRaw(void)
 
 } /* SetTTYRaw */
 
-#ifdef __STDC__
 void OpenTTY(void)
-#else
-void OpenTTY()
-#endif
-
 { /*OpenTTY*/
 
     struct dsc$descriptor_s

@@ -1,6 +1,6 @@
 #ifdef VMS
 int  VMSerror(int vms_stat);
 #endif /* VMS */
-int  PortableErrno P((int err));
-char *PortableStrerror P((int err));
-void PortablePerror P((char *text));
+int  PortableErrno(int err);
+char *PortableStrerror(int err);
+void PortablePerror(char *text);

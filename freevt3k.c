@@ -250,14 +250,7 @@ int32
 #include "timers.c"
 
 #ifdef DEBUG_TRANSLATE_TABLE
-#ifdef __STDC__
 void DisplayHex(void *buf, int buf_len, char *dump_id)
-#else
-void DisplayHex(buf, buf_len, dump_id)
-  unsigned char *buf;
-  int buf_len;
-  char *dump_id;
-#endif
 { /*DisplayHex*/
 
 #define CHAR_PER_LINE		(16)
@@ -281,11 +274,7 @@ void DisplayHex(buf, buf_len, dump_id)
       printOffset = 1;
     }
   nLines = buf_len / CHAR_PER_LINE;
-#ifdef __STDC__
   charPtr = (unsigned char*)buf;
-#else
-  charPtr = buf;
-#endif
   for (iLine = 0; iLine <= nLines; iLine++)
     {
       if (iLine == nLines)
@@ -317,15 +306,7 @@ void DisplayHex(buf, buf_len, dump_id)
 } /*DisplayHex*/
 #endif /*DEBUG_TRANSLATE_TABLE*/
 
-#ifdef __STDC__
 void Logit (int typ, char *ptr, int len, int special_dc1)
-#else
-void Logit (typ, ptr, len, special_dc1)
-  int typ;
-  char *ptr;
-  int len;
-  int special_dc1;
-#endif
 { /*Logit*/
 
 #ifdef XHPTERM
@@ -375,12 +356,7 @@ void Logit (typ, ptr, len, special_dc1)
 } /* Logit */
 
 #ifndef XHPTERM
-#ifdef __STDC__
 void PrintUsage(int detail)
-#else
-void PrintUsage(detail)
-  int detail;
-#endif
 { /*PrintUsage*/
 
   printf("freevt3k - version %s", version_id);
@@ -434,13 +410,7 @@ void PrintUsage(detail)
 } /*PrintUsage*/
 #endif /*XHPTERM*/
 
-#ifdef __STDC__
 int LoadKeybdTable(char *file_name, int i_type)
-#else
-int LoadKeybdTable(file_name, i_type)
-  char *file_name;
-  int i_type;
-#endif
 { /*LoadKeybdTable*/
 
   char
@@ -498,13 +468,7 @@ int LoadKeybdTable(file_name, i_type)
 
 #ifndef XHPTERM
 #ifndef VMS
-#ifdef __STDC__
 int SetTtyAttributes(int fd, PTERMIO termio_buf)
-#else
-int SetTtyAttributes(fd, termio_buf)
-  int fd;
-  PTERMIO termio_buf;
-#endif
 { /*SetTtyAttributes*/
 
 #ifdef HAVE_TERMIOS_H
@@ -518,13 +482,7 @@ int SetTtyAttributes(fd, termio_buf)
 
 } /*SetTtyAttributes*/
 
-#ifdef __STDC__
 int GetTtyAttributes(int fd, PTERMIO termio_buf)
-#else
-int GetTtyAttributes(fd, termio_buf)
-  int fd;
-  PTERMIO termio_buf;
-#endif
 { /*GetTtyAttributes*/
 
 #ifdef HAVE_TERMIOS_H
@@ -539,11 +497,7 @@ int GetTtyAttributes(fd, termio_buf)
 } /*GetTtyAttributes*/
 #endif /*~VMS*/
 
-#ifdef __STDC__
 void ProcessInterrupt(void)
-#else
-void ProcessInterrupt()
-#endif
 {/*ProcessInterrupt*/
     
 #ifndef VMS
@@ -597,12 +551,7 @@ void ProcessInterrupt()
 #ifdef USE_CTLC_INTERRUPTS
 typedef void (*SigfuncInt)(int);
 
-#ifdef __STDC__
 void CatchCtlC(int sig_type)
-#else
-void CatchCtlC(sig_type)
-  int sig_type;
-#endif
 { /*CatchCtlC*/
 
   SigfuncInt
@@ -625,11 +574,7 @@ void CatchCtlC(sig_type)
 
 } /*CatchCtlC*/
 
-#ifdef __STDC__
 void RestoreCtlC(void)
-#else
-void RestoreCtlC()
-#endif
 { /*RestoreCtlC*/
 
   SigfuncInt
@@ -643,11 +588,7 @@ void RestoreCtlC()
 #endif /* USE_CTLC_INTERRUPTS */
 #endif /*~XHPTERM*/
 
-#ifdef __STDC__
 void FlushQ(void)
-#else
-void FlushQ()
-#endif
 { /*FlushQ*/
 
     input_queue_len = 0;
@@ -657,11 +598,7 @@ void FlushQ()
 
 } /*FlushQ*/
 
-#ifdef __STDC__
 int GetQ(void)
-#else
-int GetQ()
-#endif
 { /*GetQ*/
 
 /*
@@ -686,12 +623,7 @@ int GetQ()
     
 } /*GetQ*/
 
-#ifdef __STDC__
 int PutQ(char ch)
-#else
-int PutQ(ch)
-  char ch;
-#endif
 { /*PutQ*/
 
   if (++inq_wptr == &input_queue[MAX_INPUT_QUEUE])
@@ -707,12 +639,7 @@ int PutQ(ch)
 
 } /*PutQ*/
 
-#ifdef __STDC__
 int PutImmediateQ(char ch)
-#else
-int PutImmediateQ(ch)
-  char ch;
-#endif
 { /*PutImmediateQ*/
 
   if (++imm_inq_wptr == &imm_input_queue[MAX_IMM_INPUT_QUEUE])
@@ -728,13 +655,7 @@ int PutImmediateQ(ch)
 
 } /*PutImmediateQ*/
 
-#ifdef __STDC__
 tBoolean AltEol(tVTConnection *conn, char ch)
-#else
-tBoolean AltEol(conn, ch)
-  tVTConnection *conn;
-  char ch;
-#endif
 { /*AltEol*/
 
 /*
@@ -751,13 +672,7 @@ tBoolean AltEol(conn, ch)
 
 } /*AltEol*/
 
-#ifdef __STDC__
 tBoolean PrimEol(tVTConnection *conn, char ch)
-#else
-tBoolean PrimEol(conn, ch)
-  tVTConnection *conn;
-  char ch;
-#endif
 { /*PrimEol*/
 
 /*
@@ -771,13 +686,7 @@ tBoolean PrimEol(conn, ch)
 
 } /*PrimEol*/
 
-#ifdef __STDC__
 int ProcessQueueToHost(tVTConnection *conn, int len)
-#else
-int ProcessQueueToHost(conn, len)
-  tVTConnection *conn;
-  int len;
-#endif
 {/*ProcessQueueToHost*/
 
 /*
@@ -993,12 +902,7 @@ int ProcessQueueToHost(conn, len)
 }/*ProcessQueueToHost*/
 
 #ifndef XHPTERM
-#ifdef __STDC__
 int ProcessSocket(tVTConnection * conn)
-#else
-int ProcessSocket(conn)
-  tVTConnection *conn;
-#endif
 {/*ProcessSocket*/
 
   int
@@ -1047,14 +951,7 @@ int ProcessSocket(conn)
 
 }/*ProcessSocket*/
 
-#ifdef __STDC__
 int ProcessTTY(tVTConnection * conn, char *buf, int len)
-#else
-int ProcessTTY(conn, buf, len)
-  tVTConnection *conn;
-  char *buf;
-  int len;
-#endif
 {/*ProcessTTY*/
     
   extern FILE
@@ -1223,13 +1120,7 @@ int ProcessTTY(conn, buf, len)
 } /*ProcessTTY*/
 
 #ifndef VMS
-#ifdef __STDC__
 int OpenTTY(PTERMIO new_termio, PTERMIO old_termio)
-#else
-int OpenTTY(new_termio, old_termio)
-  PTERMIO new_termio;
-  PTERMIO old_termio;
-#endif
 { /*OpenTTY*/
 
   int
@@ -1317,13 +1208,7 @@ int OpenTTY(new_termio, old_termio)
 
 } /*OpenTTY*/
 
-#ifdef __STDC__
 void CloseTTY(int fd, PTERMIO old_termio)
-#else
-void CloseTTY(fd, old_termio)
-  int fd;
-  PTERMIO old_termio;
-#endif
 { /*CloseTTY*/
 
   if (stdin_tty)
@@ -1334,12 +1219,7 @@ void CloseTTY(fd, old_termio)
 } /*CloseTTY*/
 #endif /*~VMS*/
 
-#ifdef __STDC__
 int DoMessageLoop(tVTConnection * conn)
-#else
-int DoMessageLoop(conn)
-  tVTConnection *conn;
-#endif
 { /*DoMessageLoop*/
   int
     whichError,
@@ -1585,14 +1465,7 @@ Last:
 
 } /*DoMessageLoop*/
 
-#ifdef __STDC__
 void vt3kDataOutProc(int32 refCon, char * buffer, int bufferLength)
-#else
-void vt3kDataOutProc(refCon, buffer, bufferLength)
-  int32 refCon;
-  char *buffer;
-  int bufferLength;
-#endif
 { /*vt3kDataOutProc*/
 
 #ifdef VMS
@@ -1630,13 +1503,7 @@ void vt3kDataOutProc(refCon, buffer, bufferLength)
 
 #  include "hpvt100.c"
 
-#ifdef __STDC__
 int main(int argc, char *argv[])
-#else
-int main(argc, argv)
-  int argc;
-  char *argv[];
-#endif
 { /*main*/
   long
     ipAddress;

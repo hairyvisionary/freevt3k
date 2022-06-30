@@ -2,12 +2,7 @@
  * @(#) timers.c: 94/04/12-07:17:58
  */
 
-#ifdef __STDC__
 int32 MyGettimeofday(void)
-#else
-int32 MyGettimeofday()
-#endif
-
 { /*MyGettimeofday*/
 
 
@@ -52,15 +47,7 @@ int32 MyGettimeofday()
 
 } /*MyGettimeofday*/
 
-#ifdef __STDC__
 int32 ElapsedTime(int32 start_time)
-#else
-int32 ElapsedTime(start_time)
-
-    int32
-    	start_time;
-#endif
-
 { /*ElapsedTime*/
 
     return(MyGettimeofday() - start_time);
@@ -68,12 +55,7 @@ int32 ElapsedTime(start_time)
 } /*ElapsedTime*/
 #ifdef INCLUDE_WALLTIME
 
-#ifdef __STDC__
 void WallTime(void)
-#else
-void WallTime()
-#endif
-
 { /*WallTime*/
 
     time_t
