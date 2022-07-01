@@ -606,7 +606,7 @@ static struct km
 {
   char *keyname;
   KeySym keysym;
-  void (*keyfunc) ();
+  void (*keyfunc) (void);
 }
 keymap[] =
 {
