@@ -306,7 +306,7 @@ void DisplayHex(void *buf, int buf_len, char *dump_id)
 } /*DisplayHex*/
 #endif /*DEBUG_TRANSLATE_TABLE*/
 
-void Logit (int typ, char *ptr, int len, int special_dc1)
+void Logit (int typ, char *ptr, int len, bool special_dc1)
 { /*Logit*/
 
 #ifdef XHPTERM
@@ -662,13 +662,13 @@ bool AltEol(tVTConnection *conn, char ch)
  * 961126: Don't check for alt eol if in unedited mode
  */
   if ((conn->fUneditedMode) || (conn->fBinaryMode))
-    return(FALSE);
+    return(false);
   if ((conn->fAltLineTerminationChar) &&
       (conn->fAltLineTerminationChar !=
        conn->fLineTerminationChar) &&
       (ch == conn->fAltLineTerminationChar))
-    return(TRUE);
-  return(FALSE);
+    return(true);
+  return(false);
 
 } /*AltEol*/
 
@@ -679,10 +679,10 @@ bool PrimEol(tVTConnection *conn, char ch)
  * 961126: Don't check for prim eol if in binary mode
  */
   if (conn->fBinaryMode)
-    return(FALSE);
+    return(false);
   if (ch == conn->fLineTerminationChar)
-    return(TRUE);
-  return(FALSE);
+    return(true);
+  return(false);
 
 } /*PrimEol*/
 
@@ -809,7 +809,7 @@ int ProcessQueueToHost(tVTConnection *conn, int len)
 	    send_index = kDTCCntlYIndex;
 #ifdef TRANSLATE_INPUT
 	  if ((translate) && (ch == '~') && (input_rec[0] == ASC_ESC))
-	    vt_fkey = TRUE;
+	    vt_fkey = true;
 	  else
 #endif
 	  if (conn->fDriverMode != kDTCBlockMode)
@@ -863,7 +863,7 @@ int ProcessQueueToHost(tVTConnection *conn, int len)
 		}
 
 	      if (log_type & LOG_INPUT)
-		Logit (LOG_INPUT, input_rec, input_rec_len, FALSE);
+		Logit (LOG_INPUT, input_rec, input_rec_len, false);
 		    
 	      break;
 	    }
@@ -1478,7 +1478,7 @@ void vt3kDataOutProc(int32 refCon, char * buffer, int bufferLength)
 #endif
 
   if (log_type & LOG_OUTPUT) 
-    Logit (LOG_OUTPUT, buffer, bufferLength, TRUE);
+    Logit (LOG_OUTPUT, buffer, bufferLength, true);
 
 #ifdef VMS
   io_status = sys$qiow(0,		/* event flag */

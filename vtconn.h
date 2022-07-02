@@ -57,8 +57,8 @@ typedef struct stVTConnection
     unsigned16		fLengthWord;		/* Length word being rec'd */
     int			fReceiveBufferOffset;	/* Where to put next block */
     int			fSendBufferOffset;	/* Where to put next in char */
-    bool		fReadInProgress;	/* TRUE when OK to read */
-    bool		fReadStarted;		/* TRUE when read initiated */
+    bool		fReadInProgress;	/* true when OK to read */
+    bool		fReadStarted;		/* true when read initiated */
     bool		fReadFlush;		/* Flush type-ahead? */
     unsigned16          fReadRequestCount;      /* From orignl read req */
     int			fReadBufferOffset;	/* Where to put next term char*/

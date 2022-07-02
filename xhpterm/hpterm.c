@@ -116,6 +116,7 @@ static char const rcsid[] = "$Id: hpterm.c,v 1.1 2003/03/14 16:28:44 randy Exp $
 
 #  include <string.h>
 #  include <stdlib.h>
+#  include <stdbool.h>
 #endif
 #include "hpterm.h"
 #include "conmgr.h"
@@ -3071,7 +3072,7 @@ void hpterm_rxfunc (void *ptr, char *buf, int nbuf)
   int ii;
 
   if (log_type & LOG_OUTPUT)	/* 970107 */
-    Logit (LOG_OUTPUT, buf, nbuf, TRUE);	/* 970107 */
+    Logit (LOG_OUTPUT, buf, nbuf, true);	/* 970107 */
 
   for (ii = 0; ii < nbuf; ii++)
   {

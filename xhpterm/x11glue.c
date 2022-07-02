@@ -41,6 +41,7 @@ static char const rcsid[] = "$Id: x11glue.c,v 1.1 2003/03/14 16:28:44 randy Exp 
 #else
 #include "config.h"
 #include <stdlib.h>
+#include <stdbool.h>
 #include <ctype.h>
 #ifdef __hpux
 #ifndef _HPUX_SOURCE
@@ -134,7 +135,7 @@ void getGC(Window win, GC * gc, XFontStruct * font_info);
 void getGC_Inverse(Window win, GC * gc, XFontStruct * font_info);
 void getGC_Halfbright(Window win, GC * gc, XFontStruct * font_info);
 void getGC_Red(Window win, GC * gc, XFontStruct * font_info);
-void Logit(int typ, char *ptr, int len, int special_dc1);
+void Logit(int typ, char *ptr, int len, bool special_dc1);
 int LoadKeybdTable(char *file_name, int i_type);
 /*******************************************************************/
 #define GRAY_INDEX 0
