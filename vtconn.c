@@ -261,8 +261,8 @@ PRIVATE int ProcessAMNegotiationRequest(tVTConnection * conn)
     if (amreq->fBreakOffset)
         {
 	breakInfo = (tVTMAMBreakInfo*)((unsigned16*)amreq + amreq->fBreakOffset/sizeof(unsigned16));
-        conn->fSysBreakEnabled = breakInfo->fSysBreakEnabled;
-        conn->fSubsysBreakEnabled = breakInfo->fSubsysBreakEnabled;
+        conn->fSysBreakEnabled = (breakInfo->fSysBreakEnabled) ? true : false;
+        conn->fSubsysBreakEnabled = (breakInfo->fSubsysBreakEnabled) ? true : false;
         conn->fSysBreakChar = ntohs(breakInfo->fSysBreakChar);
         conn->fSubsysBreakChar = ntohs(breakInfo->fSubsysBreakChar);
         }
@@ -513,14 +513,14 @@ PRIVATE int ProcessReadRequest(tVTConnection * conn)
     /* Set up for a read. Just save the parameters. */
 
     conn->fReadTimeout = ntohs(readreq->fTimeout);
-    conn->fReadInProgress = TRUE;
-    conn->fReadStarted = TRUE;	/* RM 960403 */
+    conn->fReadInProgress = true;
+    conn->fReadStarted = true;	/* RM 960403 */
     if (readFlags & kVTIORFlushTypeAhead)
-	conn->fReadFlush = TRUE;	/* RM 960403 */
+	conn->fReadFlush = true;	/* RM 960403 */
     conn->fReadLength = readDataLength;
     conn->fReadRequestCount = readreq->fRequestCount;
-    conn->fEchoCRLFOnCR = TRUE;
-    if (readFlags & kVTIORNoCRLF) conn->fEchoCRLFOnCR = FALSE;
+    conn->fEchoCRLFOnCR = true;
+    if (readFlags & kVTIORNoCRLF) conn->fEchoCRLFOnCR = false;
 
     return returnValue;
 } /*ProcessReadRequest*/
@@ -710,7 +710,7 @@ PRIVATE int ProcessDriverControlRequest(tVTConnection * conn)
     tVTMTerminalDriverControlResponse resp;
     unsigned16 requestMask = ntohs(req->fRequestMask);
     unsigned16 responseFlags = 0;
-    tBoolean	invalid_option = FALSE;
+    bool	invalid_option = false;
 
     /* For each bit set in the request mask, set the corresponding	*/
     /* driver option. I don't think that any option needs immediate	*/
@@ -733,18 +733,18 @@ PRIVATE int ProcessDriverControlRequest(tVTConnection * conn)
 	switch (req->fEditMode)
 	    {
 	case kDTCEditedMode:
-	    conn->fUneditedMode = FALSE;
+	    conn->fUneditedMode = false;
 	    conn->fLineTerminationChar = 015;	/* RM 960408 */
 	    break;
 	case kDTCUneditedMode:
-	    conn->fUneditedMode = TRUE;
+	    conn->fUneditedMode = true;
 	    conn->fLineTerminationChar = req->fLineTermCharacter;	/* RM 960408 */
 	    break;
 	case kDTCBinaryMode:
-	    conn->fBinaryMode   = TRUE;
+	    conn->fBinaryMode   = true;
 	    break;
 	case kDTCDisableBinary:
-	    conn->fBinaryMode   = FALSE;
+	    conn->fBinaryMode   = false;
 	    break;
 	default:  /* What to do? An error code? */ break;
 	    }
@@ -759,7 +759,7 @@ PRIVATE int ProcessDriverControlRequest(tVTConnection * conn)
  */
 	if ((req->fDriverMode != kDTCVanilla) && (!(conn->fBlockModeSupported)))
 	    {
-	    invalid_option = TRUE;
+	    invalid_option = true;
 	    responseFlags |= kDTCRDriverModeFailed;
 	    }
 	else
@@ -787,7 +787,7 @@ PRIVATE int ProcessDriverControlRequest(tVTConnection * conn)
 
     if (requestMask & kTDCMEchoLine)
 	{
-	conn->fDisableLineDeleteEcho = ! req->fEchoLineDelete;
+	conn->fDisableLineDeleteEcho = (req->fEchoLineDelete == 0) ? true : false;
 	responseFlags |= kTDCMEchoLine;
 	}
 
@@ -1130,7 +1130,7 @@ int VTInitConnection(tVTConnection * conn, long ipAddress, int ipPort)
     conn->fDataOutProc = DefaultDataOutProc;
     conn->fState = kvtsClosed;
     conn->fDriverMode = kDTCVanilla;
-    conn->fBlockModeSupported = FALSE;	/* RM 960411 */
+    conn->fBlockModeSupported = false;	/* RM 960411 */
     returnValue = kVTCNoError;
 
 Last:

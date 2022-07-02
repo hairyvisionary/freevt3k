@@ -135,7 +135,7 @@ tVTConnection * open_vt3k_connection (char *hostname, int port)
     printf("Connection initialized.\n");
 
     if (term_type == 10) {
-	theConnection->fBlockModeSupported = TRUE;      /* RM 960411 */
+	theConnection->fBlockModeSupported = true;      /* RM 960411 */
     }
 
     theConnection->fDataOutProc = conmgr_rxfunc;
@@ -159,8 +159,8 @@ Last:
 int read_vt3k_data (tVTConnection * theConnection) {
 
     int whichError;
-    tBoolean vtOpen=0;
-    tBoolean done=0;
+    bool vtOpen=false;
+    bool done=false;
     char messageBuffer[128];
     static char trigger[] = { 17 };
     int eof=0;
@@ -170,12 +170,12 @@ int read_vt3k_data (tVTConnection * theConnection) {
     if (whichError == kVTCVTOpen)
 	{
 	/* Now the connection is _really_ open */
-	vtOpen=1;
+	vtOpen=true;
 	}
     else if (whichError != kVTCNoError) {
 	{
 	if (whichError == kVTCStartShutdown) {
-            done=TRUE;
+            done=true;
             eof=1;
 	} else
 	    {
@@ -183,7 +183,7 @@ int read_vt3k_data (tVTConnection * theConnection) {
 	    VTErrorMessage(theConnection, whichError,
 			  messageBuffer, sizeof(messageBuffer));
             printf ("%s\n", messageBuffer);
-	    done=TRUE;
+	    done=true;
 	    }
         }
     }
@@ -191,13 +191,13 @@ int read_vt3k_data (tVTConnection * theConnection) {
  *  Check for start of a new read
  */
     if (!done && theConnection->fReadStarted) {
-	theConnection->fReadStarted = FALSE;
+	theConnection->fReadStarted = false;
 /*
  *      Check for need to flush the type-ahead buffer
  */
 	if (theConnection->fReadFlush)  /* RM 960403 */
 	    {
-	    theConnection->fReadFlush = FALSE;
+	    theConnection->fReadFlush = false;
 	    FlushQ();
 	    }
 /*
@@ -233,7 +233,7 @@ int send_vt3k_data (tVTConnection * theConnection, char *buf, int nbuf) {
 /*********************************************************************/
 void send_vt3k_break (tVTConnection * theConnection) {
 
-    theConnection->fSysBreakEnabled = 1;   /* Should not be needed */
+    theConnection->fSysBreakEnabled = true;   /* Should not be needed */
     ProcessQueueToHost(theConnection, -2);
 }
 /*********************************************************************/

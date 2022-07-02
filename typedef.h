@@ -7,6 +7,20 @@
 #ifndef _TYPEDEF_H
 #define _TYPEDEF_H
 
+/* C99 standard integer types */
+#include <stdint.h>
+/* type int16_t */
+/* type uint16_t */
+/* type int32_t */
+/* type uint32_t */
+/* type uint8_t */
+
+/* C99 standard boolean type */
+#include <stdbool.h>
+/* type bool */
+/* value false */
+/* value true */
+
 typedef short int16;
 typedef unsigned short unsigned16;
 typedef long int32;

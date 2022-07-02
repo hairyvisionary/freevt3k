@@ -151,15 +151,15 @@ int
 int
 	stdin_fd = 0,
 	stdin_tty = 0;
-tBoolean
-	done = FALSE,
-	send_break = FALSE;
+bool
+	done = false,
+	send_break = false;
 int
 	debug = 0,
 	debug_need_crlf = 0;
-tBoolean
-	stop_at_eof = FALSE,
-	type_ahead = FALSE;
+bool
+	stop_at_eof = false,
+	type_ahead = false;
 #ifdef VMS
 unsigned int
 	readMask = 0,
@@ -234,16 +234,16 @@ int
 	log_type = 0;
 
 /* Miscellaneous stuff */
-tBoolean
-	generic = FALSE,
-	vt100 = FALSE,
-	vt52 = FALSE,
-	eight_none = FALSE,
-	translate = FALSE;
+bool
+	generic = false,
+	vt100 = false,
+	vt52 = false,
+	eight_none = false,
+	translate = false;
 int
 	term_type = 10;
-tBoolean
-	disable_xon_xoff = FALSE;
+bool
+	disable_xon_xoff = false;
 int32
 	first_break_time = 0;
 
@@ -529,7 +529,7 @@ void ProcessInterrupt(void)
 	*ans = (char)toupper(*ans);
       if (*ans == 'E')
 	{
-	  done = TRUE;
+	  done = false;
 	  printf("\r\nTerminating\r\n");
 	  break;
 	}
@@ -655,7 +655,7 @@ int PutImmediateQ(char ch)
 
 } /*PutImmediateQ*/
 
-tBoolean AltEol(tVTConnection *conn, char ch)
+bool AltEol(tVTConnection *conn, char ch)
 { /*AltEol*/
 
 /*
@@ -672,7 +672,7 @@ tBoolean AltEol(tVTConnection *conn, char ch)
 
 } /*AltEol*/
 
-tBoolean PrimEol(tVTConnection *conn, char ch)
+bool PrimEol(tVTConnection *conn, char ch)
 { /*PrimEol*/
 
 /*
@@ -698,10 +698,10 @@ int ProcessQueueToHost(tVTConnection *conn, int len)
     lf = '\n';
   char
     ch;
-  tBoolean
-    vt_fkey = FALSE,
-    alt = FALSE,
-    prim = FALSE;
+  bool
+    vt_fkey = false,
+    alt = false,
+    prim = false;
   int
     int_ch = 0,
     whichError = 0,
@@ -725,7 +725,7 @@ int ProcessQueueToHost(tVTConnection *conn, int len)
 	  if ((int_ch = GetQ()) == -1)
 	    {
 	      if (stop_at_eof)
-		done = TRUE;
+		done = true;
 	      return(0);	/* Ran out of characters */
 	    }
 	  ch = (char)int_ch;
@@ -823,7 +823,7 @@ int ProcessQueueToHost(tVTConnection *conn, int len)
 			"ch=%02x, alt=%d, prim=%d, mode=%d, UneditedMode=%d, LTC=%02x, ALTC=%02x\n",
 			ch, alt, prim,
 			conn->fDriverMode,
-			conn->fUneditedMode,
+			(int) conn->fUneditedMode,
 			conn->fLineTerminationChar,
 			conn->fAltLineTerminationChar);
 		debug_need_crlf = 0;
@@ -895,7 +895,7 @@ int ProcessQueueToHost(tVTConnection *conn, int len)
       return(-1);
     }
 
-  conn->fReadInProgress = FALSE;
+  conn->fReadInProgress = false;
   input_rec_len = 0;
   return(0);
 
@@ -932,10 +932,10 @@ int ProcessSocket(tVTConnection * conn)
     }
   if (conn->fReadStarted)
     {
-      conn->fReadStarted = FALSE;
+      conn->fReadStarted = false;
       if (conn->fReadFlush)	/* RM 960403 */
 	{
-	  conn->fReadFlush = FALSE;
+	  conn->fReadFlush = false;
 	  FlushQ();
 	}
       if (term_type == 10)
@@ -976,7 +976,7 @@ int ProcessTTY(tVTConnection * conn, char *buf, int len)
 #  ifndef BREAK_VIA_SIG
       if (*buf == (conn->fSysBreakChar & 0xFF))
 	{ /* Break */
-	  send_break = TRUE;
+	  send_break = true;
 /* Check for consecutive breaks - 'break_max'-in-a-row to get out */
 	  if (debug > 1)
 	    DEBUG_PRINT_CH(*buf);
@@ -993,7 +993,7 @@ int ProcessTTY(tVTConnection * conn, char *buf, int len)
 	    {
 	      if (conn->fSysBreakEnabled)
 		ProcessQueueToHost(conn, -2);
-	      send_break = FALSE;
+	      send_break = false;
 	    }
 	}
       else
@@ -1059,7 +1059,7 @@ int ProcessTTY(tVTConnection * conn, char *buf, int len)
 	  if (((break_char != -1) && (*buf == (char)break_char)) ||
 	      ((break_char == -1) && (*buf == (conn->fSysBreakChar & 0xFF))))
 	    { /* Break */
-	      send_break = TRUE;
+	      send_break = true;
 /* Check for consecutive breaks - 'break_max'-in-a-row to get out */
 	      if (debug > 1)
 		{
@@ -1081,7 +1081,7 @@ int ProcessTTY(tVTConnection * conn, char *buf, int len)
 		{
 		  if (conn->fSysBreakEnabled)
 		    ProcessQueueToHost(conn, -2);
-		  send_break = FALSE;
+		  send_break = false;
 		}
 	      readCount = 0;
 	      continue;
@@ -1233,8 +1233,8 @@ int DoMessageLoop(tVTConnection * conn)
     readfds;
   TERMIO
     new_termios;
-  tBoolean
-    oldTermiosValid = FALSE;
+  bool
+    oldTermiosValid = false;
   int
     nfds = 0;
   char
@@ -1250,8 +1250,8 @@ int DoMessageLoop(tVTConnection * conn)
     start_time = 0,
     read_timer = 0,
     time_remaining = 0;
-  tBoolean
-    timed_read = FALSE;
+  bool
+    timed_read = false;
   char
     messageBuffer[128];
   int
@@ -1267,7 +1267,7 @@ int DoMessageLoop(tVTConnection * conn)
       returnValue = 1;
       goto Last;
     }
-  oldTermiosValid = TRUE;    /* We can clean up now. */
+  oldTermiosValid = true;    /* We can clean up now. */
 #endif
 
 /*
@@ -1303,7 +1303,7 @@ int DoMessageLoop(tVTConnection * conn)
 	{
 	  if (!timed_read)
 	    { /* First time timer was specified */
-	      timed_read = TRUE;
+	      timed_read = true;
 	      start_time = MyGettimeofday();
 	      read_timer = conn->fReadTimeout;
 	      time_remaining = read_timer;
@@ -1317,7 +1317,7 @@ int DoMessageLoop(tVTConnection * conn)
 	}
       else
 	{
-	  timed_read = FALSE;
+	  timed_read = false;
 	  timeout = 0;
 	}
       StartTTYRead((unsigned char*)termBuffer,
@@ -1333,7 +1333,7 @@ int DoMessageLoop(tVTConnection * conn)
 	  switch (ProcessSocket(conn))
 	    {
 	    case -1:	returnValue = 1;	/* fall through */
-	    case 1:	done = TRUE;
+	    case 1:	done = true;
 	    }
 	}
       if ((!done) && (returnMask & termBit))
@@ -1349,7 +1349,7 @@ int DoMessageLoop(tVTConnection * conn)
 		  returnValue = 1;
 		  goto Last;
 		}
-	      timed_read = FALSE;
+	      timed_read = false;
 	      continue;
 	    }
 	  if (timed_read)
@@ -1376,7 +1376,7 @@ int DoMessageLoop(tVTConnection * conn)
 	{
 	  if (!timed_read)
 	    { /* First time timer was specified */
-	      timed_read = TRUE;
+	      timed_read = true;
 	      start_time = MyGettimeofday();
 	      read_timer = conn->fReadTimeout * 1000;
 	      time_remaining = read_timer;
@@ -1393,7 +1393,7 @@ int DoMessageLoop(tVTConnection * conn)
 	}
       else
 	{
-	  timed_read = FALSE;
+	  timed_read = false;
 	  time_ptr = (struct timeval*)NULL;
 	}
 
@@ -1406,7 +1406,7 @@ int DoMessageLoop(tVTConnection * conn)
 	      if (send_break)
 		{
 		  ProcessQueueToHost(conn, -2);
-		  send_break = FALSE;
+		  send_break = false;
 		}
 #  endif
 	      errno = 0;
@@ -1421,7 +1421,7 @@ int DoMessageLoop(tVTConnection * conn)
 	      returnValue = 1;
 	      goto Last;
 	    }
-	  timed_read = FALSE;
+	  timed_read = false;
 	  continue;
 	default:
 	  if (timed_read)
@@ -1431,7 +1431,7 @@ int DoMessageLoop(tVTConnection * conn)
 	      switch (ProcessSocket(conn))
 		{
 		case -1: returnValue = 1;	/* fall through */
-		case 1:  done = TRUE;
+		case 1:  done = true;
 		}
 	    }
 	  if ((!done) && (FD_ISSET(stdin_fd, &readfds)))
@@ -1513,8 +1513,8 @@ int main(int argc, char *argv[])
     *theHost;
   tVTConnection
     *conn;
-  tBoolean
-    parm_error = FALSE;
+  bool
+    parm_error = false;
   int
     vtError,
     returnValue = 0;
@@ -1538,7 +1538,7 @@ int main(int argc, char *argv[])
     }
 
 #ifdef VMS
-  eight_none = TRUE;
+  eight_none = true;
 #endif
   ++argv;
   --argc;
@@ -1556,46 +1556,46 @@ int main(int argc, char *argv[])
 	    }
 	}
       else if (!strcmp(*argv, "-t"))
-	type_ahead = TRUE;
+	type_ahead = true;
       else if ((!strcmp(*argv, "-a")) ||
 	       (!strcmp(*argv, "-I")))
 	{
-	  stop_at_eof = (tBoolean)(!strcmp(*argv, "-I"));
+	  stop_at_eof = (!strcmp(*argv, "-I")) ? true : false;
 	  if (--argc)
 	    {
 	      ++argv;
 	      if (*argv[0] == '-')
-		parm_error = TRUE;
+		parm_error = true;
 	      else
 		input_file = *argv;
 	    }
 	  else
-	    parm_error = TRUE;
+	    parm_error = true;
 	}
       else if (!strcmp(*argv, "-8"))
-	eight_none = TRUE;
+	eight_none = true;
       else if (!strcmp(*argv, "-7"))
-	eight_none = FALSE;
+	eight_none = false;
       else if (!strcmp(*argv, "-generic"))
-	translate = generic = TRUE;
+	translate = generic = true;
       else if (!strcmp(*argv, "-vt100"))
-	translate = vt100 = TRUE;
+	translate = vt100 = true;
       else if (!strcmp(*argv, "-vt52"))
-	translate = vt52 = TRUE;
+	translate = vt52 = true;
       else if (!strcmp(*argv, "-x"))
-	disable_xon_xoff = TRUE;
+	disable_xon_xoff = true;
       else if (!strcmp(*argv, "-f"))
 	{
 	  if (--argc)
 	    {
 	      ++argv;
 	      if (*argv[0] == '-')
-		parm_error = TRUE;
+		parm_error = true;
 	      else
 		log_file = *argv;
 	    }
 	  else
-	    parm_error = TRUE;
+	    parm_error = true;
 	}
       else if ((strcmp(*argv, "-X") == 0) ||
 	       (strcmp(*argv, "-otable") == 0) ||
@@ -1609,7 +1609,7 @@ int main(int argc, char *argv[])
 	    {
 	      ++argv;
 	      if (*argv[0] == '-')
-		parm_error = TRUE;
+		parm_error = true;
 	      else
 		{
 		  file_name = *argv;
@@ -1618,7 +1618,7 @@ int main(int argc, char *argv[])
 		}
 	    }
 	  else
-	    parm_error = TRUE;
+	    parm_error = true;
 	}
       else if (!strcmp(*argv, "-p"))
 	{
@@ -1626,12 +1626,12 @@ int main(int argc, char *argv[])
 	    {
 	      ++argv;
 	      if (*argv[0] == '-')
-		parm_error = TRUE;
+		parm_error = true;
 	      else
 		ipPort = atoi(*argv);
 	    }
 	  else
-	    parm_error = TRUE;
+	    parm_error = true;
 	}
       else if (!strcmp(*argv, "-tt"))
 	{
@@ -1639,12 +1639,12 @@ int main(int argc, char *argv[])
 	    {
 	      ++argv;
 	      if (*argv[0] == '-')
-		parm_error = TRUE;
+		parm_error = true;
 	      else
 		term_type = atoi(*argv);
 	    }
 	  else
-	    parm_error = TRUE;
+	    parm_error = true;
 	}
       else if (!strncmp(*argv, "-l", 2))
 	{
@@ -1660,7 +1660,7 @@ int main(int argc, char *argv[])
 		log_type |= LOG_PREFIX;
 	      else
 		{
-		  parm_error = TRUE;
+		  parm_error = true;
 		  break;
 		}
 	      ++ptr;
@@ -1673,12 +1673,12 @@ int main(int argc, char *argv[])
 	    {
 	      ++argv;
 	      if (*argv[0] == '-')
-		parm_error = TRUE;
+		parm_error = true;
 	      else
 		break_max = atoi(*argv);
 	    }
 	  else
-	    parm_error = TRUE;
+	    parm_error = true;
 	}
       else if ((!strcmp(*argv, "-T")) ||
 	       (!strcmp(*argv, "-breaktimer")))
@@ -1687,12 +1687,12 @@ int main(int argc, char *argv[])
 	    {
 	      ++argv;
 	      if (*argv[0] == '-')
-		parm_error = TRUE;
+		parm_error = true;
 	      else
 		break_timer = atoi(*argv);
 	    }
 	  else
-	    parm_error = TRUE;
+	    parm_error = true;
 	}
       else if ((!strcmp(*argv, "-C")) ||
 	       (!strcmp(*argv, "-breakchar")))
@@ -1701,7 +1701,7 @@ int main(int argc, char *argv[])
 	    {
 	      ++argv;
 	      if (*argv[0] == '-')
-		parm_error = TRUE;
+		parm_error = true;
 	      else
 		{
 		  break_char = atoi(*argv) & 0x00FF;
@@ -1710,10 +1710,10 @@ int main(int argc, char *argv[])
 		}
 	    }
 	  else
-	    parm_error = TRUE;
+	    parm_error = true;
 	}
       else
-	parm_error = TRUE;
+	parm_error = true;
       if (parm_error)
 	{
 	  PrintUsage(0);
@@ -1802,7 +1802,7 @@ int main(int argc, char *argv[])
     }
 
   if (term_type == 10)
-    conn->fBlockModeSupported = TRUE;	/* RM 960411 */
+      conn->fBlockModeSupported = true;	/* RM 960411 */
   
   conn->fDataOutProc =
     ((vt100) ? vt3kHPtoVT100 :

@@ -57,9 +57,9 @@ typedef struct stVTConnection
     unsigned16		fLengthWord;		/* Length word being rec'd */
     int			fReceiveBufferOffset;	/* Where to put next block */
     int			fSendBufferOffset;	/* Where to put next in char */
-    tBoolean		fReadInProgress;	/* TRUE when OK to read */
-    tBoolean		fReadStarted;		/* TRUE when read initiated */
-    tBoolean		fReadFlush;		/* Flush type-ahead? */
+    bool		fReadInProgress;	/* TRUE when OK to read */
+    bool		fReadStarted;		/* TRUE when read initiated */
+    bool		fReadFlush;		/* Flush type-ahead? */
     unsigned16          fReadRequestCount;      /* From orignl read req */
     int			fReadBufferOffset;	/* Where to put next term char*/
     int			fReadLength;		/* Length of current read */
@@ -70,7 +70,7 @@ typedef struct stVTConnection
     char		fEcho;			/* What is this? */
     char		fLineDeleteChar;	/* Usu. ^X */
     char		fCharDeleteChar;	/* Usu. ^H, mapped to 0x7f */
-    tBoolean		fDisableLineDeleteEcho; /* The FSETMODE, I think   */
+    bool		fDisableLineDeleteEcho; /* The FSETMODE, I think   */
     int			fLineDeleteEchoLength;	/* Len. of line del string */
     char		fLineDeleteEcho[kMaxLineDeleteEcho + 1];
     int			fCharDeleteEcho;	/* What to echo on char del */
@@ -96,25 +96,25 @@ typedef struct stVTConnection
 
     int			fSysBreakChar;		/* -1 for none */
     int			fSubsysBreakChar;	/* -1 for none */
-    tBoolean		fSysBreakEnabled;
-    tBoolean		fSubsysBreakEnabled;
+    bool		fSysBreakEnabled;
+    bool		fSubsysBreakEnabled;
     char		fNoBreakRead;		/* What is this? */
 
     /* Per normal HP 3000 conventions. */
 
-    tBoolean		fUneditedMode;
-    tBoolean		fBinaryMode;
+    bool		fUneditedMode;
+    bool		fBinaryMode;
 
     /* Flags that get set on prompts and reads. */
 
-    tBoolean		fEchoCRLFOnCR;  	/* For the current read */
+    bool		fEchoCRLFOnCR;  	/* For the current read */
     int			fPromptLength;		/* For current read.	*/
 
     /* Misc flags */
 
     char		fTermType;		/* Terminal type	*/
     char		fTypeAhead;		/* Typeahead enabled	*/
-    tBoolean		fBlockModeSupported;	/* Ok for block mode forms ? */
+    bool		fBlockModeSupported;	/* Ok for block mode forms ? */
 
     /* The data-out proc. The default just dumps stuff onto the terminal */
 
