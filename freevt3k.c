@@ -1465,7 +1465,7 @@ Last:
 
 } /*DoMessageLoop*/
 
-void vt3kDataOutProc(int32 refCon, char * buffer, int bufferLength)
+void vt3kDataOutProc(int32 refCon, char * buffer, size_t bufferLength)
 { /*vt3kDataOutProc*/
 
 #ifdef VMS

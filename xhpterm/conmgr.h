@@ -21,4 +21,4 @@ void conmgr_read (struct conmgr *con);
 void conmgr_send (struct conmgr *con, char *buf, int nbuf);
 void conmgr_send_break (struct conmgr *con);
 void conmgr_close (struct conmgr *con);
-void conmgr_rxfunc (long refcon, char *buf, int nbuf);
+void conmgr_rxfunc (long refcon, char *buf, size_t nbuf);

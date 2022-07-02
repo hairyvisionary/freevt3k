@@ -3064,7 +3064,7 @@ void check_transfers_pending (void)
   term_flush_tx (term);
 }
 /***************************************************************/
-void hpterm_rxfunc (void *ptr, char *buf, int nbuf)
+void hpterm_rxfunc (void *ptr, char *buf, size_t nbuf)
 {
 /*
    **  Process block of characters received from remote computer

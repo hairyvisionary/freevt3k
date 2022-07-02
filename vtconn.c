@@ -97,7 +97,7 @@ int
 #include "dumpbuf.c"
 
 
-PRIVATE void DefaultDataOutProc(int32 refCon, char * buffer, int bufferLength)
+PRIVATE void DefaultDataOutProc(int32 refCon, char * buffer, size_t bufferLength)
 { /*DefaultDataOutProc*/
     write(STDOUT_FILENO, buffer, bufferLength);
 } /*DefaultDataOutProc*/
@@ -430,7 +430,7 @@ PRIVATE int ProcessWriteRequest(tVTConnection * conn)
     tVTMTerminalIOResponse  * writeresp = (tVTMTerminalIOResponse * ) conn->fSendBuffer;
     char * writeData = writereq->fWriteData;
     unsigned16 writeFlags = ntohs(writereq->fWriteFlags);
-    int16_t writeDataLength = ntohs(writereq->fWriteByteCount);
+    uint16_t writeDataLength = ntohs(writereq->fWriteByteCount);
     extern unsigned char out_table[];
     extern int table_spec;
     
@@ -464,7 +464,7 @@ PRIVATE int ProcessWriteRequest(tVTConnection * conn)
 	      }
 	    }
 	if (writeFlags & kVTIOWUseCCTL)
-	    conn->fDataOutProc(conn->fDataOutRefCon, writeData + 1, writeDataLength - 1);
+	    conn->fDataOutProc(conn->fDataOutRefCon, writeData + 1, (writeDataLength - 1));
 	else
 	    conn->fDataOutProc(conn->fDataOutRefCon, writeData, writeDataLength);
 	}
@@ -508,7 +508,7 @@ PRIVATE int ProcessReadRequest(tVTConnection * conn)
     int returnValue = kVTCNoError;
     tVTMIORequest * readreq = (tVTMIORequest *) conn->fReceiveBuffer;
     unsigned16 readFlags = ntohs(readreq->fReadFlags);
-    int16_t readDataLength = ntohs(readreq->fReadByteCount);
+    uint16_t readDataLength = ntohs(readreq->fReadByteCount);
 
     /* Set up for a read. Just save the parameters. */
 

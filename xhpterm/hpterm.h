@@ -238,7 +238,7 @@ void hpterm_winsize (int nbrows, int nbcols);
 void hpterm_mouse_click (int row, int col);
 void term_update (void);
 void term_redraw (void);
-void hpterm_rxfunc (void *, char *, int);
+void hpterm_rxfunc (void *, char *, size_t);
 void hpterm_kbd_ascii (char);
 void hpterm_kbd_Reset (void);
 void hpterm_kbd_Break (void);
