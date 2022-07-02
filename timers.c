@@ -2,7 +2,7 @@
  * @(#) timers.c: 94/04/12-07:17:58
  */
 
-int32 MyGettimeofday(void)
+int32_t MyGettimeofday(void)
 { /*MyGettimeofday*/
 
 
@@ -43,11 +43,11 @@ int32 MyGettimeofday(void)
 	}
     else
 	sec = sec - baseSec;
-    return((int32)((sec*1000)+ms));
+    return((int32_t)((sec*1000)+ms));
 
 } /*MyGettimeofday*/
 
-int32 ElapsedTime(int32 start_time)
+int32_t ElapsedTime(int32_t start_time)
 { /*ElapsedTime*/
 
     return(MyGettimeofday() - start_time);

@@ -97,7 +97,7 @@ int
 #include "dumpbuf.c"
 
 
-PRIVATE void DefaultDataOutProc(int32 refCon, char * buffer, size_t bufferLength)
+PRIVATE void DefaultDataOutProc(int32_t refCon, char * buffer, size_t bufferLength)
 { /*DefaultDataOutProc*/
     write(STDOUT_FILENO, buffer, bufferLength);
 } /*DefaultDataOutProc*/

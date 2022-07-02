@@ -244,7 +244,7 @@ int
 	term_type = 10;
 bool
 	disable_xon_xoff = false;
-int32
+int32_t
 	first_break_time = 0;
 
 #include "timers.c"
@@ -1240,13 +1240,13 @@ int DoMessageLoop(tVTConnection * conn)
   char
     termBuffer[2];
 #else
-  int32
+  int32_t
     timeout = 0;
   char
     termBuffer[2048];
 #endif
   /*  tBoolean    vtOpen; */
-  int32
+  int32_t
     start_time = 0,
     read_timer = 0,
     time_remaining = 0;
@@ -1465,7 +1465,7 @@ Last:
 
 } /*DoMessageLoop*/
 
-void vt3kDataOutProc(int32 refCon, char * buffer, size_t bufferLength)
+void vt3kDataOutProc(int32_t refCon, char * buffer, size_t bufferLength)
 { /*vt3kDataOutProc*/
 
 #ifdef VMS

@@ -368,7 +368,7 @@ static char VT100LineDraw(char ch)
 
 } /*VT100LineDraw*/
 
-void vt3kHPtoVT100(int32 refCon, char *buf, size_t buf_len)
+void vt3kHPtoVT100(int32_t refCon, char *buf, size_t buf_len)
 { /*vt3kHPtoVT100*/
 
 #define	ASC_SO			(0x0E)
@@ -754,7 +754,7 @@ void vt3kHPtoVT100(int32 refCon, char *buf, size_t buf_len)
 
 } /*vt3kHPtoVT100*/
 
-void vt3kHPtoGeneric(int32 refCon, char *buf, size_t buf_len)
+void vt3kHPtoGeneric(int32_t refCon, char *buf, size_t buf_len)
 { /*vt3kHPtoGeneric*/
 
 #define	ASC_SO			(0x0E)
@@ -1075,7 +1075,7 @@ void vt3kHPtoGeneric(int32 refCon, char *buf, size_t buf_len)
 
 } /*vt3kHPtoGeneric*/
 
-void vt3kHPtoVT52(int32 refCon, char *buf, size_t buf_len)
+void vt3kHPtoVT52(int32_t refCon, char *buf, size_t buf_len)
 { /*vt3kHPtoVT52*/
 
 #define	ASC_SO			(0x0E)

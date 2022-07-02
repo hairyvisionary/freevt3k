@@ -1,2 +1,2 @@
-int32 MyGettimeofday(void);
+int32_t MyGettimeofday(void);
 void  WallTime(void);

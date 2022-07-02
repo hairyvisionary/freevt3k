@@ -29,7 +29,7 @@
 
 #define kMaxLineDeleteEcho	23		/* Long enough, no? */
 
-typedef void tVTDataOutProc(int32 refCon, char * outBuffer, size_t bufferLength);
+typedef void tVTDataOutProc(int32_t refCon, char * outBuffer, size_t bufferLength);
 typedef tVTDataOutProc * tVTDataOutProcPtr;
 
 typedef enum etVTState
@@ -119,7 +119,7 @@ typedef struct stVTConnection
     /* The data-out proc. The default just dumps stuff onto the terminal */
 
     tVTDataOutProcPtr	fDataOutProc;
-    int32		fDataOutRefCon;
+    int32_t		fDataOutRefCon;
 } tVTConnection;
 
 /* Error codes returned from VT routines */

@@ -47,7 +47,7 @@
 #define SHOW_RX_DATA 0
 #define SHOW_TX_DATA 0
 /*******************************************************************/
-void conmgr_rxfunc (long refcon, char *buf, size_t nbuf) {
+void conmgr_rxfunc (int32_t refcon, char *buf, size_t nbuf) {
 /*
 **  Callback function which receives characters from the connection
 */
