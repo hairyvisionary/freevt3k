@@ -551,7 +551,7 @@ typedef struct stVTMFDCCntlReq
 {
     VT_MESSAGE_HEADER;
     unsigned16		fRequestCount;
-    unsigned32		fFDCFunc;
+    uint32_t		fFDCFunc;
     unsigned16		fFDCLength;
     unsigned16		fFDCExtra;
     char		fFDCBuffer[26];
@@ -561,7 +561,7 @@ typedef struct stVTMFDCCntlResp
 {
     VT_MESSAGE_HEADER;
     unsigned16		fRequestCount;
-    unsigned32		fFDCFunc;
+    uint32_t		fFDCFunc;
     unsigned16		fFDCLength;
     unsigned16		fFDCErrorCode;
     char		fFDCBuffer[26];
