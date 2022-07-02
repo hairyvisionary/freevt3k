@@ -430,7 +430,7 @@ PRIVATE int ProcessWriteRequest(tVTConnection * conn)
     tVTMTerminalIOResponse  * writeresp = (tVTMTerminalIOResponse * ) conn->fSendBuffer;
     char * writeData = writereq->fWriteData;
     unsigned16 writeFlags = ntohs(writereq->fWriteFlags);
-    int16      writeDataLength = ntohs(writereq->fWriteByteCount);
+    int16_t writeDataLength = ntohs(writereq->fWriteByteCount);
     extern unsigned char out_table[];
     extern int table_spec;
     
@@ -508,7 +508,7 @@ PRIVATE int ProcessReadRequest(tVTConnection * conn)
     int returnValue = kVTCNoError;
     tVTMIORequest * readreq = (tVTMIORequest *) conn->fReceiveBuffer;
     unsigned16 readFlags = ntohs(readreq->fReadFlags);
-    int16      readDataLength = ntohs(readreq->fReadByteCount);
+    int16_t readDataLength = ntohs(readreq->fReadByteCount);
 
     /* Set up for a read. Just save the parameters. */
 
