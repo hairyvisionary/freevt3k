@@ -77,7 +77,7 @@
 
 #include "hpterm.h"
 
-void myDataOutProc (int32 refCon, char *buf, int nbuf);
+void myDataOutProc (int32_t refCon, char *buf, int nbuf);
 tVTConnection * open_vt3k_connection (char *hostname, int port);
 int read_vt3k_data (tVTConnection * theConnection);
 int send_vt3k_data (tVTConnection * theConnection, char *buf, int nbuf);
