@@ -85,7 +85,7 @@ typedef enum etVTMessageType
 /* Define the standard message header */
 
 #define VT_MESSAGE_HEADER \
-		unsigned16	fMessageLength; \
+		uint16_t	fMessageLength; \
 		uint8_t		fProtocolID; \
 		uint8_t 	fMessageType; \
 		uint8_t		fUnused; \
@@ -112,38 +112,38 @@ typedef struct stVTMHeader
 typedef struct stVTMAMNegotiationRequest
 {
     VT_MESSAGE_HEADER;
-    unsigned16		fRequestCount;
+    uint16_t		fRequestCount;
     char		fVersionMask[4];
-    unsigned16		fBufferSize;
-    unsigned16		fOperatingSystem;	/* A code; see below	*/
+    uint16_t		fBufferSize;
+    uint16_t		fOperatingSystem;	/* A code; see below	*/
     uint8_t		fEcho;
     uint8_t		fEchoControl;
     uint8_t		fCharacterDelete;
     uint8_t		fCharacterDeleteEcho;
     uint8_t		fLineDeleteCharacter;
     uint8_t		fNoBreakRead;
-    unsigned16		fTypeAheadSize;
+    uint16_t		fTypeAheadSize;
     uint8_t		fTypeAheadLines;
     uint8_t		fParity;
-    unsigned16		fBreakOffset;
-    unsigned16		fBreakIndexCount;
-    unsigned16		fLogonIDOffset;
-    unsigned16		fLogonIDLength;
-    unsigned16		fDeviceIDOffset;
-    unsigned16		fDeviceIDLength;
-    unsigned16		fLineDeleteOffset;
-    unsigned16		fLineDeleteLength;
-    unsigned16		fAMMaxReceiveBurst;
-    unsigned16		fAMMaxSendBurst;
+    uint16_t		fBreakOffset;
+    uint16_t		fBreakIndexCount;
+    uint16_t		fLogonIDOffset;
+    uint16_t		fLogonIDLength;
+    uint16_t		fDeviceIDOffset;
+    uint16_t		fDeviceIDLength;
+    uint16_t		fLineDeleteOffset;
+    uint16_t		fLineDeleteLength;
+    uint16_t		fAMMaxReceiveBurst;
+    uint16_t		fAMMaxSendBurst;
     char		fVariable[1];		/* Variable-length	*/
 } tVTMAMNegotiationRequest;
 
 typedef struct stVTMAMBreakInfo
 {
-	unsigned16	fSysBreakEnabled;
-	unsigned16	fSubsysBreakEnabled;
-	unsigned16	fSysBreakChar;
-	unsigned16	fSubsysBreakChar;
+	uint16_t	fSysBreakEnabled;
+	uint16_t	fSubsysBreakEnabled;
+	uint16_t	fSysBreakChar;
+	uint16_t	fSubsysBreakChar;
 } tVTMAMBreakInfo;
 
 /* Character deletion echo values */
@@ -164,15 +164,15 @@ typedef struct stVTMAMBreakInfo
 typedef struct stVTMAMNegotiationReply
 {
     VT_MESSAGE_HEADER;
-    unsigned16		fRequestCount;
-    unsigned16		fResponseCode;
-    unsigned16		fCompletionMask;
+    uint16_t		fRequestCount;
+    uint16_t		fResponseCode;
+    uint16_t		fCompletionMask;
     char		fVersionMask[4];
-    unsigned16		fBufferSize;
-    unsigned16		fOperatingSystem;
-    unsigned16		fHardwareControlCompletionMask;
-    unsigned16		fTMMaxReceiveBurst;
-    unsigned16		fTMMaxSendBurst;
+    uint16_t		fBufferSize;
+    uint16_t		fOperatingSystem;
+    uint16_t		fHardwareControlCompletionMask;
+    uint16_t		fTMMaxReceiveBurst;
+    uint16_t		fTMMaxSendBurst;
 } tVTMAMNegotiationReply;
 
 #define kReturnOSType   0x0408		/* We are Lunix! :-) */
@@ -202,12 +202,12 @@ typedef struct stVTMAMNegotiationReply
 typedef struct stVTMTMNegotiationRequest
 {
     VT_MESSAGE_HEADER;
-    unsigned16		fRequestCount;
+    uint16_t		fRequestCount;
     uint8_t		fLinkType;
     uint8_t		fUnused2;
-    unsigned16		fTerminalClass;
+    uint16_t		fTerminalClass;
     char		fSessionID[6];
-    unsigned16		fNodeLength;
+    uint16_t		fNodeLength;
     char		fNodeName[51];
 } tVTMTMNegotiationRequest;
 
@@ -218,11 +218,11 @@ typedef struct stVTMTMNegotiationRequest
 typedef struct stVTMTMNegotiationReply
 {
     VT_MESSAGE_HEADER;
-    unsigned16		fRequestCount;
-    unsigned16		fResponseCode;
+    uint16_t		fRequestCount;
+    uint16_t		fResponseCode;
     uint8_t		fCommLinkAcceptReject;
     uint8_t		fUnused2;
-    unsigned16		fTerminalClass;
+    uint16_t		fTerminalClass;
 } tVTMTMNegotiationReply;
 
 #define kTMNRSuccessful		0x8000
@@ -234,17 +234,17 @@ typedef struct stVTMTMNegotiationReply
 typedef struct stVTMTerminationRequest
 {
     VT_MESSAGE_HEADER;
-    unsigned16		fRequestCount;
+    uint16_t		fRequestCount;
     uint8_t		fTerminationType;
     uint8_t		fUnused2;
-    unsigned16		fTerminationReason;
+    uint16_t		fTerminationReason;
 } tVTMTerminationRequest;
 
 typedef struct stVTMTerminationResponse
 {
     VT_MESSAGE_HEADER;
-    unsigned16		fRequestCount;
-    unsigned16		fResponseCode;
+    uint16_t		fRequestCount;
+    uint16_t		fResponseCode;
 } tVTMTerminationResponse;
 
 /* Termination type codes */
@@ -271,17 +271,17 @@ typedef struct stVTMTerminationResponse
 typedef struct stVTMLogonInfo
 {
     VT_MESSAGE_HEADER;
-    unsigned16		fRequestCount;
+    uint16_t		fRequestCount;
     char		fSessionID[6];
-    unsigned16		fLogonLength;
+    uint16_t		fLogonLength;
     char		fLogonString[1];  /* Extended by length */
 } tVTMLogonInfo;
 
 typedef struct stVTMLogonInfoResponse
 {
     VT_MESSAGE_HEADER;
-    unsigned16		fResponseCount;
-    unsigned16		fResponseMask;
+    uint16_t		fResponseCount;
+    uint16_t		fResponseMask;
 } tVTMLogonInfoResponse;
 
 /*=======================================================================
@@ -291,12 +291,12 @@ typedef struct stVTMLogonInfoResponse
 typedef struct stVTMIORequest
 {
     VT_MESSAGE_HEADER;
-    unsigned16		fRequestCount;
-    unsigned16		fReadFlags;
-    unsigned16		fReadByteCount;
-    unsigned16		fTimeout;
-    unsigned16		fWriteFlags;
-    unsigned16		fWriteByteCount;
+    uint16_t		fRequestCount;
+    uint16_t		fReadFlags;
+    uint16_t		fReadByteCount;
+    uint16_t		fTimeout;
+    uint16_t		fWriteFlags;
+    uint16_t		fWriteByteCount;
     char		fWriteData[1];	/* Extended by WriteByteCount */
 } tVTMIORequest;
 
@@ -328,10 +328,10 @@ typedef struct stVTMIORequest
 typedef struct stVTMTerminalIOResponse
 {
     VT_MESSAGE_HEADER;
-    unsigned16			fRequestCount;
-    unsigned16			fResponseCode;
-    unsigned16			fCompletionMask;
-    unsigned16			fBytesRead;
+    uint16_t			fRequestCount;
+    uint16_t			fResponseCode;
+    uint16_t			fCompletionMask;
+    uint16_t			fBytesRead;
     char 			fBytes[2];	/* Expands as necessary */
 } tVTMTerminalIOResponse;
 
@@ -359,15 +359,15 @@ typedef struct stVTMTerminalIOResponse
 typedef struct stVTMAbortIORequest
 {
     VT_MESSAGE_HEADER;
-    unsigned16		fRequestCount;
-    unsigned16		fRequestMask;
+    uint16_t		fRequestCount;
+    uint16_t		fRequestMask;
 } tVTMAbortIORequest;
 
 typedef struct stVTMAbortIOResponse
 {
     VT_MESSAGE_HEADER;
-    unsigned16		fRequestCount;
-    unsigned16		fResponseCode;
+    uint16_t		fRequestCount;
+    uint16_t		fResponseCode;
 } tVTMAbortIOResponse;
 
 /*=======================================================================
@@ -377,7 +377,7 @@ typedef struct stVTMAbortIOResponse
 typedef struct stVTMSetBreakRequest
 {
     VT_MESSAGE_HEADER;
-    unsigned16		fRequestCount;
+    uint16_t		fRequestCount;
     uint8_t		fIndex;
     uint8_t		fState;
 } tVTMSetBreakRequest;
@@ -385,8 +385,8 @@ typedef struct stVTMSetBreakRequest
 typedef struct stVTMSetBreakResponse
 {
     VT_MESSAGE_HEADER;
-    unsigned16		fRequestCount;
-    unsigned16          fResponseCode;
+    uint16_t		fRequestCount;
+    uint16_t		fResponseCode;
 } tVTMSetBreakResponse;
 
 /*=======================================================================
@@ -396,15 +396,15 @@ typedef struct stVTMSetBreakResponse
 typedef struct stVTMTerminalDriverControlRequest
 {
     VT_MESSAGE_HEADER;
-    unsigned16		fRequestCount;
-    unsigned16		fRequestMask;
+    uint16_t		fRequestCount;
+    uint16_t		fRequestMask;
     uint8_t		fEcho;
     uint8_t		fEditMode;
     uint8_t		fDriverMode;
     uint8_t		fDataStream;
     uint8_t		fLineTermCharacter;
     uint8_t		fEchoLineDelete;
-    unsigned16		fBaudRate;
+    uint16_t		fBaudRate;
     uint8_t		fParity;
     uint8_t		fParityChecking;
 } tVTMTerminalDriverControlRequest;
@@ -450,9 +450,9 @@ typedef struct stVTMTerminalDriverControlRequest
 typedef struct stVTMTerminalDriverControlResponse
 {
     VT_MESSAGE_HEADER;
-    unsigned16		fRequestCount;
-    unsigned16		fResponseCode;
-    unsigned16		fStatusMask;
+    uint16_t		fRequestCount;
+    uint16_t		fResponseCode;
+    uint16_t		fStatusMask;
 } tVTMTerminalDriverControlResponse;
 
 #define kDTCRSuccess		0x8000
@@ -473,15 +473,15 @@ typedef struct stVTMTerminalDriverControlResponse
 typedef struct stVTMInvokeBreakRequest
 {
     VT_MESSAGE_HEADER;
-    unsigned16		fRequestCount;
-    unsigned16		fIndex;
+    uint16_t		fRequestCount;
+    uint16_t		fIndex;
 } tVTMInvokeBreakRequest;
 
 typedef struct stVTMInvokeBreakResponse
 {
     VT_MESSAGE_HEADER;
-    unsigned16		fRequestCount;
-    unsigned16          fResponseCode;
+    uint16_t		fRequestCount;
+    uint16_t		fResponseCode;
 } tVTMInvokeBreakResponse;
 
 /*=======================================================================
@@ -491,8 +491,8 @@ typedef struct stVTMInvokeBreakResponse
 typedef struct stVTMMPECntlReq
 {
     VT_MESSAGE_HEADER;
-    unsigned16		fRequestCount;
-    unsigned16		fRequestMask;
+    uint16_t		fRequestCount;
+    uint16_t		fRequestMask;
     uint8_t		fTermType;
     uint8_t		fTypeAhead;
 } tVTMMPECntlReq;
@@ -506,9 +506,9 @@ typedef struct stVTMMPECntlReq
 typedef struct stVTMMPECntlResp
 {
     VT_MESSAGE_HEADER;
-    unsigned16		fRequestCount;
-    unsigned16		fResponseCode;
-    unsigned16		fCompletionMask;
+    uint16_t		fRequestCount;
+    uint16_t		fResponseCode;
+    uint16_t		fCompletionMask;
 } tVTMMPECntlResp;
 
 /* Completion mask */
@@ -520,18 +520,18 @@ typedef struct stVTMMPECntlResp
 typedef struct stVTMMPEGetInfoReq
 {
      VT_MESSAGE_HEADER;
-     unsigned16		fRequestCount;
-     unsigned16		fRequestMask;
+     uint16_t		fRequestCount;
+     uint16_t		fRequestMask;
 } tVTMMPEGetInfoReq;
 
 typedef struct stVTMMPEGetInfoResp
 {
      VT_MESSAGE_HEADER;
-     unsigned16		fRequestCount;
-     unsigned16		fCompletionMask;
-     unsigned16		fInfoByteCount;
-     unsigned16		fBlockModeType;
-     unsigned16		fTermType;
+     uint16_t		fRequestCount;
+     uint16_t		fCompletionMask;
+     uint16_t		fInfoByteCount;
+     uint16_t		fBlockModeType;
+     uint16_t		fTermType;
 } tVTMMPEGetInfoResp;
 
 #define kDTCBNoBlock		0
@@ -550,20 +550,20 @@ typedef struct stVTMMPEGetInfoResp
 typedef struct stVTMFDCCntlReq
 {
     VT_MESSAGE_HEADER;
-    unsigned16		fRequestCount;
+    uint16_t		fRequestCount;
     uint32_t		fFDCFunc;
-    unsigned16		fFDCLength;
-    unsigned16		fFDCExtra;
+    uint16_t		fFDCLength;
+    uint16_t		fFDCExtra;
     char		fFDCBuffer[26];
 } tVTMFDCCntlReq;
 
 typedef struct stVTMFDCCntlResp
 {
     VT_MESSAGE_HEADER;
-    unsigned16		fRequestCount;
+    uint16_t		fRequestCount;
     uint32_t		fFDCFunc;
-    unsigned16		fFDCLength;
-    unsigned16		fFDCErrorCode;
+    uint16_t		fFDCLength;
+    uint16_t		fFDCErrorCode;
     char		fFDCBuffer[26];
 } tVTMFDCCntlResp;
 
@@ -575,15 +575,15 @@ typedef struct stVTMFDCCntlResp
 typedef struct stVTMApplCntlReq
 {
     VT_MESSAGE_HEADER;
-    unsigned16		fRequestCount;
-    unsigned16		fApplIndex;
+    uint16_t		fRequestCount;
+    uint16_t		fApplIndex;
 } tVTMApplCntlReq;
 
 typedef struct stVTMApplCntlResp
 {
     VT_MESSAGE_HEADER;
-    unsigned16		fRequestCount;
-    unsigned16		fApplIndex;
+    uint16_t		fRequestCount;
+    uint16_t		fApplIndex;
 } tVTMApplCntlResp;
 
 #endif

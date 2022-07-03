@@ -260,7 +260,7 @@ PRIVATE int ProcessAMNegotiationRequest(tVTConnection * conn)
 
     if (amreq->fBreakOffset)
         {
-	breakInfo = (tVTMAMBreakInfo*)((unsigned16*)amreq + amreq->fBreakOffset/sizeof(unsigned16));
+	breakInfo = (tVTMAMBreakInfo*)((uint16_t*)amreq + amreq->fBreakOffset/sizeof(uint16_t));
         conn->fSysBreakEnabled = (breakInfo->fSysBreakEnabled) ? true : false;
         conn->fSubsysBreakEnabled = (breakInfo->fSubsysBreakEnabled) ? true : false;
         conn->fSysBreakChar = ntohs(breakInfo->fSysBreakChar);
@@ -429,7 +429,7 @@ PRIVATE int ProcessWriteRequest(tVTConnection * conn)
     tVTMIORequest * writereq = (tVTMIORequest *) conn->fReceiveBuffer;
     tVTMTerminalIOResponse  * writeresp = (tVTMTerminalIOResponse * ) conn->fSendBuffer;
     char * writeData = writereq->fWriteData;
-    unsigned16 writeFlags = ntohs(writereq->fWriteFlags);
+    uint16_t writeFlags = ntohs(writereq->fWriteFlags);
     uint16_t writeDataLength = ntohs(writereq->fWriteByteCount);
     extern unsigned char out_table[];
     extern int table_spec;
@@ -507,7 +507,7 @@ PRIVATE int ProcessReadRequest(tVTConnection * conn)
 { /*ProcessReadRequest*/
     int returnValue = kVTCNoError;
     tVTMIORequest * readreq = (tVTMIORequest *) conn->fReceiveBuffer;
-    unsigned16 readFlags = ntohs(readreq->fReadFlags);
+    uint16_t readFlags = ntohs(readreq->fReadFlags);
     uint16_t readDataLength = ntohs(readreq->fReadByteCount);
 
     /* Set up for a read. Just save the parameters. */
@@ -708,8 +708,8 @@ PRIVATE int ProcessDriverControlRequest(tVTConnection * conn)
     tVTMTerminalDriverControlRequest * req = 
 		(tVTMTerminalDriverControlRequest *) conn->fReceiveBuffer;
     tVTMTerminalDriverControlResponse resp;
-    unsigned16 requestMask = ntohs(req->fRequestMask);
-    unsigned16 responseFlags = 0;
+    uint16_t requestMask = ntohs(req->fRequestMask);
+    uint16_t responseFlags = 0;
     bool	invalid_option = false;
 
     /* For each bit set in the request mask, set the corresponding	*/
@@ -832,8 +832,8 @@ PRIVATE int ProcessMPEControlReq(tVTConnection * conn)
     int returnValue = kVTCNoError;
     tVTMMPECntlReq * req = (tVTMMPECntlReq *) conn->fReceiveBuffer;
     tVTMMPECntlResp mpeResp;
-    unsigned16 requestMask = ntohs(req->fRequestMask);
-    unsigned16 completionMask = kDTCCSuccessful;
+    uint16_t requestMask = ntohs(req->fRequestMask);
+    uint16_t completionMask = kDTCCSuccessful;
 
     if (requestMask & kDTCMSetTermType) conn->fTermType = req->fTermType;
     if (requestMask & kDTCMTypeAhead) conn->fTypeAhead = req->fTypeAhead;

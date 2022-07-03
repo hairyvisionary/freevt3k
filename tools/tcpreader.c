@@ -45,7 +45,7 @@
 typedef struct svtEntry
 {
     VT_MESSAGE_HEADER;
-    unsigned16		fRequestCount;
+    uint16_t		fRequestCount;
     uint8_t		fData[2];	/* Expands */
 } vtEntry;
 
@@ -57,7 +57,7 @@ typedef struct stcpRecord
     unsigned char	ip_port_from[2];
     unsigned char	ip_port_to[2];
     unsigned char	misc2[16];
-    unsigned16		len;
+    uint16_t		len;
     uint8_t		data[2];	/* Expands */
 } tcpRecord;
 
@@ -93,7 +93,7 @@ char
 	*progName = "tcpreader";
 int
 	need_swap = 0;
-unsigned32
+uint32_t
 	ip1 = 0xFFFFFFFF,
 	ip2 = 0xFFFFFFFF;
 char
@@ -138,7 +138,7 @@ void DumpBuffer(void *buf, int buf_len, char *dump_id, int vt_entry)
     *ptr,
     *msgPtr,
     msg[81];
-  unsigned16
+  uint16_t
     *to_port,
     *from_port;
   char
@@ -155,8 +155,8 @@ void DumpBuffer(void *buf, int buf_len, char *dump_id, int vt_entry)
     {
       et = header.time - start_time;
       tm = localtime(&header.time);
-      to_port = (unsigned16*)&prefix->ip_port_to;
-      from_port = (unsigned16*)&prefix->ip_port_from;
+      to_port = (uint16_t*)&prefix->ip_port_to;
+      from_port = (uint16_t*)&prefix->ip_port_from;
       printf("%-24s%5d  %02d:%02d:%02d\n",
 	     dump_id, et, tm->tm_hour, tm->tm_min, tm->tm_sec);
       if (ip1 == 0xFFFFFFFF)
@@ -252,7 +252,7 @@ void FormatEnvCntl(void)
     *logon_resp = (tVTMLogonInfoResponse *)vt;
   tVTMAMBreakInfo
     *break_info;
-  unsigned16
+  uint16_t
     mask = 0;
   unsigned char
     *ptr;
@@ -370,7 +370,7 @@ void FormatEnvCntl(void)
 	  if (ntohs(am_req->fBreakOffset))
 	    {
 	      break_info = (tVTMAMBreakInfo*)
-		((unsigned16*)am_req + ntohs(am_req->fBreakOffset)/2);
+		((uint16_t*)am_req + ntohs(am_req->fBreakOffset)/2);
 	      printf("  sys_break_enabled=%d, subsys_break_enabled=%d\n",
 		     ntohs(break_info->fSysBreakEnabled),
 		     ntohs(break_info->fSubsysBreakEnabled));
@@ -474,7 +474,7 @@ void FormatTerminalIO(void)
     *io_resp;
   tVTMIORequest
     *io_req = (tVTMIORequest *)vt;
-  unsigned16
+  uint16_t
     mask = 0;
     
   switch (vt->fPrimitive)
@@ -561,7 +561,7 @@ void FormatTerminalCntl(void)
     *driver_req = (tVTMTerminalDriverControlRequest*)vt;
   tVTMTerminalDriverControlResponse
     *driver_resp = (tVTMTerminalDriverControlResponse*)vt;
-  unsigned16
+  uint16_t
     mask = 0;
     
   switch (vt->fPrimitive)
@@ -672,7 +672,7 @@ void FormatMPECntl(void)
 
   tVTMMPECntlReq
     *cntl_req = (tVTMMPECntlReq *)vt;
-  unsigned16
+  uint16_t
     mask = 0;
 
   mask = ntohs(cntl_req->fRequestMask);
