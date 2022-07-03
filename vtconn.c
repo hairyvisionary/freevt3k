@@ -159,7 +159,7 @@ PRIVATE int SendToAM(tVTConnection * conn,
 
 PRIVATE void FillStandardMessageHeader(tVTMHeader * theHeader, 
 				       tVTMessageType messageType,
-				       unsigned8 primitive)	/* RM 960410 */
+				       uint8_t primitive)	/* RM 960410 */
 { /*FillStandardMessageHeader*/
     theHeader->fProtocolID = kVTProtocolID;
     theHeader->fMessageType = messageType;

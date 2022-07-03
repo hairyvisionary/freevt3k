@@ -46,7 +46,7 @@ typedef struct svtEntry
 {
     VT_MESSAGE_HEADER;
     unsigned16		fRequestCount;
-    unsigned8		fData[2];	/* Expands */
+    uint8_t		fData[2];	/* Expands */
 } vtEntry;
 
 typedef struct stcpRecord
@@ -58,7 +58,7 @@ typedef struct stcpRecord
     unsigned char	ip_port_to[2];
     unsigned char	misc2[16];
     unsigned16		len;
-    unsigned8		data[2];	/* Expands */
+    uint8_t		data[2];	/* Expands */
 } tcpRecord;
 
 typedef struct stcpdumpHeader
