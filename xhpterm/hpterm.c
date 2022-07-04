@@ -116,6 +116,7 @@ static char const rcsid[] = "$Id: hpterm.c,v 1.1 2003/03/14 16:28:44 randy Exp $
 
 #  include <string.h>
 #  include <stdlib.h>
+#  include <stdint.h>
 #  include <stdbool.h>
 #endif
 #include "hpterm.h"
