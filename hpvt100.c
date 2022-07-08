@@ -381,7 +381,9 @@ void vt3kHPtoVT100(int32_t refCon, char *buf, size_t buf_len)
     num_val = 0,
     row = 0,
     col = 0,
-    move_relative = 0;
+    move_relative = 0,
+    hold_len;
+
   char
     out_buf[MAX_VT_QUEUE],
     num_buf[256],
@@ -420,7 +422,7 @@ void vt3kHPtoVT100(int32_t refCon, char *buf, size_t buf_len)
 
   if (debug)
     {
-      int hold_len = vt_queue_len;
+      hold_len = vt_queue_len;
       char *ptr;
       ptr = vtq_rptr;
       while (GetVTQueue() != -1)
@@ -767,7 +769,8 @@ void vt3kHPtoGeneric(int32_t refCon, char *buf, size_t buf_len)
     num_val = 0,
     row = 0,
     col = 0,
-    move_relative = 0;
+    move_relative = 0,
+    hold_len;
   char
     out_buf[MAX_VT_QUEUE],
     num_buf[256],
@@ -783,7 +786,7 @@ void vt3kHPtoGeneric(int32_t refCon, char *buf, size_t buf_len)
 
   if (debug)
     {
-      int hold_len = vt_queue_len;
+      hold_len = vt_queue_len;
       char *ptr;
       ptr = vtq_rptr;
       while (GetVTQueue() != -1)
@@ -1088,7 +1091,8 @@ void vt3kHPtoVT52(int32_t refCon, char *buf, size_t buf_len)
     num_val = 0,
     row = 0,
     col = 0,
-    move_relative = 0;
+    move_relative = 0,
+    hold_len;
   char
     out_buf[MAX_VT_QUEUE],
     num_buf[256],
@@ -1116,7 +1120,7 @@ void vt3kHPtoVT52(int32_t refCon, char *buf, size_t buf_len)
 
   if (debug)
     {
-      int hold_len = vt_queue_len;
+      hold_len = vt_queue_len;
       char *ptr;
       ptr = vtq_rptr;
       while (GetVTQueue() != -1)
