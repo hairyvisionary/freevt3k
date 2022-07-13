@@ -68,12 +68,10 @@ static TERMIO
 	prev_termio;	/* tty previous termio block */
 
 /***************************************************************/
-static void show_tty_error (funcname, errnum)
+static void show_tty_error (char * funcname, int errnum)
 /*
 **  Show error condition
 */
-    char *funcname;
-    int   errnum;
 {
     fprintf (stderr, "An I/O error has occurred\n");
     fprintf (stderr, "Function name: %s\n", funcname);
@@ -82,11 +80,10 @@ static void show_tty_error (funcname, errnum)
     fflush (stderr);
 }
 /***************************************************************/
-int open_tty_connection (deviceinfo)
+int open_tty_connection (char * deviceinfo)
   /*
    **  Create tty connection, return file number
    */
-  char *deviceinfo;
 
 {
 
@@ -247,17 +244,16 @@ int open_tty_connection (deviceinfo)
 
 }
 /***************************************************************/
-int read_tty_data (s)
+int read_tty_data (int s /* File number */)
 /*
 **  Read data from the tty port
 **  Send it to the terminal emulator
 **  Returns non-zero on port eof
 */
-    int s;       /* File number */
 {
     int flags,len;
-    int bufsize = 2048;
     char buf[2048];
+    size_t bufsize = sizeof(buf) / sizeof(buf[0]);
 
     len = read (s, buf, bufsize);
     if (len < 0) {
@@ -274,14 +270,13 @@ int read_tty_data (s)
     return (0);
 }
 /***************************************************************/
-int send_tty_data (s, buf, nbuf)
+int send_tty_data (int s /* file number */,
+		   char * buf /* character buffer */,
+		   size_t nbuf /* character count */)
 /*
 **  Send data to the tty port
 **  Return non-zero on port eof
 */
-    int s;       /* file number */
-    char *buf;   /* character buffer */
-    int nbuf;    /* character count */
 {
     int flags,len;
 

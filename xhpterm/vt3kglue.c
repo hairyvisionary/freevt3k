@@ -214,7 +214,7 @@ int read_vt3k_data (tVTConnection * theConnection) {
     return (eof);
 }
 /**********************************************************************/
-int send_vt3k_data (tVTConnection * theConnection, char *buf, int nbuf) {
+int send_vt3k_data (tVTConnection * theConnection, char *buf, size_t nbuf) {
 
     int ii;
     char ch;

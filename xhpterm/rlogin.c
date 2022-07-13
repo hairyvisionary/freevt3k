@@ -47,12 +47,10 @@
 /***************************************************************/
 #include "conmgr.h"
 /***************************************************************/
-static void show_network_error (funcname, errnum)
+static void show_network_error (char * funcname, int errnum)
 /*
 **  Show error condition
 */
-    char *funcname;
-    int   errnum;
 {
     fprintf (stderr, "A networking error has occurred\n");
     fprintf (stderr, "Function name: %s\n", funcname);
@@ -74,12 +72,11 @@ static void show_network_error (funcname, errnum)
 }
 
 /***************************************************************/
-static struct hostent * gethostbynumbers (s)
+static struct hostent * gethostbynumbers (char * s)
 /*
 **  Parse an address using xxx.xxx.xxx.xxx syntax
 **  Returns null pointer if syntax error occurs.
 */
-    char *s;
 {
     static char ha[4];
     static char *hap[2];
@@ -107,13 +104,11 @@ static struct hostent * gethostbynumbers (s)
     return (&h);
 }
 /***************************************************************/
-int open_client_connection (hostname, portnum)
+int open_client_connection (char * hostname, int portnum)
 /*
 **  Create client socket, connect to server,
 **  return socket number.
 */
-    char *hostname;
-    int portnum;
 {
     int s,af,type,protocol;   /* socket() */
     struct sockaddr_in addr;
@@ -193,17 +188,16 @@ fflush (stdout);
     return (s);
 }
 /***************************************************************/
-int read_rlogin_data (s)
+int read_rlogin_data (int s /* socket number */)
 /*
 **  Read data from the rlogin server
 **  Send it to the terminal emulator
 **  Returns non-zero on socket eof
 */
-    int s;       /* socket number */
 {
     int flags,len;
-    int bufsize = 2048;
     char buf[2048];
+    size_t bufsize = sizeof(buf) / sizeof(buf[0]);
 
     flags = 0;
     len = recv (s, buf, bufsize, flags);
@@ -218,14 +212,13 @@ int read_rlogin_data (s)
     return (0);
 }
 /***************************************************************/
-int send_rlogin_data (s, buf, nbuf)
+int send_rlogin_data (int s /* socket number */,
+		      char * buf /* character buffer */,
+		      size_t nbuf /* character count */)
 /*
 **  Send data to the rlogin server
 **  Returns non-zero on socket eof
 */
-    int s;       /* socket number */
-    char *buf;   /* character buffer */
-    int nbuf;    /* character count */
 {
     int flags,len;
 

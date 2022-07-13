@@ -4316,7 +4316,7 @@ done:
 /*************************************************************************/
 /*     Keyboard handling routines                                        */
 /*************************************************************************/
-static void process_keyboard (char *buf, int nbuf)
+static void process_keyboard (char *buf, size_t nbuf)
 {
 /*
    **  Process data from the keyboard
@@ -4362,7 +4362,7 @@ static void process_keyboard (char *buf, int nbuf)
   }
 }
 /*************************************************************************/
-static void process_keyboard_A (char *buf, int nbuf)
+static void process_keyboard_A (char *buf, size_t nbuf)
 {
 /*
    **  Process keystroke for a key that is controlled by the A strap

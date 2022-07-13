@@ -103,7 +103,7 @@ PRIVATE void DefaultDataOutProc(int32_t refCon, char * buffer, size_t bufferLeng
 } /*DefaultDataOutProc*/
 
 PRIVATE int SendToAM(tVTConnection * conn, 
-                      tVTMHeader * theMessage, int messageLength)
+                      tVTMHeader * theMessage, uint16_t messageLength)
 { /*SendToAM*/
     int   returnValue = kVTCNoError;
 #ifdef VMS
@@ -1270,7 +1270,7 @@ int VTReceiveDataReady(tVTConnection * conn)
 { /*VTReceiveDataReady*/
     int    returnValue = kVTCNoError;
     char * dataDest;
-    int    lengthToReceive;
+    size_t lengthToReceive;
     int    receivedLength;
 #ifdef VMS
     extern int

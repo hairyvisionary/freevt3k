@@ -130,7 +130,7 @@ void conmgr_read (struct conmgr *con) {
     if (stat) con->eof=1;
 }
 /***********************************************************************/
-void conmgr_send (struct conmgr *con, char *buf, int nbuf) {
+void conmgr_send (struct conmgr *con, char *buf, size_t nbuf) {
 
     int stat;
 
