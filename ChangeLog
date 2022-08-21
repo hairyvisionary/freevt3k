@@ -1,11 +1,49 @@
-1999-01-13    <randy@telamon.com>
+Mon Jun 27 06:18:52 2022 -0700 <fmc@reanimators.org>
 
-	* All: Change to config.h configurations
+	* freevt3k.c, x11glue.c: version A.02.01
+	* hpterm.c: fix datacomm tx buffer overrun and resulting segfault
+
+Thu Feb 3 00:35:39 2022 -0800 <fmc@reanimators.org>
+
+	* freevt3k.c, x11glue.c: version A.02.00
+	* Makefile, tty.c: build on FreeBSD 12/13
+
+Thu Jan 6 04:38:06 2022 -0800 <fmc@reanimators.org>
+
+	* x11glue.c: add -T/-title to set window title (like xterm)
+	* x11glue.c: add -fn to set font (like xterm)
+	* x11glue.c: get -tty devicefile, -rlogin hostname into default window title
+
+Mon Jan 3 20:31:27 2022 -0800 <fmc@reanimators.org>
+
+	* hpterm.c: implement (and enable) ENQ/ACK flow control
+	* x11glue.c: permit longer window titles
+
+Fri Dec 31 21:41:57 2021 -0800 <fmc@reanimators.org>
+
+	* hpterm.c: move hpterm state from globals into struct hpterm
+
+Sat Nov 27 17:15:44 2021 -0800 <fmc@reanimators.org>
+
+	* vtconn.c: disable TCP Selective Acknowledgement (on BSD-flavored targets)
+
+Tue Jul 27 15:55:27 2021 -0700 <fmc@reanimators.org>
+
+	* vtconn.c: force IP Type of Service to 0 (on BSD-flavored sockets)
+
+Wed Jan 27 20:45:44 2021 -0800 <fmc@reanimators.org>
+
+	* x11glue.c: add -p argument for NS VT port (classic 3000 uses port 1537)
+	* Makefile, tty.c: build on macOS 10.15
 
 Mon Jun  9 12:25:32 1997    <randy@hp425t.telamon.com>
 
 	* vtconn.c: Fix numerous missing htons/htonl calls
 	* freevt3k.c: Switch A.01.03
+
+1999-01-13    <randy@telamon.com>
+
+	* All: Change to config.h configurations
 
 Tue Jan  7 08:09:44 1997    <randy@telamon.com>
 
@@ -15,5 +53,6 @@ Tue Jan  7 08:09:44 1997    <randy@telamon.com>
 	* x11glue.c:  made "-li, -lo, -lio" without a "-f" log to stdout (per vt3k)
 	* x11glue.c:  Added Logit routine
 	* hpterm.c:   Added code to implement Device Control toggle of logging
-	* freevt3k.c: made "-li, -lo, -lio" without a "-f" log to stdout (per vt3k) 
+	* freevt3k.c: made "-li, -lo, -lio" without a "-f" log to stdout (per vt3k)
+
 
