@@ -306,7 +306,7 @@ void DisplayHex(void *buf, int buf_len, char *dump_id)
 } /*DisplayHex*/
 #endif /*DEBUG_TRANSLATE_TABLE*/
 
-void Logit (int typ, char *ptr, int len, bool special_dc1)
+void Logit (int typ, char *ptr, size_t len, bool special_dc1)
 { /*Logit*/
 
 #ifdef XHPTERM
@@ -686,7 +686,7 @@ bool PrimEol(tVTConnection *conn, char ch)
 
 } /*PrimEol*/
 
-int ProcessQueueToHost(tVTConnection *conn, int len)
+int ProcessQueueToHost(tVTConnection *conn, ssize_t len)
 {/*ProcessQueueToHost*/
 
 /*
@@ -951,14 +951,14 @@ int ProcessSocket(tVTConnection * conn)
 
 }/*ProcessSocket*/
 
-int ProcessTTY(tVTConnection * conn, char *buf, int len)
+int ProcessTTY(tVTConnection * conn, char *buf, ssize_t len)
 {/*ProcessTTY*/
     
   extern FILE
     *debug_fd;
   struct timeval
     timeout;
-  int
+  ssize_t
     readCount = 1;
 #ifndef VMS
   fd_set
@@ -1123,8 +1123,9 @@ int ProcessTTY(tVTConnection * conn, char *buf, int len)
 int OpenTTY(PTERMIO new_termio, PTERMIO old_termio)
 { /*OpenTTY*/
 
+  long
+    posix_vdisable = 0;
   int
-    posix_vdisable = 0,
     fd = 0;
 
   if (isatty(STDIN_FILENO))
@@ -1223,8 +1224,9 @@ int DoMessageLoop(tVTConnection * conn)
 { /*DoMessageLoop*/
   int
     whichError,
-    readCount,
     returnValue = 0;
+  ssize_t
+    readCount;
 #ifndef VMS
   struct timeval
     timeout,

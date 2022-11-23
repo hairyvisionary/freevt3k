@@ -114,7 +114,8 @@ PRIVATE int SendToAM(tVTConnection * conn,
     int
 	io_status;
 #else
-    int   charsSent;
+    ssize_t
+	charsSent;
 #endif
 
     theMessage->fMessageLength = htons(messageLength);
@@ -182,7 +183,7 @@ PRIVATE int ProcessAMNegotiationRequest(tVTConnection * conn)
     tVTMTMNegotiationRequest    tmreq;
     char	hostName[128];
     char	domainName[128];
-    int		nodeNameLength;
+    uint16_t	nodeNameLength;
     tVTMAMBreakInfo		*breakInfo;
     char	pid_buf[sizeof(tmreq.fSessionID)+1];
 #ifdef VMS
@@ -389,7 +390,7 @@ PRIVATE void ProcessCCTL(tVTConnection * conn, unsigned char cctlChar)
 { /*ProcessCCTL*/
     char  lfBuffer[80];
     char  *ptr;
-    int	  len = 0;
+    long  len = 0;
 
 #define CR	(0x0D)
 #define LF	(0x0A)
@@ -1271,7 +1272,8 @@ int VTReceiveDataReady(tVTConnection * conn)
     int    returnValue = kVTCNoError;
     char * dataDest;
     size_t lengthToReceive;
-    int    receivedLength;
+    ssize_t
+	   receivedLength;
 #ifdef VMS
     extern int
 	sockReadPending;

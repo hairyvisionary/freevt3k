@@ -6,10 +6,11 @@ int32_t MyGettimeofday(void)
 { /*MyGettimeofday*/
 
 
+    static long
+	baseSec = 0;
     static int
-	baseSec = 0,
 	baseSet = 0;
-    int
+    long
 	sec,
 	ms;
 #ifdef VMS

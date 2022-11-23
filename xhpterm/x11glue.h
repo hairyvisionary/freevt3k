@@ -42,5 +42,5 @@ int keymapper (KeySym keysym, unsigned int state);
 void disp_drawtext (int style, int row, int col, char *buf, int nbuf);
 void disp_erasetext (int row, int col, int nchar);
 void disp_drawcursor (int style, int row, int col);
-void Logit (int typ, char *ptr, int len, bool special_dc1);
+void Logit (int typ, char *ptr, size_t len, bool special_dc1);
 void doXBell (void);

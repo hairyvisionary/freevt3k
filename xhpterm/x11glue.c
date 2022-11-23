@@ -135,7 +135,7 @@ void getGC(Window win, GC * gc, XFontStruct * font_info);
 void getGC_Inverse(Window win, GC * gc, XFontStruct * font_info);
 void getGC_Halfbright(Window win, GC * gc, XFontStruct * font_info);
 void getGC_Red(Window win, GC * gc, XFontStruct * font_info);
-void Logit(int typ, char *ptr, int len, bool special_dc1);
+void Logit(int typ, char *ptr, size_t len, bool special_dc1);
 int LoadKeybdTable(char *file_name, int i_type);
 /*******************************************************************/
 #define GRAY_INDEX 0

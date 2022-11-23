@@ -158,6 +158,6 @@ int  VTCloseConnection(tVTConnection * conn);
 int  VTSocket(tVTConnection * conn);
 int  VTSendBreak(tVTConnection * conn, int send_index);
 int  VTSendData(tVTConnection * conn, char * buffer, int length, int flags);
-int  ProcessQueueToHost(tVTConnection *conn, int len);
+int  ProcessQueueToHost(tVTConnection *conn, ssize_t len);
 #endif
 

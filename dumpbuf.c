@@ -5,7 +5,7 @@
 FILE
 	*debug_fd = NULL;
 
-void DumpBuffer(void *buf, int buf_len, char *dump_id)
+void DumpBuffer(void *buf, long buf_len, char *dump_id)
 { /*DumpBuffer*/
 
 #define CHAR_PER_LINE		(16)
@@ -13,9 +13,10 @@ void DumpBuffer(void *buf, int buf_len, char *dump_id)
 	printOffset = 0,
 	offset = 0,
 	nChars = CHAR_PER_LINE,
-	nLines,
 	iLine,
 	iChar;
+    long
+	nLines;
     unsigned char
 	*charPtr,
 	*ptr,
