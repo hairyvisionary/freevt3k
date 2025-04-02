@@ -227,8 +227,8 @@ struct hpterm
 
 };
 
-void set_display_functions (void);
-void clear_display_functions (void);
+void set_display_functions (struct hpterm *);
+void clear_display_functions (struct hpterm *);
 #if defined(MEMLOCK_2000)
 void do_roll_down(void);
 void do_roll_up(void);
@@ -236,8 +236,8 @@ void do_roll_up(void);
 struct hpterm * init_hpterm (void);
 void hpterm_winsize (int nbrows, int nbcols);
 void hpterm_mouse_click (int row, int col);
-void term_update (void);
-void term_redraw (void);
+void term_update (struct hpterm *);
+void term_redraw (struct hpterm *);
 void hpterm_rxfunc (void *, char *, size_t);
 void hpterm_kbd_ascii (char);
 void hpterm_kbd_Reset (void);

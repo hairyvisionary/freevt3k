@@ -344,23 +344,23 @@ void update_display (void)
   update_cursor ();
 }
 /*****************************************************************/
-void update_menus (void)
+void update_menus (struct hpterm * term)
 {
   update_row (term->nbrows, term->menu1);
   update_row (term->nbrows + 1, term->menu2);
   term->update_menus = 0;
 }
 /*****************************************************************/
-void term_redraw (void)
+void term_redraw (struct hpterm * term)
 {
 /*
    **  This routine is called in response to an X Expose event
  */
   update_display ();
-  update_menus ();
+  update_menus (term);
 }
 /*****************************************************************/
-void term_update (void)
+void term_update (struct hpterm * term)
 {
 /*
    **  Perform screen updates that have been deferred
@@ -371,7 +371,7 @@ void term_update (void)
     }
   if (term->update_menus)
     {
-      update_menus ();
+      update_menus (term);
     }
 }
 /*****************************************************************/
@@ -607,12 +607,12 @@ void show_terminal_config (void)
   term->menu2->nbchars = strlen (m2);
 }
 /*****************************************************************/
-void set_display_functions (void)
+void set_display_functions (struct hpterm * term)
 {
   term->DisplayFuncs = 1;
 }
 /*****************************************************************/
-void clear_display_functions (void)
+void clear_display_functions (struct hpterm * term)
 {
   term->DisplayFuncs = 0;
 }

@@ -118,7 +118,7 @@ GC gc_red;
 
 XFontStruct *font_info;
 
-static struct hpterm *term;
+static struct hpterm *thisterm;
 
 struct conmgr *con = 0;
 int logging = 0;
@@ -332,7 +332,7 @@ void event_loop (void)
 
   while (!con->eof)
   {
-    term_update ();		/* flush deferred screen updates */
+    term_update (thisterm);	/* flush deferred screen updates */
     XFlush (display);		/* and send them to the server */
 
     /* Use select() to wait for traffic from X or remote computer */
@@ -406,7 +406,7 @@ void event_loop (void)
 	  break;
 
 	/* redraw term emulator stuff */
-	term_redraw ();
+	term_redraw (thisterm);
 	break;
       case ConfigureNotify:
 	/* window has been resized
@@ -1231,9 +1231,9 @@ int main (int argc, char **argv)
   init_disp (argc, argv, wintitle, font1);
 
   /* Start the terminal emulator */
-  term = init_hpterm ();
+  thisterm = init_hpterm ();
   if (display_fns)
-    set_display_functions ();
+    set_display_functions (thisterm);
 
   if (input_file)
   {
@@ -1291,7 +1291,7 @@ int main (int argc, char **argv)
     con = 0;
   }
 
-  term->dccon = con;
+  thisterm->dccon = con;
   
   if (!con)
     return (1);
