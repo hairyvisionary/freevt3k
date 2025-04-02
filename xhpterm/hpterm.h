@@ -234,8 +234,8 @@ void do_roll_down(void);
 void do_roll_up(void);
 #endif
 struct hpterm * init_hpterm (void);
-void hpterm_winsize (int nbrows, int nbcols);
-void hpterm_mouse_click (int row, int col);
+void hpterm_winsize (struct hpterm *, int nbrows, int nbcols);
+void hpterm_mouse_click (struct hpterm *, int row, int col);
 void term_update (struct hpterm *);
 void term_redraw (struct hpterm *);
 void hpterm_rxfunc (void *, char *, size_t);

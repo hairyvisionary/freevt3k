@@ -2078,7 +2078,7 @@ struct hpterm * init_hpterm (void)
   return term;
 }
 /***************************************************************/
-void hpterm_winsize (int nbrows, int nbcols)
+void hpterm_winsize (struct hpterm * term, int nbrows, int nbcols)
 {
 /*
    **  Window size was changed by the window system
@@ -4793,7 +4793,7 @@ void hpterm_kbd_KP_Enter (void)
   }
 }
 /*********************************************************************/
-void hpterm_mouse_click (int row, int col)
+void hpterm_mouse_click (struct hpterm * term, int row, int col)
 {
 /*
    **  Process a single mouse click

@@ -415,7 +415,7 @@ void event_loop (void)
 	height = report.xconfigure.height;
 	nbcols = width / font_info->max_bounds.width;
 	nbrows = height / (font_info->ascent + font_info->descent);
-	hpterm_winsize (nbrows, nbcols);
+	hpterm_winsize (thisterm, nbrows, nbcols);
 	break;
       case ButtonPress:
 	if (report.xbutton.button == 1)
@@ -423,7 +423,7 @@ void event_loop (void)
 	  int r, c;
 	  c = report.xbutton.x / font_info->max_bounds.width;
 	  r = report.xbutton.y / (font_info->ascent + font_info->descent);
-	  hpterm_mouse_click (r, c);
+	  hpterm_mouse_click (thisterm, r, c);
 	}
 	/* right mouse button causes program to exit */
 	if ((report.xbutton.button == 3) && (!must_logoff))
