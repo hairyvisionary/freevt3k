@@ -231,11 +231,10 @@ int send_rlogin_data (int s /* socket number */,
     return (0);
 }
 /***************************************************************/
-int open_rlogin_connection (hostname)
+int open_rlogin_connection (char * hostname)
 /*
 **  Create an rlogin connection to a remote computer
 */
-    char *hostname;
 {
     int s;
     static char username[100] = "";

@@ -54,11 +54,7 @@ static char *visual_class[] = {
 "DirectColor"
 };
 
-int get_colors(nb_colors, color_names, color_codes)
-
-    int nb_colors;
-    char **color_names;
-    unsigned long *color_codes;
+int get_colors(int nb_colors, char ** color_names, unsigned long * color_codes)
 {
         int default_depth;
         Visual *default_visual;

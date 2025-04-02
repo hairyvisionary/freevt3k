@@ -483,10 +483,7 @@ void event_loop (void)
   }				/* end while */
 }
 
-void getGC (win, gc, font_info)
-     Window win;
-     GC *gc;
-     XFontStruct *font_info;
+void getGC (Window win, GC * gc, XFontStruct * font_info)
 {
   unsigned long valuemask = 0;	/* ignore XGCvalues and use defaults */
   XGCValues values;
@@ -517,10 +514,7 @@ void getGC (win, gc, font_info)
   XSetDashes (display, *gc, dash_offset, dash_list, list_length);
 }
 
-void getGC_Inverse (win, gc, font_info)
-     Window win;
-     GC *gc;
-     XFontStruct *font_info;
+void getGC_Inverse (Window win, GC * gc, XFontStruct * font_info)
 {
   unsigned long valuemask = 0;	/* ignore XGCvalues and use defaults */
   XGCValues values;
@@ -536,10 +530,7 @@ void getGC_Inverse (win, gc, font_info)
   XSetBackground (display, *gc, BlackPixel (display, screen_num));
 }
 
-void getGC_Halfbright (win, gc, font_info)
-     Window win;
-     GC *gc;
-     XFontStruct *font_info;
+void getGC_Halfbright (Window win, GC * gc, XFontStruct * font_info)
 {
   unsigned long valuemask = 0;	/* ignore XGCValues and use defaults */
   XGCValues values;
@@ -555,10 +546,7 @@ void getGC_Halfbright (win, gc, font_info)
   XSetBackground (display, *gc, WhitePixel (display, screen_num));
 }
 
-void getGC_Red (win, gc, font_info)
-     Window win;
-     GC *gc;
-     XFontStruct *font_info;
+void getGC_Red (Window win, GC * gc, XFontStruct * font_info)
 {
   unsigned long valuemask = 0;	/* ignore XGCValues and use defaults */
   XGCValues values;
@@ -886,12 +874,13 @@ int keymapper (KeySym keysym, unsigned int state) {
 #endif
 
 
-void disp_drawtext (style, row, col, buf, nbuf)
-     int style;			/* Low order 4 bits of display enhancements escape code */
-     int row;			/* Row number of 1st char of string, 0..23 (or more) */
-     int col;			/* Column number of 1st char of string, 0..79 (or more) */
-     char *buf;			/* String to display */
-     int nbuf;			/* Number of chars to display */
+void disp_drawtext (
+     int style,			/* Low order 4 bits of display enhancements escape code */
+     int row,			/* Row number of 1st char of string, 0..23 (or more) */
+     int col,			/* Column number of 1st char of string, 0..79 (or more) */
+     char *buf,			/* String to display */
+     int nbuf			/* Number of chars to display */
+)
 {
 #if defined(MEMLOCK_2000)
   int font_height, font_width;
@@ -952,10 +941,7 @@ void disp_drawtext (style, row, col, buf, nbuf)
 }
 
 
-void disp_erasetext (row, col, nchar)
-     int row;
-     int col;
-     int nchar;
+void disp_erasetext (int row, int col, int nchar)
 {
   int font_height;
 #if defined(MEMLOCK_2000)
@@ -974,10 +960,7 @@ void disp_erasetext (row, col, nchar)
 		  nchar * font_width, font_height);
 }
 
-void disp_drawcursor (style, row, col)
-     int style;
-     int row;
-     int col;
+void disp_drawcursor (int style, int row, int col)
 {
   int font_height;
 #if defined(MEMLOCK_2000)
