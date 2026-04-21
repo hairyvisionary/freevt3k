@@ -1094,30 +1094,30 @@ void do_esc_atsign (struct hpterm * term)
   term->update_all = hold_upd;
 #endif
 }
-void set_security ()
+void set_security (struct hpterm * term)
 {
   nyi ();
 }
-void do_delete_char_with_wrap (void)
+void do_delete_char_with_wrap (struct hpterm * term)
 {
   nyi ();
 }
-void do_hard_reset (void)
+void do_hard_reset (struct hpterm * term)
 {
   nyi ();
 }
-void do_bell (void)
+void do_bell (struct hpterm * term)
 {
   doXBell ();
 }
-void do_modem_disconnect (void)
+void do_modem_disconnect (struct hpterm * term)
 {
   nyi ();
 }
 /*****************************************************************/
 static void do_soft_reset (struct hpterm * term)
 {
-  do_bell ();
+  do_bell (term);
   term->EnableKybd = 1;
   if (term->Message)
     {
@@ -3187,7 +3187,7 @@ static void hpterm_rxchar (char ch)
     else if (ich == ASC_LF)
       do_line_feed (term);
     else if (ich == ASC_BEL)
-      do_bell ();
+      do_bell (term);
     else if (ich == ASC_BS)
       do_back_space (term);
     else if (ich == ASC_HT)
@@ -3267,7 +3267,7 @@ static void hpterm_rxchar (char ch)
     }
     else if (ich == 'E')
     {
-      do_hard_reset ();
+      do_hard_reset (term);
       term->state = 0;
     }
     else if (ich == 'F')
@@ -3319,7 +3319,7 @@ static void hpterm_rxchar (char ch)
     }
     else if (ich == 'O')
     {
-      do_delete_char_with_wrap ();
+      do_delete_char_with_wrap (term);
       term->state = 0;
     }
     else if (ich == 'P')
@@ -3452,7 +3452,7 @@ static void hpterm_rxchar (char ch)
     }
     else if (ich == 'f')
     {
-      do_modem_disconnect ();
+      do_modem_disconnect (term);
       term->state = 0;
     }
     else if (ich == 'g')
@@ -3744,11 +3744,11 @@ static void hpterm_rxchar (char ch)
   case 11:			/* Got esc & d, waiting for more */
     if (ich == 's')
     {
-      set_security ();
+      set_security (term);
     }
     else if (ich == 'S')
     {
-      set_security ();
+      set_security (term);
       term->state = 0;
     }
     else if (ich >= '@' && ich <= 'O')
