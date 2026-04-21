@@ -469,7 +469,7 @@ void event_loop (void)
 	{
 	  if (charcount == 1)
 	  {
-	    hpterm_kbd_ascii (buffer[0]);
+	    hpterm_kbd_ascii (thisterm, buffer[0]);
 	  }
 	}
 	break;
@@ -505,13 +505,16 @@ void getGC (Window win, GC * gc, XFontStruct * font_info)
   /* specify black foreground since default window background is
    * white and default foreground is undefined. */
   XSetForeground (display, *gc, BlackPixel (display, screen_num));
+  XSetBackground (display, *gc, WhitePixel (display, screen_num));
 
+#ifdef NOTDEF
   /* set line attributes */
   XSetLineAttributes (display, *gc, line_width, line_style,
 		      cap_style, join_style);
 
   /* set dashes */
   XSetDashes (display, *gc, dash_offset, dash_list, list_length);
+#endif /* NOTDEF */
 }
 
 void getGC_Inverse (Window win, GC * gc, XFontStruct * font_info)
@@ -595,7 +598,7 @@ static struct km
 {
   char *keyname;
   KeySym keysym;
-  void (*keyfunc) (void);
+  void (*keyfunc) (struct hpterm *);
 }
 keymap[] =
 {
@@ -679,17 +682,17 @@ int keymapper (KeySym keysym, unsigned int state, char *buffer, int charcount)
   {
     if (keysym == XK_Up)
     {
-      hpterm_kbd_RollUp ();
+      hpterm_kbd_RollUp (thisterm);
       return (1);
     }
     if (keysym == XK_Down)
     {
-      hpterm_kbd_RollDown ();
+      hpterm_kbd_RollDown (thisterm);
       return (1);
     }
     if (keysym == XK_Home)
     {
-      hpterm_kbd_HomeDown ();
+      hpterm_kbd_HomeDown (thisterm);
       return (1);
     }
   }
@@ -700,17 +703,17 @@ int keymapper (KeySym keysym, unsigned int state, char *buffer, int charcount)
   {
     if (keysym == XK_KP_8)
     {
-      hpterm_kbd_RollUp ();
+      hpterm_kbd_RollUp (thisterm);
       return (1);
     }
     if (keysym == XK_KP_2)
     {
-      hpterm_kbd_RollDown ();
+      hpterm_kbd_RollDown (thisterm);
       return (1);
     }
     if (keysym == XK_Tab)
     {
-      hpterm_kbd_BackTab ();
+      hpterm_kbd_BackTab (thisterm);
       return (1);
     }
   }
@@ -722,52 +725,52 @@ int keymapper (KeySym keysym, unsigned int state, char *buffer, int charcount)
   {
     if (keysym == XK_1)
     {
-      hpterm_kbd_F1 ();
+      hpterm_kbd_F1 (thisterm);
       return (1);
     }
     else if (keysym == XK_2)
     {
-      hpterm_kbd_F2 ();
+      hpterm_kbd_F2 (thisterm);
       return (1);
     }
     else if (keysym == XK_U || keysym == XK_u)
     {
-      hpterm_kbd_Menu ();
+      hpterm_kbd_Menu (thisterm);
       return (1);
     }
     else if (keysym == XK_M || keysym == XK_m)
     {
-      hpterm_kbd_Modes ();
+      hpterm_kbd_Modes (thisterm);
       return (1);
     }
     else if (keysym == XK_S || keysym == XK_s)
     {
-      hpterm_kbd_System ();
+      hpterm_kbd_System (thisterm);
       return (1);
     }
     else if (keysym == XK_J || keysym == XK_j)
     {
-      hpterm_kbd_Clear ();
+      hpterm_kbd_Clear (thisterm);
       return (1);
     }
     else if (keysym == XK_R || keysym == XK_r)
     {
-      hpterm_kbd_Reset ();
+      hpterm_kbd_Reset (thisterm);
       return (1);
     }
     else if (keysym == XK_D || keysym == XK_d)
     {
-      hpterm_kbd_DeleteLine ();
+      hpterm_kbd_DeleteLine (thisterm);
       return (1);
     }
     else if (keysym == XK_I || keysym == XK_i)
     {
-      hpterm_kbd_InsertLine ();
+      hpterm_kbd_InsertLine (thisterm);
       return (1);
     }
     else if (keysym == XK_P || keysym == XK_p)
     {
-      dump_display ();
+      dump_display (thisterm);
       return (1);
     }
   }
@@ -778,7 +781,7 @@ int keymapper (KeySym keysym, unsigned int state, char *buffer, int charcount)
   {
     if (keymap[ii].keysym == keysym)
     {
-      (*(keymap[ii].keyfunc)) ();
+      (*(keymap[ii].keyfunc)) (thisterm);
       return (1);
     }
   }
@@ -815,15 +818,15 @@ int keymapper (KeySym keysym, unsigned int state) {
 */
     if (state & ShiftMask) {
 	if (keysym == XK_Up) {
-	    hpterm_kbd_RollUp();
+	    hpterm_kbd_RollUp(thisterm);
 	    return (1);
         }
 	if (keysym == XK_Down) {
-	    hpterm_kbd_RollDown();
+	    hpterm_kbd_RollDown(thisterm);
 	    return (1);
         }
 	if (keysym == XK_Home) {
-	    hpterm_kbd_HomeDown();
+	    hpterm_kbd_HomeDown(thisterm);
 	    return (1);
         }
     }
@@ -832,15 +835,15 @@ int keymapper (KeySym keysym, unsigned int state) {
 */
     if (state & ShiftMask) {
         if (keysym == XK_KP_8) {
-            hpterm_kbd_RollUp();
+            hpterm_kbd_RollUp(thisterm);
             return (1);
         }
         if (keysym == XK_KP_2) {
-            hpterm_kbd_RollDown();
+            hpterm_kbd_RollDown(thisterm);
             return (1);
         }
         if (keysym == XK_Tab) {
-            hpterm_kbd_BackTab();
+            hpterm_kbd_BackTab(thisterm);
             return (1);
         }
     }
@@ -850,13 +853,13 @@ int keymapper (KeySym keysym, unsigned int state) {
 */
     if (state & Mod2Mask) {
         if (keysym == XK_1) {
-            hpterm_kbd_F1();
+            hpterm_kbd_F1(thisterm);
             return (1);
         } else if (keysym == XK_2) {
-            hpterm_kbd_F2();
+            hpterm_kbd_F2(thisterm);
             return (1);
         } else if (keysym == XK_M || keysym == XK_m) {
-            hpterm_kbd_Menu();
+            hpterm_kbd_Menu(thisterm);
             return (1);
         }
     }
@@ -865,7 +868,7 @@ int keymapper (KeySym keysym, unsigned int state) {
 */
     for (ii=0; keymap[ii].keyname; ii++) {
 	if (keymap[ii].keysym == keysym) {
-	   (*(keymap[ii].keyfunc))();
+	   (*(keymap[ii].keyfunc))(thisterm);
 	   return (1);
         }
     }
@@ -918,7 +921,7 @@ void disp_drawtext (
   }
 
   XDrawString (display, win, gc, col * font_width,
-	       font_info->ascent + row * font_height, buf, nbuf);
+	       font_info->ascent + row * font_height + 1, buf, nbuf);
 
   if (style & HPTERM_UNDERLINE_MASK)
   {
@@ -935,7 +938,7 @@ void disp_drawtext (
   if (style & HPTERM_HALFBRIGHT_MASK)
   {
     XDrawString (display, win, gc, col * font_width + 1,
-		 font_info->ascent + row * font_height, buf, nbuf);
+		 font_info->ascent + row * font_height + 1, buf, nbuf);
   }
 #endif
 }

@@ -148,12 +148,12 @@ extern char *termid;		/*990121 */
 #define ASC_DC1 0x11
 #define ASC_DC2 0x12
 #define ASC_ESC 0x1B
-static void do_function_button (int);	/* Forward */
-static void update_labels (void);	/* Forward */
+static void do_function_button (struct hpterm *, int);	/* Forward */
+static void update_labels (struct hpterm *);	/* Forward */
 static void hpterm_rxchar (char);	/* Forward */
-struct row *find_cursor_row (void);	/* Forward */
-static void do_home_up (void);	/* Forward */
-static void do_forward_tab (void);	/* Forward */
+struct row *find_cursor_row (struct hpterm *);	/* Forward */
+static void do_home_up (struct hpterm *);	/* Forward */
+static void do_forward_tab (struct hpterm *);	/* Forward */
 /*******************************************************************/
 /*
    **  Someday, all routines might have 'term' as their first argument
@@ -195,7 +195,7 @@ void term_flush_tx(struct hpterm *term)
 	      term->DC1Count = 0;
 	      term->DC2Count = 0;
 #if SHOW_DC1_COUNT
-	      update_labels ();
+	      update_labels (term);
 #endif
 	    }
 	}
@@ -216,7 +216,7 @@ void term_flush_tx(struct hpterm *term)
     }
 }
 /*******************************************************************/
-void update_row (int r, struct row *rp)
+void update_row (struct hpterm * term, int r, struct row *rp)
 /*
    **  Update row 'r' on the display.
    **  Accepts 'r' from 0 to 23. (or more) (or less)
@@ -265,7 +265,7 @@ void update_row (int r, struct row *rp)
     }
 }
 /******************************************************************/
-void update_cursor (void)
+void update_cursor (struct hpterm * term)
 {
 
   struct row *rp;
@@ -274,7 +274,7 @@ void update_cursor (void)
   if (!term->update_all)
     {
 
-      rp = find_cursor_row ();
+      rp = find_cursor_row (term);
 /*
    **      Determine the display enhancements for the cell
    **      that is cursor'ed
@@ -298,7 +298,7 @@ void update_cursor (void)
 }
 #if defined(MEMLOCK_2000)
 /******************************************************************/
-void dump_display (void)
+void dump_display (struct hpterm * term)
 {
 /*
    **  Update entire display
@@ -326,7 +326,7 @@ void dump_display (void)
 }
 #endif
 /******************************************************************/
-void update_display (void)
+void update_display (struct hpterm * term)
 {
 /*
    **  Update entire display
@@ -337,17 +337,17 @@ void update_display (void)
   rp = term->dptr;
   for (r = 0; r < term->nbrows; r++)
     {
-      update_row (r, rp);
+      update_row (term, r, rp);
       rp = rp->next;
     }
   term->update_all = 0;
-  update_cursor ();
+  update_cursor (term);
 }
 /*****************************************************************/
 void update_menus (struct hpterm * term)
 {
-  update_row (term->nbrows, term->menu1);
-  update_row (term->nbrows + 1, term->menu2);
+  update_row (term, term->nbrows, term->menu1);
+  update_row (term, term->nbrows + 1, term->menu2);
   term->update_menus = 0;
 }
 /*****************************************************************/
@@ -356,7 +356,7 @@ void term_redraw (struct hpterm * term)
 /*
    **  This routine is called in response to an X Expose event
  */
-  update_display ();
+  update_display (term);
   update_menus (term);
 }
 /*****************************************************************/
@@ -367,7 +367,7 @@ void term_update (struct hpterm * term)
  */
   if (term->update_all)
     {
-      update_display ();
+      update_display (term);
     }
   if (term->update_menus)
     {
@@ -375,7 +375,7 @@ void term_update (struct hpterm * term)
     }
 }
 /*****************************************************************/
-void remove_row (struct row *rp)
+void remove_row (struct hpterm * term, struct row *rp)
 {
 /*
    **  Remove row from the linked list
@@ -398,7 +398,7 @@ void remove_row (struct row *rp)
     }
 }
 /****************************************************************/
-void insert_before (struct row *ip, struct row *rp)
+void insert_before (struct hpterm * term, struct row *ip, struct row *rp)
 {
 /*
    **  Insert row ip in front of row rp
@@ -417,7 +417,7 @@ void insert_before (struct row *ip, struct row *rp)
   rp->prev = ip;
 }
 /****************************************************************/
-void insert_after (struct row *ip, struct row *rp)
+void insert_after (struct hpterm * term, struct row *ip, struct row *rp)
 {
 /*
    **  Insert row ip after row rp
@@ -444,7 +444,7 @@ void clear_row (struct row *rp)
   memset (rp->disp, 0, 132);
 }
 /*****************************************************************/
-struct row *find_cursor_row (void)
+struct row *find_cursor_row (struct hpterm * term)
 {
 /*
    **  Return pointer to the row containing the cursor
@@ -466,7 +466,7 @@ struct row *find_cursor_row (void)
   return (rp);
 }
 /*****************************************************************/
-struct row *find_bottom_row (void)
+struct row *find_bottom_row (struct hpterm * term)
 {
 /*
    **  Return pointer to the bottom row on the screen
@@ -488,7 +488,7 @@ struct row *find_bottom_row (void)
   return (rp);
 }
 /*****************************************************************/
-void erase_cursor (void)
+void erase_cursor (struct hpterm * term)
 {
 
   struct row *rp;
@@ -503,7 +503,7 @@ void erase_cursor (void)
 /*
    **  Find cursor row in memory
  */
-  rp = find_cursor_row ();
+  rp = find_cursor_row (term);
 /*
    **  Erase cell that was cursor'ed
  */
@@ -526,7 +526,7 @@ void erase_cursor (void)
     }
 }
 /*****************************************************************/
-void show_system (void)
+void show_system (struct hpterm * term)
 {
 /*
    **  Display system menu above function buttons
@@ -541,7 +541,7 @@ void show_system (void)
   term->menu2->nbchars = strlen (m2);
 }
 /*****************************************************************/
-void show_device_control (void)
+void show_device_control (struct hpterm * term)
 {
 /*
    **  Display device control menu above function buttons
@@ -561,7 +561,7 @@ void show_device_control (void)
 
 }
 /****************************************************************/
-void show_margins_tabs (void)
+void show_margins_tabs (struct hpterm * term)
 {
 /*
    **  Display margin and tabs menu above function buttons
@@ -576,7 +576,7 @@ void show_margins_tabs (void)
   term->menu2->nbchars = strlen (m2);
 }
 /****************************************************************/
-void show_config_keys (void)
+void show_config_keys (struct hpterm * term)
 {
 /*
    **  Display config keys menu above function buttons
@@ -592,7 +592,7 @@ void show_config_keys (void)
   term->menu2->nbchars = strlen (m2);
 }
 /***************************************************************/
-void show_terminal_config (void)
+void show_terminal_config (struct hpterm * term)
 {
 /*
    **  Display terminal config menu above function buttons
@@ -617,7 +617,7 @@ void clear_display_functions (struct hpterm * term)
   term->DisplayFuncs = 0;
 }
 /*****************************************************************/
-void show_modes (void)
+void show_modes (struct hpterm * term)
 {
 /*
    **  Display modes above function buttons
@@ -651,7 +651,7 @@ void show_modes (void)
     term->menu2->text[79] = '*';
 }
 /*****************************************************************/
-static void update_labels (void)
+static void update_labels (struct hpterm * term)
 {
 /*
    **  Bring term->menu1 and term->menu2 up to date
@@ -701,27 +701,27 @@ static void update_labels (void)
     }
   else if (term->KeyState == ks_modes)
     {
-      show_modes ();
+      show_modes (term);
     }
   else if (term->KeyState == ks_system)
     {
-      show_system ();
+      show_system (term);
     }
   else if (term->KeyState == ks_device_control)
     {
-      show_device_control ();
+      show_device_control (term);
     }
   else if (term->KeyState == ks_margins_tabs)
     {
-      show_margins_tabs ();
+      show_margins_tabs (term);
     }
   else if (term->KeyState == ks_config_keys)
     {
-      show_config_keys ();
+      show_config_keys (term);
     }
   else if (term->KeyState == ks_terminal_config)
     {
-      show_terminal_config ();
+      show_terminal_config (term);
     }
   else if (term->KeyState == ks_user)
     {
@@ -785,13 +785,13 @@ static void update_labels (void)
   term->update_menus = 1;
 }
 /*****************************************************************/
-void do_carriage_return (void)
+void do_carriage_return (struct hpterm * term)
 {
   term->cc = term->LeftMargin;
   term->SPOW_latch = 1;
 }
 /*****************************************************************/
-void do_line_feed (void)
+void do_line_feed (struct hpterm * term)
 {
 
   struct row *rp;
@@ -802,21 +802,21 @@ void do_line_feed (void)
   term->cr++;
   if (term->cr >= term->nbrows)
     {				/* while? */
-      rp = find_bottom_row ();
+      rp = find_bottom_row (term);
       if (!rp->next)
 	{
 	  rp = term->head;
-	  remove_row (rp);
+	  remove_row (term, rp);
 	  clear_row (rp);
-	  insert_after (rp, term->tail);
+	  insert_after (term, rp, term->tail);
 	}
 #if defined(MEMLOCK_2000)
       if (term->MemoryLock)
 	{
 	  rp = term->MemLockRP->next;
-	  remove_row (rp);
+	  remove_row (term, rp);
 	  saverp = term->dptr;
-	  insert_before (rp, term->dptr);
+	  insert_before (term, rp, term->dptr);
 	}
       else
 #endif
@@ -827,14 +827,14 @@ void do_line_feed (void)
   term->SPOW_latch = 0;
 }
 /*****************************************************************/
-void do_back_space (void)
+void do_back_space (struct hpterm * term)
 {
 
   if (term->cc)
     term->cc--;
 }
 /*****************************************************************/
-int is_cursor_protected (void)
+int is_cursor_protected (struct hpterm * term)
 {
 /*
    **  Returns 1 if the cursor is positioned in a protected region
@@ -842,7 +842,7 @@ int is_cursor_protected (void)
   struct row *rp;
   int ee;
 
-  rp = find_cursor_row ();
+  rp = find_cursor_row (term);
   ee = term->cc;
   if (ee >= rp->nbchars)
     ee = rp->nbchars - 1;
@@ -864,7 +864,7 @@ int is_cursor_protected (void)
   return (1);
 }
 /*****************************************************************/
-void goto_next_field (void)
+void goto_next_field (struct hpterm * term)
 {
 /*
    **  Position the cursor at the start of the next unprotected field,
@@ -877,8 +877,8 @@ void goto_next_field (void)
    **  If the cursor is in an unprotected field, move it out
    **  of the field
  */
-  rp = find_cursor_row ();
-  if (!is_cursor_protected ())
+  rp = find_cursor_row (term);
+  if (!is_cursor_protected (term))
     {
       while (term->cc < rp->nbchars && !(rp->disp[term->cc] & HPTERM_END_FIELD))
 	{
@@ -890,7 +890,7 @@ void goto_next_field (void)
   save_cr = term->cr;
   save_cc = term->cc;
 /*  SWC */
-  rp = find_cursor_row ();
+  rp = find_cursor_row (term);
   while (rp)
     {
 #if defined(MEMLOCK_2000)
@@ -912,7 +912,7 @@ void goto_next_field (void)
       if (rp)
 	{
 	  term->cc = 0;
-	  do_line_feed ();
+	  do_line_feed (term);
 	}
     }
 
@@ -921,7 +921,7 @@ void goto_next_field (void)
   term->cc = save_cc;
 }
 /*****************************************************************/
-void do_delete_char (void)
+void do_delete_char (struct hpterm * term)
 {
 /*
    **  Perform delete character function
@@ -929,10 +929,10 @@ void do_delete_char (void)
   struct row *rp;
   int ii;
 
-  rp = find_cursor_row ();
+  rp = find_cursor_row (term);
   if (term->FormatMode)
     {
-      if (is_cursor_protected ())
+      if (is_cursor_protected (term))
 	return;
       ii = term->cc;
       while (ii + 1 < rp->nbchars && !(rp->disp[ii + 1] & HPTERM_END_FIELD))
@@ -941,7 +941,7 @@ void do_delete_char (void)
 	  ii++;
 	}
       rp->text[ii] = ' ';
-      update_row (term->cr, rp);
+      update_row (term, term->cr, rp);
     }
   else if (term->cc < rp->nbchars)
     {
@@ -955,11 +955,11 @@ void do_delete_char (void)
       rp->text[ii] = ' ';
       rp->disp[ii] = 0;
       rp->nbchars--;
-      update_row (term->cr, rp);
+      update_row (term, term->cr, rp);
     }
 }
 /*****************************************************************/
-void display_char (char ch)
+void display_char (struct hpterm * term, char ch)
 /*
    **  Put a character onto the display.
  */
@@ -972,15 +972,15 @@ void display_char (char ch)
  */
   if (term->FormatMode)
     {
-      if (is_cursor_protected ())
-	do_forward_tab ();
-      if (is_cursor_protected ())
+      if (is_cursor_protected (term))
+	do_forward_tab (term);
+      if (is_cursor_protected (term))
 	return;
     }
 /*
    **  Find current row in memory
  */
-  rp = find_cursor_row ();
+  rp = find_cursor_row (term);
 /*
    **  Push characters right if insert is on
  */
@@ -1046,7 +1046,7 @@ void display_char (char ch)
     {
       if (term->InsertMode || fillflag)
 	{
-	  update_row (term->cr, rp);
+	  update_row (term, term->cr, rp);
 	}
       else
 	{
@@ -1072,29 +1072,29 @@ void display_char (char ch)
 	}
       else
 	{
-	  do_carriage_return ();
-	  do_line_feed ();
+	  do_carriage_return (term);
+	  do_line_feed (term);
 	}
     }
-  if (term->FormatMode && is_cursor_protected ())
+  if (term->FormatMode && is_cursor_protected (term))
     {
-      do_forward_tab ();
+      do_forward_tab (term);
     }
 }
 /*****************************************************************/
-void do_esc_atsign (void)
+void do_esc_atsign (struct hpterm * term)
 {
-  update_display ();
+  update_display (term);
   sleep (1);
 #ifdef test_esc_atsign
   int hold_upd = term->update_all;
   term->update_all = 0;
-  update_cursor ();
+  update_cursor (term);
   sleep (1);
   term->update_all = hold_upd;
 #endif
 }
-void set_security (void)
+void set_security ()
 {
   nyi ();
 }
@@ -1115,7 +1115,7 @@ void do_modem_disconnect (void)
   nyi ();
 }
 /*****************************************************************/
-static void do_soft_reset (void)
+static void do_soft_reset (struct hpterm * term)
 {
   do_bell ();
   term->EnableKybd = 1;
@@ -1128,12 +1128,12 @@ static void do_soft_reset (void)
   term->RecordMode = 0;
 }
 /*****************************************************************/
-static void set_display_enh (char ch)
+static void set_display_enh (struct hpterm * term, char ch)
 {
 
   struct row *rp;
 
-  rp = find_cursor_row ();
+  rp = find_cursor_row (term);
 
   if (ch == '@')
     {
@@ -1146,14 +1146,14 @@ static void set_display_enh (char ch)
   if (term->cc >= rp->nbchars)
     rp->nbchars = term->cc + 1;
   if (!term->update_all)
-    update_row (term->cr, rp);
+    update_row (term, term->cr, rp);
 }
 /*****************************************************************/
-static void set_start_field (void)
+static void set_start_field (struct hpterm * term)
 {
   struct row *rp;
 
-  rp = find_cursor_row ();
+  rp = find_cursor_row (term);
   rp->disp[term->cc] = (rp->disp[term->cc] & 0x1F) | HPTERM_START_FIELD;
   if (term->cc >= rp->nbchars)
     rp->nbchars = term->cc + 1;
@@ -1165,21 +1165,21 @@ static void set_start_field (void)
 #endif
 }
 /*****************************************************************/
-static void set_start_tx_only_field (void)
+static void set_start_tx_only_field (struct hpterm * term)
 {
   struct row *rp;
 
-  rp = find_cursor_row ();
+  rp = find_cursor_row (term);
   rp->disp[term->cc] = (rp->disp[term->cc] & 0x1F) | HPTERM_START_TX_ONLY;
   if (term->cc >= rp->nbchars)
     rp->nbchars = term->cc + 1;
 }
 /*****************************************************************/
-static void set_end_field (void)
+static void set_end_field (struct hpterm * term)
 {
   struct row *rp;
 
-  rp = find_cursor_row ();
+  rp = find_cursor_row (term);
   rp->disp[term->cc] = (rp->disp[term->cc] & 0x1F) | HPTERM_END_FIELD;
   if (term->cc >= rp->nbchars)
     rp->nbchars = term->cc + 1;
@@ -1191,17 +1191,17 @@ static void set_end_field (void)
 #endif
 }
 /*****************************************************************/
-static void set_tab (void)
+static void set_tab (struct hpterm * term)
 {
   term->TabStops[term->cc] = 1;
 }
 /*****************************************************************/
-static void clear_tab (void)
+static void clear_tab (struct hpterm * term)
 {
   term->TabStops[term->cc] = 0;
 }
 /*****************************************************************/
-static void clear_all_tabs (void)
+static void clear_all_tabs (struct hpterm * term)
 {
   int ii;
   for (ii = 0; ii < 132; ii++)
@@ -1210,7 +1210,7 @@ static void clear_all_tabs (void)
   }
 }
 /*****************************************************************/
-static void do_forward_tab (void)
+static void do_forward_tab (struct hpterm * term)
 {
   int done;
 
@@ -1222,10 +1222,10 @@ static void do_forward_tab (void)
    **      of the first field.
  */
       term->cc++;
-      goto_next_field ();
-      if (is_cursor_protected ())
+      goto_next_field (term);
+      if (is_cursor_protected (term))
 	{
-	  do_home_up ();
+	  do_home_up (term);
 	}
     }
   else
@@ -1239,7 +1239,7 @@ static void do_forward_tab (void)
 	  term->cc++;
 	  if (term->cc >= term->nbcols || term->cc >= term->RightMargin)
 	    {
-	      do_line_feed ();
+	      do_line_feed (term);
 	      term->cc = term->LeftMargin;
 	      done = 1;
 	    }
@@ -1252,44 +1252,44 @@ static void do_forward_tab (void)
   term->SPOW_latch = 0;
 }
 /*****************************************************************/
-static void do_back_tab (void)
+static void do_back_tab (struct hpterm * term)
 {
   nyi ();
 }
 /*****************************************************************/
-void do_cursor_up (void)
+void do_cursor_up (struct hpterm * term)
 {
 /*
    **  Perform 'Cursor Up' function
  */
-  erase_cursor ();
+  erase_cursor (term);
   if (term->cr)
     term->cr--;
   else
     term->cr = term->nbrows - 1;
-  update_cursor ();
+  update_cursor (term);
 }
 /*****************************************************************/
-void do_cursor_down (void)
+void do_cursor_down (struct hpterm * term)
 {
 /*
    **  Perform 'Cursor Down' function
  */
-  erase_cursor ();
+  erase_cursor (term);
   term->cr++;
   if (term->cr >= term->nbrows)
     {
       term->cr = 0;
     }
-  update_cursor ();
+  update_cursor (term);
 }
 /*****************************************************************/
-void do_cursor_right (void)
+void do_cursor_right (struct hpterm * term)
 {
 /*
    **  Perform 'Cursor Right' function
  */
-  erase_cursor ();
+  erase_cursor (term);
   term->cc++;
   if (term->cc >= term->nbcols)
     {
@@ -1300,15 +1300,15 @@ void do_cursor_right (void)
 	  term->cr = 0;
 	}
     }
-  update_cursor ();
+  update_cursor (term);
 }
 /*****************************************************************/
-void do_cursor_left (void)
+void do_cursor_left (struct hpterm * term)
 {
 /*
    **  Perform 'Cursor Left' function
  */
-  erase_cursor ();
+  erase_cursor (term);
   term->cc--;
   if (term->cc < 0)
   {
@@ -1319,10 +1319,10 @@ void do_cursor_left (void)
       term->cr = term->nbrows - 1;
     }
   }
-  update_cursor ();
+  update_cursor (term);
 }
 /*****************************************************************/
-static void do_home_up (void)
+static void do_home_up (struct hpterm * term)
 {
 /*
  **  Perform 'Home Up' function
@@ -1337,7 +1337,7 @@ static void do_home_up (void)
     if(term->dptr->prev != NULL)
     {
       while(term->dptr->prev != NULL)
-        do_roll_down();
+        do_roll_down(term);
       term->head = term->dptr;
     }
     term->cr = term->MemLockRow + 1;
@@ -1348,9 +1348,9 @@ static void do_home_up (void)
 
   if (term->FormatMode)
   {
-    if (is_cursor_protected ())
-      goto_next_field ();
-    if (is_cursor_protected ())
+    if (is_cursor_protected (term))
+      goto_next_field (term);
+    if (is_cursor_protected (term))
     {
       term->cr = 0;
       term->cc = 0;
@@ -1361,7 +1361,7 @@ static void do_home_up (void)
   term->SPOW_latch = 0;
 }
 /*****************************************************************/
-void do_home_down (void)
+void do_home_down (struct hpterm * term)
 {
 /*
  **  Perform 'Home Down' function
@@ -1370,7 +1370,7 @@ void do_home_down (void)
   struct row *rp, *bptr, *sptr1, *sptr2;
   int ii, jj, state = 1;
 
-  bptr = find_bottom_row();
+  bptr = find_bottom_row(term);
 /*
  **  Find last line of memory that is in use
  **  case 1: after display memory
@@ -1415,10 +1415,10 @@ void do_home_down (void)
       fflush (stdout);
     }
     for(jj = 0;jj < ii;jj++)
-      do_roll_up();
+      do_roll_up(term);
     term->cr = term->nbrows - 1;
-    do_carriage_return ();
-    do_line_feed ();
+    do_carriage_return (term);
+    do_line_feed (term);
     term->update_all = 1;
     return;
   }
@@ -1426,8 +1426,8 @@ void do_home_down (void)
   {
     term->cc = rp->nbchars;
     term->cr = ii;
-    do_carriage_return ();
-    do_line_feed ();
+    do_carriage_return (term);
+    do_line_feed (term);
     term->update_all = 1;
     return;
   }
@@ -1455,7 +1455,7 @@ void do_home_down (void)
       jj++;
     }
     for(ii = 0;ii < jj;ii++)
-      do_roll_down();
+      do_roll_down(term);
   }
   else
   {
@@ -1468,8 +1468,8 @@ void do_home_down (void)
     }
     term->dptr = rp;
   }
-  do_carriage_return ();
-  do_line_feed ();
+  do_carriage_return (term);
+  do_line_feed (term);
   term->update_all = 1;
 #else
   struct row *rp;
@@ -1498,14 +1498,14 @@ void do_home_down (void)
 /*
 **  Now do a carriage return and line feed to put cursor on a blank line
 */
-    do_carriage_return();
-    do_line_feed();
+    do_carriage_return(term);
+    do_line_feed(term);
     
     term->update_all = 1;
 #endif
 }
 /*****************************************************************/
-void do_clear_display (void)
+void do_clear_display (struct hpterm * term)
 {
 /*
    **  Perform 'Clear Display' function
@@ -1515,9 +1515,9 @@ void do_clear_display (void)
 
   if (term->FormatMode)
   {
-    rp = find_cursor_row ();
+    rp = find_cursor_row (term);
     j = term->cc;
-    k = is_cursor_protected ();
+    k = is_cursor_protected (term);
     while (rp)
     {
       while (j < rp->nbchars)
@@ -1542,7 +1542,7 @@ void do_clear_display (void)
 /*
    **  Find row cr in memory
  */
-  rp = find_cursor_row ();
+  rp = find_cursor_row (term);
 /*
    **  Clear current row to end of line
  */
@@ -1563,7 +1563,7 @@ void do_clear_display (void)
   term->update_all = 1;
 }
 /****************************************************************/
-void do_clear_line (void)
+void do_clear_line (struct hpterm * term)
 {
 /*
    **  Perform 'Clear Line' function
@@ -1573,11 +1573,11 @@ void do_clear_line (void)
 /*
    **  Find row cr in memory
  */
-  rp = find_cursor_row ();
+  rp = find_cursor_row (term);
 
   if (term->FormatMode)
   {
-    if (is_cursor_protected ())
+    if (is_cursor_protected (term))
     {
       /* No action */
     }
@@ -1606,11 +1606,11 @@ void do_clear_line (void)
   }
   if (!term->update_all)
   {
-    update_row (term->cr, rp);
+    update_row (term, term->cr, rp);
   }
 }
 /*****************************************************************/
-void do_insert_line (void)
+void do_insert_line (struct hpterm * term)
 {
 /*
    **  Perform 'Insert Line' function
@@ -1631,7 +1631,7 @@ void do_insert_line (void)
 /*
    **  Find row cr in memory
  */
-  rp = find_cursor_row ();
+  rp = find_cursor_row (term);
 /*
    **  Get the new row and insert into linked list
  */
@@ -1643,9 +1643,9 @@ void do_insert_line (void)
   {
     ip = term->tail;
   }
-  remove_row (ip);
+  remove_row (term, ip);
   clear_row (ip);
-  insert_before (ip, rp);
+  insert_before (term, ip, rp);
 /*
    **  Take care of inserting on first line of screen
  */
@@ -1658,7 +1658,7 @@ void do_insert_line (void)
   term->cc = 0;
 }
 /*****************************************************************/
-void do_delete_line (void)
+void do_delete_line (struct hpterm * term)
 {
 /*
    **  Perform 'Delete Line' function
@@ -1679,7 +1679,7 @@ void do_delete_line (void)
 /*
    **  Find row cr in memory
  */
-  rp = find_cursor_row ();
+  rp = find_cursor_row (term);
 /*
    **  Handle case of deleting first line of screen
  */
@@ -1690,11 +1690,11 @@ void do_delete_line (void)
 /*
    **  Remove row from linked list
  */
-  remove_row (rp);
+  remove_row (term, rp);
 /*
    **  Move row to end of linked list
  */
-  insert_after (rp, term->tail);
+  insert_after (term, rp, term->tail);
 /*
    **  Erase the row that we moved
  */
@@ -1703,22 +1703,22 @@ void do_delete_line (void)
   term->cc = 0;
 }
 /*****************************************************************/
-void do_roll_up (void)
+void do_roll_up (struct hpterm * term)
 {
 /*
    **  Perform 'Roll Text Up' function
  */
   struct row *rp;
 
-  rp = find_bottom_row ();
+  rp = find_bottom_row (term);
   if (rp->next)
   {
 #if defined(MEMLOCK_2000)
     if (term->MemoryLock)
     {
       rp = term->MemLockRP->next;
-      remove_row (rp);
-      insert_before (rp, term->dptr);
+      remove_row (term, rp);
+      insert_before (term, rp, term->dptr);
     }
     else
 #endif
@@ -1727,7 +1727,7 @@ void do_roll_up (void)
   }
 }
 /****************************************************************/
-void do_roll_down (void)
+void do_roll_down (struct hpterm * term)
 {
 /*
    **  Perform 'Roll Text Down' function
@@ -1739,8 +1739,8 @@ void do_roll_down (void)
     {
       struct row *rp;
       rp = term->dptr->prev;
-      remove_row (rp);
-      insert_after (rp, term->MemLockRP);
+      remove_row (term, rp);
+      insert_after (term, rp, term->MemLockRP);
     }
     else
 #endif
@@ -1749,7 +1749,7 @@ void do_roll_down (void)
   }
 }
 /*****************************************************************/
-void do_next_page (void)
+void do_next_page (struct hpterm * term)
 {
 /*
    **  Perform 'Next Page' function
@@ -1763,14 +1763,14 @@ void do_next_page (void)
     ii = term->nbrows - term->MemLockRow;
     while(ii)
     {
-      do_roll_up();
+      do_roll_up(term);
       ii--;
     }
   }
   else
 #endif
   {
-    rp = find_bottom_row ();
+    rp = find_bottom_row (term);
     ii = term->nbrows;
     while (ii && rp->next)
     {
@@ -1782,7 +1782,7 @@ void do_next_page (void)
   term->update_all = 1;
 }
 /****************************************************************/
-void do_previous_page (void)
+void do_previous_page (struct hpterm * term)
 {
 /*
    **  Perform 'Previous Page' function
@@ -1795,7 +1795,7 @@ void do_previous_page (void)
     ii = term->nbrows - term->MemLockRow;
     while(ii)
     {
-      do_roll_down();
+      do_roll_down(term);
       ii--;
     }
   }
@@ -1812,7 +1812,7 @@ void do_previous_page (void)
   term->update_all = 1;
 }
 /***************************************************************/
-void do_esc_amper_a_r (int parm)
+void do_esc_amper_a_r (struct hpterm * term, int parm)
 /*
    **  Perform absolute row cursor positioning
  */
@@ -1856,7 +1856,7 @@ void do_esc_amper_a_r (int parm)
   }
 }
 /***************************************************************/
-void do_esc_amper_a_plus_r (int parm)
+void do_esc_amper_a_plus_r (struct hpterm * term, int parm)
 {
 /*
    **  Position cursor using cursor relative row offset
@@ -1874,18 +1874,18 @@ void do_esc_amper_a_plus_r (int parm)
     dr++;
   }
 
-  do_esc_amper_a_r (dr + term->cr + parm);
+  do_esc_amper_a_r (term, dr + term->cr + parm);
 }
 /***************************************************************/
-void do_esc_amper_a_minus_r (int parm)
+void do_esc_amper_a_minus_r (struct hpterm * term, int parm)
 {
 /*
    **  Position cursor using cursor relative row offset
  */
-  do_esc_amper_a_plus_r (-parm);
+  do_esc_amper_a_plus_r (term, -parm);
 }
 /***************************************************************/
-void do_esc_amper_a_y (int parm)
+void do_esc_amper_a_y (struct hpterm * term, int parm)
 {
 /*
    **  Position cursor using screen relative row number
@@ -1903,10 +1903,10 @@ void do_esc_amper_a_y (int parm)
     dr++;
   }
 
-  do_esc_amper_a_r (dr + parm);
+  do_esc_amper_a_r (term, dr + parm);
 }
 /***************************************************************/
-void send_number (int i)
+void send_number (struct hpterm * term, int i)
 /*
    **  Send 3-digit decimal number
  */
@@ -1921,7 +1921,7 @@ void send_number (int i)
   term->dctxbuff[term->dctxtail++] = c + '0';
 }
 /***************************************************************/
-void send_cursor_abs (void)
+void send_cursor_abs (struct hpterm * term)
 {
 /*
    **  Send cursor position using absolute addressing
@@ -1943,13 +1943,13 @@ void send_cursor_abs (void)
   term->dctxbuff[term->dctxtail++] = ASC_ESC;
   term->dctxbuff[term->dctxtail++] = '&';
   term->dctxbuff[term->dctxtail++] = 'a';
-  send_number (term->cc);
+  send_number (term, term->cc);
   term->dctxbuff[term->dctxtail++] = 'c';
-  send_number (dr + term->cr);
+  send_number (term, dr + term->cr);
   term->dctxbuff[term->dctxtail++] = 'R';
 }
 /***************************************************************/
-void send_cursor_rel (void)
+void send_cursor_rel (struct hpterm * term)
 {
 /*
    **  Send cursor position using relative addressing
@@ -1958,13 +1958,13 @@ void send_cursor_rel (void)
   term->dctxbuff[term->dctxtail++] = ASC_ESC;
   term->dctxbuff[term->dctxtail++] = '&';
   term->dctxbuff[term->dctxtail++] = 'a';
-  send_number (term->cc);
+  send_number (term, term->cc);
   term->dctxbuff[term->dctxtail++] = 'c';
-  send_number (term->cr);
+  send_number (term, term->cr);
   term->dctxbuff[term->dctxtail++] = 'Y';
 }
 /***************************************************************/
-void reset_user_keys (void)
+void reset_user_keys (struct hpterm * term)
 {
 /*
    **  Reset user keys to the power-on state
@@ -2041,7 +2041,7 @@ struct hpterm * init_hpterm (void)
   term->menu2 = (struct row *) calloc (1, sizeof (struct row));
   term->menu2->text = (char *) calloc (1, 132);
   term->menu2->disp = (char *) calloc (1, 132);
-  reset_user_keys ();
+  reset_user_keys (term);
   term->UserSystem = 1;
 #if defined(MEMLOCK_2000)
   term->MemLockRow = 0;
@@ -2138,12 +2138,12 @@ void hpterm_winsize (struct hpterm * term, int nbrows, int nbcols)
     term->MemLockRow = 0;
 #endif
     if (term->KeyState == ks_modes)
-      update_labels ();
+      update_labels (term);
   }
   term->update_all = 1;
 }
 /***************************************************************/
-void get_terminal_status (char s[14])
+void get_terminal_status (struct hpterm * term, char s[14])
 {
 /*
    **  Build the terminal status message
@@ -2226,7 +2226,7 @@ void get_terminal_status (char s[14])
     s[13] |= 0x4;
 }
 /***************************************************************/
-void send_terminator (void)
+void send_terminator (struct hpterm * term)
 {
 /*
    **  Send block transfer terminator
@@ -2247,14 +2247,14 @@ void send_terminator (void)
   }
 }
 /***************************************************************/
-void send_primary_status (void)
+void send_primary_status (struct hpterm * term)
 {
 /*
    **  Send the primary status information
  */
   char s[14];
 
-  get_terminal_status (s);
+  get_terminal_status (term, s);
   term->dctxbuff[term->dctxtail++] = ASC_ESC;
   term->dctxbuff[term->dctxtail++] = '\\';
   term->dctxbuff[term->dctxtail++] = s[0];
@@ -2264,19 +2264,19 @@ void send_primary_status (void)
   term->dctxbuff[term->dctxtail++] = s[4];
   term->dctxbuff[term->dctxtail++] = s[5];
   term->dctxbuff[term->dctxtail++] = s[6];
-  send_terminator ();
+  send_terminator (term);
 
   term->PrimaryStatusPending = 0;
 }
 /***************************************************************/
-void send_secondary_status (void)
+void send_secondary_status (struct hpterm * term)
 {
 /*
    **  Send the secondary status information
  */
   char s[14];
 
-  get_terminal_status (s);
+  get_terminal_status (term, s);
   term->dctxbuff[term->dctxtail++] = ASC_ESC;
   term->dctxbuff[term->dctxtail++] = '|';
   term->dctxbuff[term->dctxtail++] = s[7];
@@ -2286,12 +2286,12 @@ void send_secondary_status (void)
   term->dctxbuff[term->dctxtail++] = s[11];
   term->dctxbuff[term->dctxtail++] = s[12];
   term->dctxbuff[term->dctxtail++] = s[13];
-  send_terminator ();
+  send_terminator (term);
 
   term->SecondaryStatusPending = 0;
 }
 /***************************************************************/
-void send_device_status (void)
+void send_device_status (struct hpterm * term)
 {
 
   term->dctxbuff[term->dctxtail++] = ASC_ESC;
@@ -2301,28 +2301,28 @@ void send_device_status (void)
   term->dctxbuff[term->dctxtail++] = 0x30;	/* 0x31 = Last print failed */
   term->dctxbuff[term->dctxtail++] = 0x38;	/* 0x31 = Busy, 0x38 = Completed */
   term->dctxbuff[term->dctxtail++] = 0x31;	/* 0x31 = Printer Present */
-  send_terminator ();
+  send_terminator (term);
 
   term->DeviceStatusPending = 0;
 }
 /***************************************************************/
-void send_cursor_sense (void)
+void send_cursor_sense (struct hpterm * term)
 {
 
   if (term->CursorSensePending == 1)
   {
-    send_cursor_abs ();
+    send_cursor_abs (term);
   }
   else if (term->CursorSensePending == 2)
   {
-    send_cursor_rel ();
+    send_cursor_rel (term);
   }
-  send_terminator ();
+  send_terminator (term);
 
   term->CursorSensePending = 0;
 }
 /***************************************************************/
-void send_function_key (void)
+void send_function_key (struct hpterm * term)
 {
 
   struct udf *u;
@@ -2330,7 +2330,7 @@ void send_function_key (void)
 
   if (term->SendCursorPos)
   {				/* Check page 3-3: Need Esc & a? */
-    send_cursor_abs ();		/* Sends Esc & a xxx c yyy R */
+    send_cursor_abs (term);	/* Sends Esc & a xxx c yyy R */
   }
 
   n = term->FunctionKeyPending;
@@ -2357,7 +2357,7 @@ void send_function_key (void)
       term->dctxbuff[term->dctxtail++] = u->String[j];
     }
   }
-  send_terminator ();
+  send_terminator (term);
 
   if (term->AutoKybdLock)
     term->EnableKybd = 0;
@@ -2365,7 +2365,7 @@ void send_function_key (void)
   term->FunctionKeyPending = 0;
 }
 /***************************************************************/
-int send_field (struct row *rp)
+int send_field (struct hpterm * term, struct row *rp)
 {
 /*
    **  Send a field of data starting from column cc
@@ -2390,7 +2390,7 @@ int send_field (struct row *rp)
   return (0);
 }
 /***************************************************************/
-int send_line (struct row *rp)
+int send_line (struct hpterm * term, struct row *rp)
 {
 /*
    **  Send a line of data starting from column cc
@@ -2442,7 +2442,7 @@ int send_line (struct row *rp)
   return (0);
 }
 /***************************************************************/
-void send_enter_data (void)
+void send_enter_data (struct hpterm * term)
 {
 /*
    **  This version based on pages 3-10 through 3-17 of 700/92 manual
@@ -2457,7 +2457,7 @@ void send_enter_data (void)
   {
     if (term->SendCursorPos)
     {
-      send_cursor_abs ();
+      send_cursor_abs (term);
     }
   }
 
@@ -2485,9 +2485,9 @@ void send_enter_data (void)
       term->dctxbuff[term->dctxtail++] = 'a';
       term->dctxbuff[term->dctxtail++] = i + '1';
       term->dctxbuff[term->dctxtail++] = 'k';
-      send_number (u->LabelLength);
+      send_number (term, u->LabelLength);
       term->dctxbuff[term->dctxtail++] = 'd';
-      send_number (u->StringLength);
+      send_number (term, u->StringLength);
       term->dctxbuff[term->dctxtail++] = 'L';
       for (j = 0; j < u->LabelLength; j++)
       {
@@ -2521,10 +2521,10 @@ void send_enter_data (void)
     fflush (stdout);
 #endif
 #endif
-    rp = find_cursor_row ();
+    rp = find_cursor_row (term);
     if (term->InhDC2_H)
       term->cc = 0;			/* See page 3-13 */
-    blkterm = send_line (rp);
+    blkterm = send_line (term, rp);
     if (blkterm)
     {
       term->dctxbuff[term->dctxtail++] = term->BlkTerminator;
@@ -2533,7 +2533,7 @@ void send_enter_data (void)
     {
       term->cc = 0;
       if (term->AutoLineFeed)
-	do_line_feed ();
+	do_line_feed (term);
     }
     term->dctxbuff[term->dctxtail++] = ASC_CR;
     if (term->AutoLineFeed)
@@ -2553,16 +2553,16 @@ void send_enter_data (void)
     fflush (stdout);
 #endif
 #endif
-    if (is_cursor_protected ())
-      goto_next_field ();
-    if (is_cursor_protected ())
+    if (is_cursor_protected (term))
+      goto_next_field (term);
+    if (is_cursor_protected (term))
     {
       term->dctxbuff[term->dctxtail++] = term->BlkTerminator;
     }
     else
     {
-      rp = find_cursor_row ();
-      blkterm = send_field (rp);
+      rp = find_cursor_row (term);
+      blkterm = send_field (term, rp);
       if (blkterm)
       {
 	term->dctxbuff[term->dctxtail++] = term->BlkTerminator;
@@ -2587,11 +2587,11 @@ void send_enter_data (void)
 #endif
 #endif
     if (term->InhDC2_H)
-      do_home_up ();
+      do_home_up (term);
 /*
    **      Find last line of used memory
  */
-    re = rp = find_cursor_row ();
+    re = rp = find_cursor_row (term);
     while (rp->next)
     {
       rp = rp->next;
@@ -2604,8 +2604,8 @@ void send_enter_data (void)
     done = 0;
     while (!done)
     {
-      rp = find_cursor_row ();
-      blkterm = send_line (rp);
+      rp = find_cursor_row (term);
+      blkterm = send_line (term, rp);
       if (blkterm)
       {
 	done = 1;
@@ -2615,7 +2615,7 @@ void send_enter_data (void)
 	term->dctxbuff[term->dctxtail++] = ASC_CR;
 	term->dctxbuff[term->dctxtail++] = ASC_LF;
 	term->cc = 0;
-	do_line_feed ();
+	do_line_feed (term);
       }
       if (rp == re)
 	done = 1;
@@ -2637,15 +2637,15 @@ void send_enter_data (void)
 #endif
 #endif
     if (term->InhDC2_H)
-      do_home_up ();
+      do_home_up (term);
 
     done = 0;
     count = 0;
     while (!done)
     {
-      if (is_cursor_protected ())
+      if (is_cursor_protected (term))
       {
-	goto_next_field ();
+	goto_next_field (term);
 #if defined(MEMLOCK_2000)
 #if DEBUG_BLOCK_MODE
 	printf ("is_cursor_protected true (goto next)\n");
@@ -2662,7 +2662,7 @@ void send_enter_data (void)
       }
 #endif
 #endif
-      if (is_cursor_protected ())
+      if (is_cursor_protected (term))
       {
 	done = 1;
 #if defined(MEMLOCK_2000)
@@ -2691,8 +2691,8 @@ void send_enter_data (void)
 #endif
 #endif
 	}
-	rp = find_cursor_row ();
-	blkterm = send_field (rp);
+	rp = find_cursor_row (term);
+	blkterm = send_field (term, rp);
 	if (blkterm)
 	{
 	  done = 1;
@@ -2726,16 +2726,16 @@ void send_enter_data (void)
     fflush (stdout);
 #endif
 #endif
-    if (is_cursor_protected ())
-      goto_next_field ();
-    if (is_cursor_protected ())
+    if (is_cursor_protected (term))
+      goto_next_field (term);
+    if (is_cursor_protected (term))
     {
       term->dctxbuff[term->dctxtail++] = term->BlkTerminator;
     }
     else
     {
-      rp = find_cursor_row ();	/*??? */
-      blkterm = send_field (rp);
+      rp = find_cursor_row (term);	/*??? */
+      blkterm = send_field (term, rp);
       if (blkterm)
 	term->dctxbuff[term->dctxtail++] = term->BlkTerminator;
     }
@@ -2757,9 +2757,9 @@ void send_enter_data (void)
     fflush (stdout);
 #endif
 #endif
-    rp = find_cursor_row ();
+    rp = find_cursor_row (term);
     term->cc = ccsave = term->StartCol;
-    blkterm = send_line (rp);
+    blkterm = send_line (term, rp);
     if (blkterm)
     {
       term->dctxbuff[term->dctxtail++] = term->BlkTerminator;
@@ -2780,7 +2780,7 @@ void send_enter_data (void)
     {
       term->LineModify = 0;
       if (term->KeyState == ks_modes)
-	update_labels ();
+	update_labels (term);
     }
 
   }
@@ -2795,9 +2795,9 @@ void send_enter_data (void)
     fflush (stdout);
 #endif
 #endif
-    rp = find_cursor_row ();
+    rp = find_cursor_row (term);
     term->cc = term->LeftMargin;
-    blkterm = send_line (rp);
+    blkterm = send_line (term, rp);
     if (blkterm)
     {
       term->dctxbuff[term->dctxtail++] = term->BlkTerminator;
@@ -2805,7 +2805,7 @@ void send_enter_data (void)
     else
     {
       term->cc = 0;
-      do_line_feed ();
+      do_line_feed (term);
     }
     term->dctxbuff[term->dctxtail++] = ASC_CR;
     if (term->AutoLineFeed)
@@ -2823,16 +2823,16 @@ void send_enter_data (void)
   term->EnterKeyPending = 0;
 }
 /***************************************************************/
-void send_device_completion_status (void)
+void send_device_completion_status (struct hpterm * term)
 {
 /*
    **  Needed for External Devices
  */
-  send_terminator ();
+  send_terminator (term);
   term->DeviceCompletionPending = 0;
 }
 /***************************************************************/
-void send_terminal_id (void)
+void send_terminal_id (struct hpterm * term)
 {
 
   int ii;
@@ -2841,12 +2841,12 @@ void send_terminal_id (void)
   {
     term->dctxbuff[term->dctxtail++] = term->TerminalId[ii];
   }
-  send_terminator ();
+  send_terminator (term);
 
   term->TerminalIdPending = 0;
 }
 /***************************************************************/
-int check_type1_handshake (void)
+int check_type1_handshake (struct hpterm * term)
 {
 /*
    **  Check the status of the type 1 handshake
@@ -2858,7 +2858,7 @@ int check_type1_handshake (void)
   return (1);
 }
 /***************************************************************/
-int check_type2_handshake (void)
+int check_type2_handshake (struct hpterm * term)
 {
 /*
    **  Check the status of the type 2 handshake
@@ -2879,7 +2879,7 @@ int check_type2_handshake (void)
   return (out);
 }
 /***************************************************************/
-int check_type3_handshake (void)
+int check_type3_handshake (struct hpterm * term)
 {
 /*
    **  Check the status of the type 3 handshake
@@ -2904,7 +2904,7 @@ int check_type3_handshake (void)
     term->DC1Count = 0;
     term->DC2Count = 1;
 #if SHOW_DC1_COUNT
-    update_labels ();
+    update_labels (term);
 #endif
     out = 0;
   }
@@ -2919,7 +2919,7 @@ int check_type3_handshake (void)
   return (out);
 }
 /***************************************************************/
-int check_short_block_handshake (void)
+int check_short_block_handshake (struct hpterm * term)
 {
 /*
    **  Check the status of the short block handshake.
@@ -2930,20 +2930,20 @@ int check_short_block_handshake (void)
 
   if (!term->InhHndShk_G)
   {
-    out = check_type2_handshake ();
+    out = check_type2_handshake (term);
   }
   else if (!term->InhDC2_H)
   {
-    out = check_type3_handshake ();
+    out = check_type3_handshake (term);
   }
   else
   {
-    out = check_type1_handshake ();
+    out = check_type1_handshake (term);
   }
   return (out);
 }
 /***************************************************************/
-int check_long_block_handshake (void)
+int check_long_block_handshake (struct hpterm * term)
 {
 /*
    **  Check the status of the long block handshake.
@@ -2954,16 +2954,16 @@ int check_long_block_handshake (void)
 
   if (!term->InhDC2_H)
   {
-    out = check_type3_handshake ();
+    out = check_type3_handshake (term);
   }
   else
   {
-    out = check_type1_handshake ();
+    out = check_type1_handshake (term);
   }
   return (out);
 }
 /****************************************************************/
-int check_long_character_handshake (void)
+int check_long_character_handshake (struct hpterm * term)
 {
 /*
    **  Check the status of the long character handshake.
@@ -2974,16 +2974,16 @@ int check_long_character_handshake (void)
 
   if (term->InhHndShk_G && !term->InhDC2_H)
   {
-    out = check_type3_handshake ();
+    out = check_type3_handshake (term);
   }
   else
   {
-    out = check_type1_handshake ();
+    out = check_type1_handshake (term);
   }
   return (out);
 }
 /***************************************************************/
-void check_transfers_pending (void)
+void check_transfers_pending (struct hpterm * term)
 {
 /*
    **  Check the status of any terminal-to-computer transfers
@@ -2994,69 +2994,69 @@ void check_transfers_pending (void)
 
   if (term->PrimaryStatusPending)
   {
-    ok = check_short_block_handshake ();
+    ok = check_short_block_handshake (term);
     if (ok)
-      send_primary_status ();
+      send_primary_status (term);
   }
   else if (term->SecondaryStatusPending)
   {
-    ok = check_short_block_handshake ();
+    ok = check_short_block_handshake (term);
     if (ok)
-      send_secondary_status ();
+      send_secondary_status (term);
   }
   else if (term->DeviceStatusPending)
   {
-    ok = check_short_block_handshake ();
+    ok = check_short_block_handshake (term);
     if (ok)
-      send_device_status ();
+      send_device_status (term);
   }
   else if (term->CursorSensePending)
   {
-    ok = check_short_block_handshake ();
+    ok = check_short_block_handshake (term);
     if (ok)
-      send_cursor_sense ();
+      send_cursor_sense (term);
   }
   else if (term->FunctionKeyPending)
   {
     if (term->BlockMode && term->LinePage_D)
     {
-      ok = check_long_block_handshake ();
+      ok = check_long_block_handshake (term);
     }
     else
     {
-      ok = check_short_block_handshake ();
+      ok = check_short_block_handshake (term);
     }
     if (ok)
-      send_function_key ();
+      send_function_key (term);
   }
   else if (term->EnterKeyPending)
   {
     if (term->EnterKeyPending == 2)
     {				/* Esc d */
-      ok = check_short_block_handshake ();
+      ok = check_short_block_handshake (term);
     }
     else if (term->BlockMode)
     {
-      ok = check_long_block_handshake ();
+      ok = check_long_block_handshake (term);
     }
     else
     {
-      ok = check_long_character_handshake ();
+      ok = check_long_character_handshake (term);
     }
     if (ok)
-      send_enter_data ();
+      send_enter_data (term);
   }
   else if (term->DeviceCompletionPending)
   {
-    ok = check_short_block_handshake ();
+    ok = check_short_block_handshake (term);
     if (ok)
-      send_device_completion_status ();
+      send_device_completion_status (term);
   }
   else if (term->TerminalIdPending)
   {
-    ok = check_short_block_handshake ();
+    ok = check_short_block_handshake (term);
     if (ok)
-      send_terminal_id ();
+      send_terminal_id (term);
   }
   else
   {
@@ -3103,7 +3103,7 @@ static void hpterm_rxchar (char ch)
     }
 #endif
 
-  erase_cursor ();
+  erase_cursor (term);
 /*
    **  Set the following true if you think your display has nice
    **  symbols for the control characters
@@ -3113,7 +3113,7 @@ static void hpterm_rxchar (char ch)
   if (term->DisplayFuncs)
   {
     if (HAVE_BITMAPS)
-      display_char (ch);
+      display_char (term, ch);
     else if (ich < 32)
     {
       const char *ascii_ctl[] =
@@ -3126,33 +3126,33 @@ static void hpterm_rxchar (char ch)
        "cn", "em", "sb", "ec",
        "fs", "gs", "rs", "us"};
       char *ptr = (char *) ascii_ctl[ich];
-      display_char ('<');
-      display_char (*ptr);
-      display_char (*(ptr + 1));
-      display_char ('>');
+      display_char (term, '<');
+      display_char (term, *ptr);
+      display_char (term, *(ptr + 1));
+      display_char (term, '>');
     }
     else if (ich > 127)
     {
 #define HEXIFY(ch) (char)((ch < 10) ? (ch+'0') : (ch+'7'))
       int ch1 = ((ich >> 4) & 0x0F), ch2 = (ich & 0x0F);
-      display_char ('<');
-      display_char (HEXIFY (ch1));
-      display_char (HEXIFY (ch2));
-      display_char ('>');
+      display_char (term, '<');
+      display_char (term, HEXIFY (ch1));
+      display_char (term, HEXIFY (ch2));
+      display_char (term, '>');
 #undef HEXIFY
     }
     else
-      display_char (ich);
+      display_char (term, ich);
     if (ch == ASC_LF)
     {
-      do_carriage_return ();
-      do_line_feed ();
+      do_carriage_return (term);
+      do_line_feed (term);
     }
     if (term->state == 1 && ch == 'Z' && term->DisplayFuncs == 1)
     {
       term->DisplayFuncs = 0;
       if (term->KeyState == ks_modes)
-	update_labels ();
+	update_labels (term);
     }
     if (ich == ASC_ESC)
       term->state = 1;
@@ -3165,9 +3165,9 @@ static void hpterm_rxchar (char ch)
   {
     term->DC1Count++;
 #if SHOW_DC1_COUNT
-    update_labels ();
+    update_labels (term);
 #endif
-    check_transfers_pending ();
+    check_transfers_pending (term);
     goto done;
   }
 
@@ -3183,24 +3183,24 @@ static void hpterm_rxchar (char ch)
     if (ich == ASC_ESC)
       term->state = 1;
     else if (ich == ASC_CR)
-      do_carriage_return ();
+      do_carriage_return (term);
     else if (ich == ASC_LF)
-      do_line_feed ();
+      do_line_feed (term);
     else if (ich == ASC_BEL)
       do_bell ();
     else if (ich == ASC_BS)
-      do_back_space ();
+      do_back_space (term);
     else if (ich == ASC_HT)
-      do_forward_tab ();
+      do_forward_tab (term);
     else if (ich >= 32)
       {
 #if defined(kai_changes)
       if (term->state_B == 0) 		/* added to filter out ESC)B, 18.12.2000 */
-        display_char (ich);
+	display_char (term, ich);
       else
         term->state_B = 0;
 #else
-      display_char (ich);
+      display_char (term, ich);
 #endif
       }  
     break;
@@ -3211,17 +3211,17 @@ static void hpterm_rxchar (char ch)
     }
     else if (ich == '1')
     {
-      set_tab ();
+      set_tab (term);
       term->state = 0;
     }
     else if (ich == '2')
     {
-      clear_tab ();
+      clear_tab (term);
       term->state = 0;
     }
     else if (ich == '3')
     {
-      clear_all_tabs ();
+      clear_all_tabs (term);
       term->state = 0;
     }
     else if (ich == '4')
@@ -3242,27 +3242,27 @@ static void hpterm_rxchar (char ch)
     }
     else if (ich == '@')
     {
-      do_esc_atsign ();
+      do_esc_atsign (term);
       term->state = 0;
     }
     else if (ich == 'A')
     {
-      do_cursor_up ();
+      do_cursor_up (term);
       term->state = 0;
     }
     else if (ich == 'B')
     {
-      do_cursor_down ();
+      do_cursor_down (term);
       term->state = 0;
     }
     else if (ich == 'C')
     {
-      do_cursor_right ();
+      do_cursor_right (term);
       term->state = 0;
     }
     else if (ich == 'D')
     {
-      do_cursor_left ();
+      do_cursor_left (term);
       term->state = 0;
     }
     else if (ich == 'E')
@@ -3272,49 +3272,49 @@ static void hpterm_rxchar (char ch)
     }
     else if (ich == 'F')
     {
-      do_home_down ();
+      do_home_down (term);
       term->state = 0;
     }
     else if (ich == 'H' || ich == 'h')
     {
-      do_home_up ();
+      do_home_up (term);
       term->state = 0;
     }
     else if (ich == 'G')
     {
-      do_carriage_return ();
+      do_carriage_return (term);
       term->state = 0;
     }
     else if (ich == 'I')
     {
-      do_forward_tab ();
+      do_forward_tab (term);
       term->state = 0;
     }
     else if (ich == 'J')
     {
-      do_clear_display ();
+      do_clear_display (term);
       term->state = 0;
     }
     else if (ich == 'K')
     {
-      do_clear_line ();
+      do_clear_line (term);
       term->state = 0;
     }
     else if (ich == 'L')
     {
-      do_insert_line ();
+      do_insert_line (term);
       term->state = 0;
     }
     else if (ich == 'M')
     {
-      do_delete_line ();
+      do_delete_line (term);
       term->state = 0;
     }
     else if (ich == 'N')
     {
       term->InsertMode = 2;	/* Insert Char w/wraparound */
       if (term->KeyState)
-	update_labels ();
+	update_labels (term);
       term->state = 0;
     }
     else if (ich == 'O')
@@ -3324,41 +3324,41 @@ static void hpterm_rxchar (char ch)
     }
     else if (ich == 'P')
     {
-      do_delete_char ();
+      do_delete_char (term);
       term->state = 0;
     }
     else if (ich == 'Q')
     {
       term->InsertMode = 1;	/* Insert Char w/o wraparound */
       if (term->KeyState)
-	update_labels ();
+	update_labels (term);
       term->state = 0;
     }
     else if (ich == 'R')
     {
       term->InsertMode = 0;
       if (term->KeyState)
-	update_labels ();
+	update_labels (term);
       term->state = 0;
     }
     else if (ich == 'S')
     {
-      do_roll_up ();
+      do_roll_up (term);
       term->state = 0;
     }
     else if (ich == 'T')
     {
-      do_roll_down ();
+      do_roll_down (term);
       term->state = 0;
     }
     else if (ich == 'U')
     {
-      do_next_page ();
+      do_next_page (term);
       term->state = 0;
     }
     else if (ich == 'V')
     {
-      do_previous_page ();
+      do_previous_page (term);
       term->state = 0;
     }
     else if (ich == 'W')
@@ -3368,8 +3368,8 @@ static void hpterm_rxchar (char ch)
       fflush (stdout);
 #endif
       term->FormatMode = 1;
-      if (is_cursor_protected ())
-	do_forward_tab ();
+      if (is_cursor_protected (term))
+	do_forward_tab (term);
       term->state = 0;
     }
     else if (ich == 'X')
@@ -3387,7 +3387,7 @@ static void hpterm_rxchar (char ch)
       {
 	term->DisplayFuncs = 1;
 	if (term->KeyState == ks_modes)
-	  update_labels ();
+	  update_labels (term);
       }
       term->state = 0;
     }
@@ -3397,36 +3397,36 @@ static void hpterm_rxchar (char ch)
       {
 	term->DisplayFuncs = 0;
 	if (term->KeyState == ks_modes)
-	  update_labels ();
+	  update_labels (term);
       }
       term->state = 0;
     }
     else if (ich == '[')
     {
-      set_start_field ();
+      set_start_field (term);
       term->state = 0;
     }
     else if (ich == ']')
     {
-      set_end_field ();
+      set_end_field (term);
       term->state = 0;
     }
     else if (ich == '^')
     {
       term->PrimaryStatusPending = 1;
-      check_transfers_pending ();
+      check_transfers_pending (term);
       term->state = 0;
     }
     else if (ich == '~')
     {
       term->SecondaryStatusPending = 1;
-      check_transfers_pending ();
+      check_transfers_pending (term);
       term->state = 0;
     }
     else if (ich == 'a')
     {
       term->CursorSensePending = 1;	/* 1=abs, 2=rel */
-      check_transfers_pending ();
+      check_transfers_pending (term);
       term->state = 0;
     }
     else if (ich == 'b')
@@ -3445,9 +3445,9 @@ static void hpterm_rxchar (char ch)
       term->DC1Count = 0;	/* See note on page 3-18 */
       term->DC2Count = 0;
 #if SHOW_DC1_COUNT
-      update_labels ();
+      update_labels (term);
 #endif
-      check_transfers_pending ();
+      check_transfers_pending (term);
       term->state = 0;
     }
     else if (ich == 'f')
@@ -3457,12 +3457,12 @@ static void hpterm_rxchar (char ch)
     }
     else if (ich == 'g')
     {
-      do_soft_reset ();
+      do_soft_reset (term);
       term->state = 0;
     }
     else if (ich == 'i')
     {
-      do_back_tab ();
+      do_back_tab (term);
       term->state = 0;
     }
     else if (ich == 'j')
@@ -3481,13 +3481,13 @@ static void hpterm_rxchar (char ch)
 #if defined(MEMLOCK_2000)
       term->MemLockRow = term->cr - 1;
       term->cr = term->cr - 1;
-      term->MemLockRP = find_cursor_row ();
+      term->MemLockRP = find_cursor_row (term);
       term->cr = term->cr + 1;
 #else
       term->MemLockRow = term->cr;
 #endif
       if (term->KeyState == ks_modes)
-	update_labels ();
+	update_labels (term);
       term->state = 0;
     }
     else if (ich == 'm')
@@ -3498,7 +3498,7 @@ static void hpterm_rxchar (char ch)
       term->MemLockRow = 0;
 #endif
       if (term->KeyState == ks_modes)
-	      update_labels ();
+	      update_labels (term);
       term->state = 0;
     }
     else if (ich >= 'p' && ich <= 'w')
@@ -3511,13 +3511,13 @@ static void hpterm_rxchar (char ch)
       /* Turn display functions on, but esc Z can't clear it */
       term->DisplayFuncs = 2;
       if (term->KeyState == ks_modes)
-	update_labels ();
+	update_labels (term);
       term->state = 0;
     }
     else if (ich == '\'')
     {
       term->CursorSensePending = 2;	/* 1=abs, 2=rel */
-      check_transfers_pending ();
+      check_transfers_pending (term);
       term->state = 0;
     }
     else if (ich == '*')
@@ -3526,7 +3526,7 @@ static void hpterm_rxchar (char ch)
     }
     else if (ich == '{')
     {
-      set_start_tx_only_field ();
+      set_start_tx_only_field (term);
       term->state = 0;
     }
     else if ((ich == ')') || (ich == '('))
@@ -3537,14 +3537,14 @@ static void hpterm_rxchar (char ch)
     {
 #if defined(kai_changes)
 /* Änderung um ESC)B auszufiltern, 18.12 */
-      /* display_char ('E');
-      display_char ('c');
-      display_char (ich); */
+      /* display_char (term, 'E');
+      display_char (term, 'c');
+      display_char (term, ich); */
       term->state_B = 1;  
 #else
-      display_char ('E');
-      display_char ('c');
-      display_char (ich);
+      display_char (term, 'E');
+      display_char (term, 'c');
+      display_char (term, ich);
 #endif
       term->state = 0;
     }
@@ -3618,7 +3618,7 @@ static void hpterm_rxchar (char ch)
     }
     else if (ich == 'y')
     {
-      do_esc_amper_a_y (term->parm);
+	do_esc_amper_a_y (term, term->parm);
       term->parm = 0;
     }
     else if (ich == 'r')
@@ -3626,7 +3626,7 @@ static void hpterm_rxchar (char ch)
 #if defined(MEMLOCK_2000)
       if (!term->MemoryLock)
 #endif
-	do_esc_amper_a_r (term->parm);
+      do_esc_amper_a_r (term, term->parm);
       term->parm = 0;
     }
     else if (ich == 'C')
@@ -3638,7 +3638,7 @@ static void hpterm_rxchar (char ch)
     }
     else if (ich == 'Y')
     {
-      do_esc_amper_a_y (term->parm);
+	do_esc_amper_a_y (term, term->parm);
       term->state = 0;
     }
     else if (ich == 'R')
@@ -3646,7 +3646,7 @@ static void hpterm_rxchar (char ch)
 #if defined(MEMLOCK_2000)
       if (!term->MemoryLock)
 #endif
-	do_esc_amper_a_r (term->parm);
+      do_esc_amper_a_r (term, term->parm);
       term->state = 0;
     }
     else
@@ -3673,7 +3673,7 @@ static void hpterm_rxchar (char ch)
 #if defined(MEMLOCK_2000)
       if (!term->MemoryLock)
 #endif
-	do_esc_amper_a_plus_r (term->parm);
+        do_esc_amper_a_plus_r (term, term->parm);
       term->parm = 0;
       term->state = 3;
     }
@@ -3689,7 +3689,7 @@ static void hpterm_rxchar (char ch)
 #if defined(MEMLOCK_2000)
       if (!term->MemoryLock)
 #endif
-	do_esc_amper_a_plus_r (term->parm);
+	do_esc_amper_a_plus_r (term, term->parm);
       term->state = 0;
     }
     else
@@ -3716,7 +3716,7 @@ static void hpterm_rxchar (char ch)
 #if defined(MEMLOCK_2000)
       if (!term->MemoryLock)
 #endif
-	do_esc_amper_a_minus_r (term->parm);
+	do_esc_amper_a_minus_r (term, term->parm);
       term->parm = 0;
       term->state = 3;
     }
@@ -3732,7 +3732,7 @@ static void hpterm_rxchar (char ch)
 #if defined(MEMLOCK_2000)
       if (!term->MemoryLock)
 #endif
-	do_esc_amper_a_minus_r (term->parm);
+	do_esc_amper_a_minus_r (term, term->parm);
       term->state = 0;
     }
     else
@@ -3753,7 +3753,7 @@ static void hpterm_rxchar (char ch)
     }
     else if (ich >= '@' && ich <= 'O')
     {
-      set_display_enh (ich);
+      set_display_enh (term, ich);
       term->state = 0;
     }
     else
@@ -3788,7 +3788,7 @@ static void hpterm_rxchar (char ch)
     else if (ich == '^')
     {
       term->TerminalIdPending = 1;
-      check_transfers_pending ();
+      check_transfers_pending (term);
       term->state = 0;
     }
     else
@@ -3805,19 +3805,19 @@ static void hpterm_rxchar (char ch)
     else if (ich == '@')
     {
       term->KeyState = ks_off;
-      update_labels ();
+      update_labels (term);
       term->state = 0;
     }
     else if (ich == 'A')
     {
       term->KeyState = ks_modes;
-      update_labels ();
+      update_labels (term);
       term->state = 0;
     }
     else if (ich == 'B')
     {
       term->KeyState = ks_user;
-      update_labels ();
+      update_labels (term);
       term->state = 0;
     }
     else if (ich == 'C')
@@ -3826,7 +3826,7 @@ static void hpterm_rxchar (char ch)
       {
 	free (term->Message);
 	term->Message = 0;
-	update_labels ();
+	update_labels (term);
       }
       term->state = 0;
     }
@@ -3868,7 +3868,7 @@ static void hpterm_rxchar (char ch)
     term->Message[term->nparm++] = ich;
     if (term->nparm == term->parm)
     {
-      update_labels ();
+      update_labels (term);
       term->state = 0;
     }
     break;
@@ -3887,7 +3887,7 @@ static void hpterm_rxchar (char ch)
       term->keyn = term->sign * term->parm;
       if (term->keyn >= 1 && term->keyn <= 8)
       {
-	do_function_button (term->keyn - 1);
+        do_function_button (term, term->keyn - 1);
 	term->state = 0;
 #if defined(MEMLOCK_2000)
 	term->parm = 0;
@@ -3900,7 +3900,7 @@ static void hpterm_rxchar (char ch)
       }
       else if (term->keyn == -1)
       {
-	hpterm_kbd_Enter ();
+	hpterm_kbd_Enter (term);
 	term->state = 0;
 #if defined(MEMLOCK_2000)
 	term->parm = 0;
@@ -4066,13 +4066,13 @@ static void hpterm_rxchar (char ch)
     {
       term->AutoLineFeed = term->parm;
       if (term->KeyState == ks_modes)
-	update_labels ();
+	update_labels (term);
     }
     else if (ich == 'b' || ich == 'B')
     {
       term->BlockMode = term->parm;
       if (term->KeyState == ks_modes)
-	update_labels ();
+	update_labels (term);
 #if DEBUG_BLOCK_MODE
       printf ("BlockMode = %d\n", term->parm);
       fflush (stdout);
@@ -4102,7 +4102,7 @@ static void hpterm_rxchar (char ch)
     {
       term->ModifyAll = term->parm;
       if (term->KeyState == ks_modes)
-	update_labels ();
+	update_labels (term);
     }
     else if (ich == 'p' || ich == 'P')
     {
@@ -4116,13 +4116,13 @@ static void hpterm_rxchar (char ch)
     {
       term->RemoteMode = term->parm;
       if (term->KeyState == ks_modes)
-	update_labels ();
+	update_labels (term);
     }
     else if (ich == '[')
     {
       term->SmoothScroll = term->parm;
       if (term->KeyState == ks_modes)
-	update_labels ();
+	update_labels (term);
       term->state = 0;
     }
     else if (ich == ']')
@@ -4311,12 +4311,12 @@ static void hpterm_rxchar (char ch)
     break;
   }
 done:
-  update_cursor ();
+  update_cursor (term);
 }
 /*************************************************************************/
 /*     Keyboard handling routines                                        */
 /*************************************************************************/
-static void process_keyboard (char *buf, size_t nbuf)
+static void process_keyboard (struct hpterm * term, char *buf, size_t nbuf)
 {
 /*
    **  Process data from the keyboard
@@ -4348,7 +4348,7 @@ static void process_keyboard (char *buf, size_t nbuf)
       term->DC1Count = 0;
       term->DC2Count = 0;
 #if SHOW_DC1_COUNT
-      update_labels ();
+      update_labels (term);
 #endif
     }
     if (term->LocalEcho)
@@ -4362,14 +4362,14 @@ static void process_keyboard (char *buf, size_t nbuf)
   }
 }
 /*************************************************************************/
-static void process_keyboard_A (char *buf, size_t nbuf)
+static void process_keyboard_A (struct hpterm * term, char *buf, size_t nbuf)
 {
 /*
    **  Process keystroke for a key that is controlled by the A strap
  */
   if (term->XmitFnctn_A)
   {
-    process_keyboard (buf, nbuf);
+    process_keyboard (term, buf, nbuf);
   }
   else
   {
@@ -4377,22 +4377,22 @@ static void process_keyboard_A (char *buf, size_t nbuf)
   }
 }
 /*************************************************************************/
-void hpterm_kbd_ascii (char ch)
+void hpterm_kbd_ascii (struct hpterm * term, char ch)
 {
 /*
    **  Process a normal character typed on the keyboard
  */
   if (term->EnableKybd || IGNORE_KEYBOARD_LOCK)
   {
-    process_keyboard (&ch, 1);
+    process_keyboard (term, &ch, 1);
     if (ch == ASC_CR && term->AutoLineFeed)
     {
-      process_keyboard ("\012", 1);
+      process_keyboard (term, "\012", 1);
     }
   }
 }
 /*************************************************************************/
-void hpterm_kbd_Break (void)
+void hpterm_kbd_Break (struct hpterm * term)
 {
   if (term->RemoteMode)
   {
@@ -4404,26 +4404,26 @@ void hpterm_kbd_Break (void)
     term->DC1Count = 0;
     term->DC2Count = 0;
 #if SHOW_DC1_COUNT
-    update_labels ();
+    update_labels (term);
 #endif
   }
 }
 /*************************************************************************/
-void hpterm_kbd_User (void)
+void hpterm_kbd_User (struct hpterm * term)
 {
   if (term->UserSystem || IGNORE_USER_SYSTEM_LOCK)
   {
     term->KeyState = ks_user;
   }
-  update_labels ();
+  update_labels (term);
 }
 /*************************************************************************/
-void hpterm_kbd_Reset (void)
+void hpterm_kbd_Reset (struct hpterm * term)
 {
-  do_soft_reset ();
+  do_soft_reset (term);
 }
 /*************************************************************************/
-void hpterm_kbd_Menu (void)
+void hpterm_kbd_Menu (struct hpterm * term)
 {
   if (term->UserSystem || IGNORE_USER_SYSTEM_LOCK)
   {
@@ -4436,124 +4436,124 @@ void hpterm_kbd_Menu (void)
       term->KeyState = ks_off;
     }
   }
-  update_labels ();
+  update_labels (term);
 }
 /*************************************************************************/
-void hpterm_kbd_System (void)
+void hpterm_kbd_System (struct hpterm * term)
 {
   if (term->UserSystem || IGNORE_USER_SYSTEM_LOCK)
   {
     term->KeyState = ks_system;
   }
-  update_labels ();
+  update_labels (term);
 }
 #if defined(MEMLOCK_2000)
 /*************************************************************************/
-void hpterm_kbd_Modes (void)
+void hpterm_kbd_Modes (struct hpterm * term)
 {
   if (term->UserSystem || IGNORE_USER_SYSTEM_LOCK)
   {
     term->KeyState = ks_modes;
   }
-  update_labels ();
+  update_labels (term);
 }
 #endif
 #if defined(MEMLOCK_2000)
 /*************************************************************************/
-void hpterm_kbd_Clear (void)
+void hpterm_kbd_Clear (struct hpterm * term)
 {
-  process_keyboard_A ("\033J", 2);
+  process_keyboard_A (term, "\033J", 2);
 }
 #endif
 /*************************************************************************/
-void hpterm_kbd_ClearLine (void)
+void hpterm_kbd_ClearLine (struct hpterm * term)
 {
-  process_keyboard_A ("\033K", 2);
+  process_keyboard_A (term, "\033K", 2);
 }
 /*************************************************************************/
-void hpterm_kbd_InsertLine (void)
+void hpterm_kbd_InsertLine (struct hpterm * term)
 {
-  process_keyboard_A ("\033L", 2);
+  process_keyboard_A (term, "\033L", 2);
 }
 /*************************************************************************/
-void hpterm_kbd_InsertChar (void)
+void hpterm_kbd_InsertChar (struct hpterm * term)
 {
 /*
    **  Implement toggle
  */
   if (term->InsertMode)
   {
-    process_keyboard_A ("\033R", 2);	/* Disable */
+    process_keyboard_A (term,"\033R", 2);	/* Disable */
   }
   else
   {
-    process_keyboard_A ("\033Q", 2);	/* Enable */
+    process_keyboard_A (term, "\033Q", 2);	/* Enable */
   }
 }
 /*************************************************************************/
-void hpterm_kbd_DeleteLine (void)
+void hpterm_kbd_DeleteLine (struct hpterm * term)
 {
-  process_keyboard_A ("\033M", 2);
+  process_keyboard_A (term, "\033M", 2);
 }
 /*************************************************************************/
-void hpterm_kbd_DeleteChar (void)
+void hpterm_kbd_DeleteChar (struct hpterm * term)
 {
-  process_keyboard_A ("\033P", 2);
+  process_keyboard_A (term, "\033P", 2);
 }
 /*************************************************************************/
-void hpterm_kbd_BackTab (void)
+void hpterm_kbd_BackTab (struct hpterm * term)
 {
-  process_keyboard_A ("\033i", 2);
+  process_keyboard_A (term, "\033i", 2);
 }
 /*************************************************************************/
-void hpterm_kbd_KP_BackTab (void)
+void hpterm_kbd_KP_BackTab (struct hpterm * term)
 {
-  process_keyboard_A ("\033i", 2);
+  process_keyboard_A (term, "\033i", 2);
 }
 /*************************************************************************/
-void hpterm_kbd_Home (void)
+void hpterm_kbd_Home (struct hpterm * term)
 {
-  process_keyboard_A ("\033H", 2);
+  process_keyboard_A (term, "\033H", 2);
 }
-void hpterm_kbd_Up (void)
+void hpterm_kbd_Up (struct hpterm * term)
 {
-  process_keyboard_A ("\033A", 2);
+  process_keyboard_A (term, "\033A", 2);
 }
-void hpterm_kbd_Right (void)
+void hpterm_kbd_Right (struct hpterm * term)
 {
-  process_keyboard_A ("\033C", 2);
+  process_keyboard_A (term, "\033C", 2);
 }
-void hpterm_kbd_Left (void)
+void hpterm_kbd_Left (struct hpterm * term)
 {
-  process_keyboard_A ("\033D", 2);
+  process_keyboard_A (term, "\033D", 2);
 }
-void hpterm_kbd_Down (void)
+void hpterm_kbd_Down (struct hpterm * term)
 {
-  process_keyboard_A ("\033B", 2);
+  process_keyboard_A (term, "\033B", 2);
 }
-void hpterm_kbd_Prev (void)
+void hpterm_kbd_Prev (struct hpterm * term)
 {
-  process_keyboard_A ("\033V", 2);
+  process_keyboard_A (term, "\033V", 2);
 }
-void hpterm_kbd_Next (void)
+void hpterm_kbd_Next (struct hpterm * term)
 {
-  process_keyboard_A ("\033U", 2);
+  process_keyboard_A (term, "\033U", 2);
 }
-void hpterm_kbd_RollUp (void)
+void hpterm_kbd_RollUp (struct hpterm * term)
 {
-  process_keyboard_A ("\033S", 2);
+  process_keyboard_A (term, "\033S", 2);
 }
-void hpterm_kbd_RollDown (void)
+void hpterm_kbd_RollDown (struct hpterm * term)
 {
-  process_keyboard_A ("\033T", 2);
+  process_keyboard_A (term, "\033T", 2);
 }
-void hpterm_kbd_HomeDown (void)
+void hpterm_kbd_HomeDown (struct hpterm * term)
 {
-  process_keyboard_A ("\033F", 2);
+  process_keyboard_A (term, "\033F", 2);
 }
 
 /***************************************************************/
-void do_mode_button (int i)
+void do_mode_button (struct hpterm * term, int i)
 {
 /*
    **  Perform mode button keypress
@@ -4579,11 +4579,11 @@ void do_mode_button (int i)
   case 5:
     if (term->MemoryLock)
     {
-      process_keyboard_A ("\033m", 2);
+      process_keyboard_A (term, "\033m", 2);
     }
     else
     {
-      process_keyboard_A ("\033l", 2);
+      process_keyboard_A (term, "\033l", 2);
     }
     break;
   case 6:
@@ -4593,10 +4593,10 @@ void do_mode_button (int i)
     term->AutoLineFeed ^= 1;
     break;
   }
-  update_labels ();
+  update_labels (term);
 }
 /***************************************************************/
-void do_system_button (int i)
+void do_system_button (struct hpterm * term, int i)
 {
 /*
    **  Perform system menu button press
@@ -4628,10 +4628,10 @@ void do_system_button (int i)
     term->KeyState = ks_config_keys;
     break;
   }
-  update_labels ();
+  update_labels (term);
 }
 /***************************************************************/
-void do_device_control_button (int i)
+void do_device_control_button (struct hpterm * term, int i)
 {				/* 970107... */
 
 /*
@@ -4644,28 +4644,28 @@ void do_device_control_button (int i)
   else
     nyi ();
 
-  update_labels ();
+  update_labels (term);
 }				/* ...970107 */
 /***************************************************************/
-void do_margins_tabs_button (int i)
+void do_margins_tabs_button (struct hpterm * term, int i)
 {
   nyi ();
 }
 /***************************************************************/
-void do_config_keys_button (int i)
+void do_config_keys_button (struct hpterm * term, int i)
 {
   if (i == 4)
   {
     term->KeyState = ks_terminal_config;
-    update_labels ();
+    update_labels (term);
   }
 }
 /**************************************************************/
-void do_terminal_config_button (int i)
+void do_terminal_config_button (struct hpterm * term, int i)
 {
 }
 /***************************************************************/
-static void do_function_button (int i)
+static void do_function_button (struct hpterm * term, int i)
 {
 /*
    **  Perform function button keypress
@@ -4684,32 +4684,32 @@ static void do_function_button (int i)
     else
     {				/* Transmit to host */
       term->FunctionKeyPending = i + 1;
-      check_transfers_pending ();
+      check_transfers_pending (term);
     }
   }
   else if (term->KeyState == ks_modes)
   {
-    do_mode_button (i);
+    do_mode_button (term, i);
   }
   else if (term->KeyState == ks_system)
   {
-    do_system_button (i);
+    do_system_button (term, i);
   }
   else if (term->KeyState == ks_device_control)
   {
-    do_device_control_button (i);
+    do_device_control_button (term, i);
   }
   else if (term->KeyState == ks_margins_tabs)
   {
-    do_margins_tabs_button (i);
+    do_margins_tabs_button (term, i);
   }
   else if (term->KeyState == ks_config_keys)
   {
-    do_config_keys_button (i);
+    do_config_keys_button (term, i);
   }
   else if (term->KeyState == ks_terminal_config)
   {
-    do_terminal_config_button (i);
+    do_terminal_config_button (term, i);
   }
   else
   {
@@ -4724,40 +4724,40 @@ static void do_function_button (int i)
   }
 }
 /***************************************************************/
-void hpterm_kbd_F1 (void)
+void hpterm_kbd_F1 (struct hpterm * term)
 {
-  do_function_button (0);
+  do_function_button (term, 0);
 }
-void hpterm_kbd_F2 (void)
+void hpterm_kbd_F2 (struct hpterm * term)
 {
-  do_function_button (1);
+  do_function_button (term, 1);
 }
-void hpterm_kbd_F3 (void)
+void hpterm_kbd_F3 (struct hpterm * term)
 {
-  do_function_button (2);
+  do_function_button (term, 2);
 }
-void hpterm_kbd_F4 (void)
+void hpterm_kbd_F4 (struct hpterm * term)
 {
-  do_function_button (3);
+  do_function_button (term, 3);
 }
-void hpterm_kbd_F5 (void)
+void hpterm_kbd_F5 (struct hpterm * term)
 {
-  do_function_button (4);
+  do_function_button (term, 4);
 }
-void hpterm_kbd_F6 (void)
+void hpterm_kbd_F6 (struct hpterm * term)
 {
-  do_function_button (5);
+  do_function_button (term, 5);
 }
-void hpterm_kbd_F7 (void)
+void hpterm_kbd_F7 (struct hpterm * term)
 {
-  do_function_button (6);
+  do_function_button (term, 6);
 }
-void hpterm_kbd_F8 (void)
+void hpterm_kbd_F8 (struct hpterm * term)
 {
-  do_function_button (7);
+  do_function_button (term, 7);
 }
 /*********************************************************************/
-void hpterm_kbd_Enter (void)
+void hpterm_kbd_Enter (struct hpterm * term)
 {
 
   if (!term->RemoteMode)
@@ -4767,29 +4767,29 @@ void hpterm_kbd_Enter (void)
   else
   {
     term->EnterKeyPending = 1;
-    check_transfers_pending ();
+    check_transfers_pending (term);
   }
 }
 /*********************************************************************/
-void hpterm_kbd_Select (void)
+void hpterm_kbd_Select (struct hpterm * term)
 {
 
   term->FunctionKeyPending = 9;
-  check_transfers_pending ();
+  check_transfers_pending (term);
 }
 /*********************************************************************/
-void hpterm_kbd_KP_Enter (void)
+void hpterm_kbd_KP_Enter (struct hpterm * term)
 {
 /*
    **  Process keypad's Enter key
  */
   if (term->EnterSelect)
   {
-    hpterm_kbd_Select ();
+    hpterm_kbd_Select (term);
   }
   else
   {
-    hpterm_kbd_Enter ();
+    hpterm_kbd_Enter (term);
   }
 }
 /*********************************************************************/
@@ -4810,7 +4810,7 @@ void hpterm_mouse_click (struct hpterm * term, int row, int col)
 	j += 9;
       if (col >= j && col <= j + 7)
       {
-	do_function_button (i);
+        do_function_button (term, i);
       }
     }
   }
