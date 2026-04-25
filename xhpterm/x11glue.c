@@ -127,7 +127,7 @@ int must_logoff = 0;
 
 char *termid = NULL;
 
-char *version_str = "B.00.A1";
+char *version_str = "B.00.A2";
 
 /*******************************************************************/
 int get_colors(int nb_colors, char **color_names, unsigned long *color_codes);

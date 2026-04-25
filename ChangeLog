@@ -1,3 +1,11 @@
+Sat Apr 25 09:44:00 2026 -0800 <fmc@reanimators.org>
+	* freevt3k.c, hpvt100.[ch], vtconn.[ch], conmgr.[ch], vt3kglue.h:
+	version B.00.A2
+	Changed tVTDataOutProc()'s first argument type from int32_t
+	to void *
+	More plumbing for passing the struct hpterm * through
+	function calls
+	
 Tue Apr 21 11:58:48 2026 -0800 <fmc@reanimators.org>
 	* hpterm.c, hpterm.h, x11glue.c: version B.00.A1
 	Plumbing for passing the struct hpterm * as a function argument

@@ -28,7 +28,7 @@
 */
 
 char
-	*Sccsid = "@(#) freevt3k.c: B.00.A0";
+	*Sccsid = "@(#) freevt3k.c: B.00.A2";
 
 #ifdef VMS
 #  include <types.h>
@@ -1467,7 +1467,7 @@ Last:
 
 } /*DoMessageLoop*/
 
-void vt3kDataOutProc(int32_t refCon, char * buffer, size_t bufferLength)
+void vt3kDataOutProc(void * refCon, char * buffer, size_t bufferLength)
 { /*vt3kDataOutProc*/
 
 #ifdef VMS
